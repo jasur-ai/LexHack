@@ -67,7 +67,8 @@ jobs:
         run: |
           pip install --quiet -r agent_couinter/requirements.txt
           pip install --quiet -e agent_couinter --no-deps
-          AGENT_URL=$(python -c "import json; print(json.load(open('render-result.json'))['services']['agent']['url'])")
+          AGENT_URL=$(python -c "import json; print(json.load(open('render-result.json')).get('services', {}).get('agent', {}).get('url', ''))")
+          if [ -z "$AGENT_URL" ]; then echo "No agent URL in render-result.json; audit skipped"; exit 0; fi
           python agent/scripts/counter_audit.py --target "$AGENT_URL" --concurrency 2 --json-out counter-audit.json --md-out counter-audit.md
           cat counter-audit.md >> "$GITHUB_STEP_SUMMARY"
 

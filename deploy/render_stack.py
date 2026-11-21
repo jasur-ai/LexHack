@@ -81,6 +81,19 @@ class Render:
         return None
 
 
+def _trigger_deploy(render: Render, sid: str) -> str:
+    """Start a deploy and return its id. Render answers without a body when a deploy (for example the autodeploy of
+    the same push) is already queued; the newest deploy is followed then."""
+    started = render.call("POST", f"/services/{sid}/deploys", {"clearCache": "do_not_clear"})
+    if isinstance(started, dict) and started.get("id"):
+        return str(started["id"])
+    rows = render.call("GET", f"/services/{sid}/deploys", params={"limit": 1}) or []
+    newest = (rows[0].get("deploy") or rows[0]) if rows and isinstance(rows[0], dict) else {}
+    if not newest.get("id"):
+        raise RenderError(0, f"no deploy found for {sid}")
+    return str(newest["id"])
+
+
 def _random_secret(kind: str) -> str:
     if kind == "fernet":
         return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode("ascii")
@@ -294,12 +307,12 @@ def _main() -> int:
             print(f"Creating {spec['name']} (plan {spec.get('plan')}, branch {args.branch})")
             svc, deploy_id, plan, fallback = _create(render, owner["id"], spec, stack, args.branch, env)
             if not deploy_id:
-                deploy_id = render.call("POST", f"/services/{svc['id']}/deploys", {})["id"]
+                deploy_id = _trigger_deploy(render, svc["id"])
             created = True
         else:
             print(f"Updating {spec['name']} ({svc['id']})")
             _update(render, svc, spec, args.branch, env_plain, secret_defaults, passthrough)
-            deploy_id = render.call("POST", f"/services/{svc['id']}/deploys", {"clearCache": "do_not_clear"})["id"]
+            deploy_id = _trigger_deploy(render, svc["id"])
             svc = render.find_service(owner["id"], spec["name"]) or svc
             plan = (svc.get("serviceDetails") or {}).get("plan")
             fallback, created = False, False
