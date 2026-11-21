@@ -13,9 +13,12 @@ import {
   Lightbulb,
   MessageSquare,
   Mic,
+  PanelLeft,
+  PanelLeftClose,
   Plus,
   RotateCcw,
   Scale,
+  ScanLine,
   Send,
   ShieldAlert,
   ShieldCheck,
@@ -354,8 +357,8 @@ export function AgentView({
   const [input, setInput] = useState("");
   const [sessions, setSessions] = useState<ChatSession[]>(DEFAULT_SESSIONS);
   const [activeSessionId, setActiveSessionId] = useState<string>("live");
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([createWelcomeMessage()]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -377,15 +380,15 @@ export function AgentView({
       setSessions((prev) => [newSess, ...prev]);
     }
     setActiveSessionId("live");
-    setMessages([createWelcomeMessage()]);
-    setHistoryOpen(false);
+    setMessages([]);
+    setSidebarOpen(false);
     haptics.impact("light");
   };
 
   const handleSelectSession = (sess: ChatSession) => {
     setActiveSessionId(sess.id);
     setMessages(sess.messages);
-    setHistoryOpen(false);
+    setSidebarOpen(false);
     haptics.impact("light");
   };
 
@@ -393,7 +396,7 @@ export function AgentView({
     setSessions((prev) => prev.filter((s) => s.id !== id));
     if (activeSessionId === id) {
       setActiveSessionId("live");
-      setMessages([createWelcomeMessage()]);
+      setMessages([]);
     }
     haptics.impact("light");
   };
@@ -510,78 +513,67 @@ export function AgentView({
     <div
       className={
         isSidePanel
-          ? "h-full flex flex-col justify-between bg-white overflow-hidden text-slate-800"
-          : "space-y-4 animate-in fade-in duration-200"
+          ? "h-full flex flex-col justify-between bg-white overflow-hidden text-slate-800 relative"
+          : "space-y-4 animate-in fade-in duration-200 relative"
       }
     >
-      {/* Header */}
-      {isSidePanel ? (
-        <div className="relative p-2.5 sm:p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/90 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-xs">
-              <Bot className="h-4 w-4" />
-            </div>
-            <div className="flex flex-col min-w-0 text-left">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-900 tracking-tight">Haqly AI</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
-              <span className="text-[10px] text-slate-500 truncate">Yuridik Sun'iy Intellekt</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            {/* Memory / History Toggle Button */}
+      {/* Top Header Tab Bar (matching Image 1 & 2) */}
+      <div className="relative border-b border-slate-200 bg-slate-100/90 shrink-0 select-none">
+        <div className="flex items-center justify-between px-2.5 pt-2 pb-0">
+          {/* Left: Sidebar Toggle + Haqly AI Tab */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Sidebar toggle button (Image 1) */}
             <button
               type="button"
               onClick={() => {
                 haptics.impact("light");
-                setHistoryOpen(!historyOpen);
+                setSidebarOpen(!sidebarOpen);
               }}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                historyOpen
-                  ? "bg-[#0074ff] text-white border-[#0074ff]"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+              className={`p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer ${
+                sidebarOpen ? "bg-slate-200 text-[#0074ff]" : ""
               }`}
-              title="Suhbatlar xotirasi va tarixi"
+              title="Suhbatlar tarixi panelini ochish"
+              aria-label="Toggle history sidebar"
             >
-              <History className="h-3.5 w-3.5" />
-              <span className="text-[11px] font-semibold">Xotira</span>
-              <span
-                className={`text-[10px] px-1 py-0.2 rounded-full font-bold ${
-                  historyOpen ? "bg-white/20 text-white" : "bg-blue-50 text-[#0074ff]"
-                }`}
-              >
-                {sessions.length}
-              </span>
+              <PanelLeft className="h-4 w-4" />
             </button>
 
-            {/* New Chat Button */}
+            {/* Tab: Haqly AI (Image 2 style) */}
+            <div className="flex items-center gap-1.5 bg-white border-t border-x border-slate-200 rounded-t-xl px-3.5 py-1.5 text-xs font-bold text-slate-900 shadow-2xs">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Haqly AI</span>
+            </div>
+          </div>
+
+          {/* Right Action Icons: New Chat, Clear, Close */}
+          <div className="flex items-center gap-1 pb-1">
             <button
               type="button"
               onClick={handleStartNewChat}
-              className="h-7 w-7 flex items-center justify-center rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer transition-colors"
+              className="flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer shadow-2xs"
               title="Yangi suhbat"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3.5 w-3.5 text-[#0074ff]" />
+              <span className="text-[11px] font-medium hidden sm:inline">Yangi chat</span>
             </button>
 
-            {/* Clear Current Chat */}
             <button
               type="button"
-              onClick={() => setMessages([createWelcomeMessage()])}
-              className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-500 cursor-pointer transition-colors"
+              onClick={() => {
+                haptics.impact("light");
+                handleStartNewChat();
+              }}
+              className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-500 cursor-pointer transition-colors"
               title="Tozalash"
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
 
-            {/* Close Panel Button */}
             {onClose && (
               <button
                 type="button"
                 onClick={onClose}
-                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-600 cursor-pointer transition-colors"
+                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200 text-slate-600 cursor-pointer transition-colors"
                 title="Yopish"
               >
                 <X className="h-4 w-4" />
@@ -589,90 +581,62 @@ export function AgentView({
             )}
           </div>
         </div>
-      ) : (
-        <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-3 border-slate-200">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff]">
-                <Bot className="h-3.5 w-3.5" />
-                HAQLY AI
-              </span>
-              <Chip tone="success">100% Avtonom</Chip>
-            </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Haqly AI</h1>
-            <p className="text-xs text-slate-500">
-              O'zbekiston Respublikasi qonunlari va kodekslari bo'yicha tezkor, aniq va rasmiy huquqiy yordamchi
-            </p>
-          </div>
+      </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant={historyOpen ? "primary" : "secondary"}
-              onClick={() => {
-                haptics.impact("light");
-                setHistoryOpen(!historyOpen);
-              }}
-            >
-              <History className="h-3.5 w-3.5" />
-              <span>Xotira ({sessions.length})</span>
-            </Button>
-            <Button size="sm" variant="secondary" onClick={handleStartNewChat}>
-              <Plus className="h-3.5 w-3.5" />
-              <span>Yangi suhbat</span>
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setMessages([createWelcomeMessage()]);
-              }}
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              <span>Tozalash</span>
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Memory & History Drawer (Slide down) */}
-      {historyOpen && (
-        <div className="border-b border-slate-200 bg-slate-50/95 p-3 space-y-2.5 animate-in slide-in-from-top-2 duration-150 shadow-xs shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+      {/* Inner AI Agent Sidebar (Chat History Drawer) */}
+      {sidebarOpen && (
+        <div className="absolute inset-y-0 left-0 w-[270px] sm:w-[290px] bg-slate-50 border-r border-slate-200 z-30 shadow-xl flex flex-col animate-in slide-in-from-left duration-200">
+          {/* Sidebar Header */}
+          <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
               <Brain className="h-4 w-4 text-[#0074ff]" />
-              <span>Suhbatlar xotirasi</span>
-              <span className="text-[10px] font-normal text-slate-500">
-                ({sessions.length} ta mavzu saqlangan)
+              <span>Suhbatlar tarixi</span>
+              <span className="text-[10px] bg-blue-50 text-[#0074ff] px-1.5 py-0.2 rounded-full font-bold">
+                {sessions.length}
               </span>
             </div>
             <button
               type="button"
-              onClick={handleStartNewChat}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0074ff] text-white text-[11px] font-semibold hover:bg-blue-600 transition-colors cursor-pointer"
+              onClick={() => setSidebarOpen(false)}
+              className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-500 cursor-pointer"
+              title="Yopish"
             >
-              <Plus className="h-3 w-3" />
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* + New Chat Button inside Sidebar */}
+          <div className="p-2 border-b border-slate-200 bg-white/60">
+            <button
+              type="button"
+              onClick={() => {
+                handleStartNewChat();
+                setSidebarOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-[#0074ff] hover:bg-blue-600 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
               <span>Yangi suhbat</span>
             </button>
           </div>
 
-          {/* Context sync info badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50/70 border border-blue-100 rounded-lg text-[10.5px] text-blue-800 font-medium">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span className="truncate">Kontekst xotirasi faol — Lex.uz qonunchilik bazasi bilan ulangan</span>
-          </div>
-
-          {/* List of sessions */}
-          <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+          {/* Sessions List */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1">
+              Oldingi suhbatlar
+            </div>
             {sessions.map((sess) => {
               const isActive = activeSessionId === sess.id;
               return (
                 <div
                   key={sess.id}
-                  onClick={() => handleSelectSession(sess)}
+                  onClick={() => {
+                    handleSelectSession(sess);
+                    setSidebarOpen(false);
+                  }}
                   className={`group flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer transition-all ${
                     isActive
-                      ? "bg-white border-[#0074ff] shadow-xs text-blue-900 ring-1 ring-[#0074ff]/20"
+                      ? "bg-white border-[#0074ff] shadow-xs text-blue-900 ring-1 ring-[#0074ff]/20 font-semibold"
                       : "bg-white/80 border-slate-200 hover:bg-white hover:border-slate-300 text-slate-700"
                   }`}
                 >
@@ -683,12 +647,10 @@ export function AgentView({
                       }`}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold truncate text-[11.5px] leading-snug">{sess.title}</p>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                      <p className="truncate text-xs leading-snug">{sess.title}</p>
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
                         <Clock className="h-3 w-3 shrink-0" />
                         <span>{sess.date}</span>
-                        <span>•</span>
-                        <span>{sess.messages.length} ta xabar</span>
                       </div>
                     </div>
                   </div>
@@ -708,14 +670,93 @@ export function AgentView({
               );
             })}
           </div>
+
+          {/* Sidebar Footer Context info */}
+          <div className="p-2.5 border-t border-slate-200 bg-white/80 text-[10.5px] text-slate-500 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="truncate">Lex.uz bazasi bilan sinxron</span>
+          </div>
         </div>
       )}
 
+      {/* Backdrop for inner sidebar on small widths */}
+      {sidebarOpen && (
+        <div
+          className="absolute inset-0 bg-black/25 z-20 transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Main chat body scrollable in side panel */}
-      <div className={isSidePanel ? "flex-1 overflow-y-auto p-3 space-y-3" : "space-y-4"}>
-        {/* Messages Stream */}
-        <div className="space-y-3 pt-1">
-        {messages.map((msg) => (
+      <div className={isSidePanel ? "flex-1 overflow-y-auto p-3 flex flex-col" : "space-y-4"}>
+        {messages.length === 0 ? (
+          <div className="my-auto py-8 px-2 flex flex-col items-center justify-center text-center max-w-md mx-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#0074ff] to-blue-500 text-white shadow-md shadow-blue-500/20 mb-3.5">
+              <Bot className="h-6 w-6" />
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-2">
+              Qanday yordam kerak?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-xs mb-6 leading-relaxed">
+              O'zbekiston Respublikasi qonunlari bo'yicha tezkor, rasmiy va 100% ishonchli yuridik yordamchi.
+            </p>
+
+            {/* Quick starter cards */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+              {[
+                {
+                  icon: Car,
+                  title: "Radar jarimasi",
+                  desc: "Bekor qilish va shikoyat",
+                  prompt: "Radar xatosi bo'yicha jarimani qanday bekor qilsam bo'ladi?",
+                },
+                {
+                  icon: FileCheck2,
+                  title: "10 BHM tilxat & qarz",
+                  desc: "Qarz shartnomasi qoidalari",
+                  prompt: "Fuqarolar o'rtasida 10 BHM dan ortiq qarz tilxati qanday yoziladi?",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Ish haqi 1% penya",
+                  desc: "Rasmiy talabnoma yozish",
+                  prompt: "Ish haqim 2 oy kechikdi, 1% penya bilan qanday talabnoma yozaman?",
+                },
+                {
+                  icon: ScanLine,
+                  title: "Shartnoma skaneri",
+                  desc: "7 ta tuzoqni aniqlash",
+                  prompt: "Shartnomada qanday yashirin xavflar va tuzoqlar bo'lishi mumkin?",
+                },
+              ].map((card, idx) => {
+                const CardIcon = card.icon;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSend(card.prompt)}
+                    className="p-2.5 rounded-xl border border-slate-200 bg-white hover:border-[#0074ff] hover:shadow-2xs transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="h-5 w-5 rounded-md bg-blue-50 text-[#0074ff] flex items-center justify-center shrink-0 group-hover:bg-[#0074ff] group-hover:text-white transition-colors">
+                        <CardIcon className="h-3 w-3" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-[#0074ff] transition-colors truncate">
+                        {card.title}
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-slate-500 line-clamp-1 pl-7">
+                      {card.desc}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3 pt-1">
+            {messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -852,8 +893,17 @@ export function AgentView({
             )}
           </div>
         ))}
-        </div>
+
+        {busy && messages[messages.length - 1]?.role === 'user' && (
+          <div className="flex items-center gap-2 text-xs text-slate-500 py-2 px-3 bg-slate-50 rounded-xl border border-slate-100 max-w-[200px]">
+            <Sparkles className="h-3.5 w-3.5 animate-spin text-[#0074ff]" />
+            <span>Tahlil qilinmoqda...</span>
+          </div>
+        )}
+
         <div ref={bottomRef} />
+          </div>
+        )}
       </div>
 
       {/* Floating / Bottom Composer */}

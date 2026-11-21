@@ -386,6 +386,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Navigation Sections */}
         <div className="px-2.5 py-1 flex-1 overflow-y-auto space-y-2.5">
+          {/* Asosiy Boshqaruv Navigation Button (matching live panel card) */}
+          <button
+            type="button"
+            onClick={() => {
+              haptics.selection();
+              if (activeMode !== "citizen") setActiveMode("citizen");
+              setActiveTab("home");
+              onItemClick?.();
+            }}
+            className={`w-full flex items-center justify-between p-2 rounded-2xl border transition-all cursor-pointer ${
+              activeTab === "home"
+                ? "bg-blue-50/80 border-blue-200 shadow-2xs"
+                : "bg-white border-slate-200/80 hover:bg-slate-50 hover:border-slate-300"
+            }`}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-xs">
+                <Home className="h-5 w-5" />
+              </div>
+              <span
+                className={`text-sm font-bold truncate ${
+                  activeTab === "home" ? "text-[#0074ff]" : "text-slate-800"
+                }`}
+              >
+                Asosiy Boshqaruv
+              </span>
+            </div>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-100 shrink-0">
+              Live
+            </span>
+          </button>
+
           {/* Xizmatlar ⌄ (5 ta Himoya Moduli bo'yicha) */}
           <div className="pt-1">
             <button
