@@ -234,16 +234,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { id: "himoya", label: t("nav.himoya", "Himoya"), Icon: ShieldCheck },
   ];
 
-  const platformItems: Array<{
-    id: NavTab;
-    label: string;
-    badge?: string;
-    Icon: typeof Scale;
-  }> = [
-    { id: "home", label: "Asosiy Boshqaruv", badge: "Live", Icon: Home },
-    { id: "services", label: "Xizmatlar Katalogi", badge: "5 ta", Icon: Zap },
-  ];
-
   const desktopModules: Array<{
     id: NavTab;
     num: string;
