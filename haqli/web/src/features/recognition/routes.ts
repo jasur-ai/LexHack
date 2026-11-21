@@ -35,10 +35,10 @@ export function mapRouteHintToPrefill(
     }
   }
 
-  let target: "himoya" | "tilxat" | "scanner" = "himoya";
+  let target: "jarima" | "himoya" | "tilxat" | "scanner" = "himoya";
   let category: RecognitionPrefill["category"] = "consumer";
 
-  const hintTarget = routeHint?.target;
+  const hintTarget = routeHint?.target as string | undefined;
   if (hintTarget === "tilxat" || options.docType === "passport_data_page" || options.docType === "tilxat") {
     target = "tilxat";
   } else if (
@@ -48,13 +48,20 @@ export function mapRouteHintToPrefill(
     options.docType === "microloan_contract"
   ) {
     target = "scanner";
+  } else if (hintTarget === "jarima" || options.docType === "fine_decision" || routeHint?.category === "traffic") {
+    target = "jarima";
+    category = "traffic";
+  } else if (hintTarget === "himoya") {
+    target = "himoya";
+    const cat = routeHint?.category;
+    if (cat === "labor" || cat === "consumer" || cat === "rental" || cat === "debt") {
+      category = cat;
+    }
   } else {
     target = "himoya";
     const cat = routeHint?.category;
-    if (cat === "labor" || cat === "consumer" || cat === "rental" || cat === "traffic" || cat === "debt") {
+    if (cat === "labor" || cat === "consumer" || cat === "rental" || cat === "debt") {
       category = cat;
-    } else if (options.docType === "fine_decision") {
-      category = "traffic";
     } else if (options.docType === "receipt") {
       category = "consumer";
     }
@@ -73,7 +80,10 @@ export function mapRouteHintToPrefill(
 }
 
 export function getPrimaryActionLabelKey(routeHint: RouteHintDTO | null | undefined, docType?: string | null): string {
-  const target = routeHint?.target;
+  const target = routeHint?.target as string | undefined;
+  if (target === "jarima" || docType === "fine_decision" || routeHint?.category === "traffic") {
+    return "rec.cta.jarima";
+  }
   if (target === "tilxat" || docType === "passport_data_page" || docType === "tilxat") {
     return "rec.cta.tilxat";
   }

@@ -38,6 +38,7 @@ class AgentAskRequest(CamelModel):
 
 
 class PreferencesPatch(CamelModel):
+    full_name: str | None = None
     language: Literal["uz_lat", "uz_cyr", "ru"] | None = None
     role: Literal["citizen", "advocate"] | None = None
     invite_code: str | None = None

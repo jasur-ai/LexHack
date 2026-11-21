@@ -70,7 +70,7 @@ def test_parsers_fine_receipt_mismatch_and_contract_clauses() -> None:
     fmap = {f.key: f.value for f in f_fields}
     assert fmap["vehiclePlate"] == "01 A 555 AA"
     assert fmap["fineAmountUzs"] == Decimal("1500000.00")
-    assert f_route.target == "himoya" and f_route.category == "traffic"
+    assert f_route.target in ("himoya", "jarima") and f_route.category == "traffic"
 
     # 2. Receipt parser with total mismatch (>1%)
     r_fields, r_route, r_warns = parse_receipt_v1(

@@ -92,5 +92,5 @@ def parse_fine(text: str, *, today: date | None = None) -> tuple[list[Field], Ro
         "article": article_val,
         "plate": plate.value if plate else None,
     }
-    route = RouteHint(target="himoya", category="traffic", prefill={k: v for k, v in prefill.items() if v is not None})
+    route = RouteHint(target="jarima", category="traffic", prefill={k: v for k, v in prefill.items() if v is not None})
     return fields, route, warnings

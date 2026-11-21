@@ -238,7 +238,13 @@ export function ScannerView() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("scanner.title")}</h1>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/50">
+            4-MODUL
+          </span>
+          <Chip tone="primary">7 ta Qizil Bayroq & Muqobil Bandlar</Chip>
+        </div>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">{t("scanner.title")}</h1>
         <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
           {t("scanner.subtitle")}
         </p>
@@ -261,7 +267,7 @@ export function ScannerView() {
               <div className="font-bold text-sm" style={{ color: "var(--primary)" }}>
                 {s.title}
               </div>
-              <p className="mt-1 text-xs line-clamp-2" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
                 {s.preview}
               </p>
             </button>

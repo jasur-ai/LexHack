@@ -316,7 +316,13 @@ export function TilxatView() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("tilxat.title")}</h1>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/50">
+            3-MODUL
+          </span>
+          <Chip tone="primary">FK 108-modda: 10 BHM nazorati</Chip>
+        </div>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">{t("tilxat.title")}</h1>
         <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
           {t("tilxat.subtitle")}
         </p>
@@ -466,7 +472,7 @@ export function TilxatView() {
               onClick={() => setActive(item)}
             >
               <div className="min-w-0">
-                <div className="font-semibold text-sm truncate">
+                <div className="font-semibold text-sm leading-snug break-words">
                   {item.partyAName} → {item.partyBName}
                 </div>
                 <div className="text-xs font-mono-tabular" style={{ color: "var(--text-muted)" }}>

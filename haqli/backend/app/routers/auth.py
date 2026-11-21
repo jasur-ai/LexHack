@@ -76,8 +76,8 @@ async def auth_telegram(
     elif req.device_id and (cfg.allow_web_guests or cfg.demo_mode):
         # Private guest account per browser; negative ids never collide with real Telegram users.
         tg_id = guest_telegram_id(req.device_id)
-        full_name = (req.demo_name or "").strip()[:120]
-        username = None
+        full_name = (req.demo_name or "").strip()[:120] or "Azizbek Karimov"
+        username = "demo_fuqaro"
         lang = "uz_lat"
     elif cfg.demo_mode:
         tg_id = 999000111
@@ -137,6 +137,8 @@ async def update_preferences(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     cfg = get_settings()
+    if req.full_name is not None and req.full_name.strip():
+        user.full_name = req.full_name.strip()[:120]
     if req.language is not None:
         user.language = req.language
     if req.theme_pref is not None:

@@ -5,7 +5,7 @@ import { getPrimaryActionLabelKey, mapRouteHintToPrefill } from "./routes";
 describe("Recognition prefill routing map (routes.ts)", () => {
   it("routes fine_decision to himoya/traffic with mapped fields", () => {
     const out = mapRouteHintToPrefill(
-      { target: "himoya", category: "traffic", prefill: { claim_amount_uzs: "1875000.00" } },
+      { target: "jarima", category: "traffic", prefill: { claim_amount_uzs: "1875000.00" } },
       [
         {
           key: "vehiclePlate",
@@ -20,11 +20,11 @@ describe("Recognition prefill routing map (routes.ts)", () => {
       ],
       { docType: "fine_decision", jobId: "job-123" }
     );
-    expect(out.tab).toBe("himoya");
+    expect(out.tab).toBe("jarima");
     expect(out.prefill.category).toBe("traffic");
     expect(out.prefill.fields.vehiclePlate).toBe("01 A 777 AA");
     expect(out.prefill.fields.claim_amount_uzs).toBe("1875000.00");
-    expect(getPrimaryActionLabelKey({ target: "himoya", category: "traffic", prefill: {} })).toBe("rec.cta.himoya");
+    expect(getPrimaryActionLabelKey({ target: "jarima", category: "traffic", prefill: {} })).toBe("rec.cta.jarima");
   });
 
   it("routes passport MRZ to tilxat and contracts to scanner", () => {

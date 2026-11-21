@@ -4,7 +4,7 @@ import { readString, STORAGE_KEYS, writeString } from "./storage";
 export type LangCode = "uz_lat" | "uz_cyr" | "ru";
 export type UserRole = "citizen" | "advocate";
 export type ThemePref = "auto" | "light" | "dark";
-export type NavTab = "himoya" | "tilxat" | "scanner" | "radar";
+export type NavTab = "home" | "services" | "agent" | "jarima" | "himoya" | "tilxat" | "scanner" | "radar";
 
 export interface UserProfile {
   id: string;
@@ -29,7 +29,7 @@ export interface ConstantsMeta {
 }
 
 export interface RecognitionPrefill {
-  target: "himoya" | "tilxat" | "scanner";
+  target: "jarima" | "himoya" | "tilxat" | "scanner";
   category?: "labor" | "consumer" | "rental" | "traffic" | "debt";
   fields: Record<string, string | null | undefined>;
   rawText?: string;
@@ -83,7 +83,7 @@ export const DEFAULT_CONSTANTS: ConstantsMeta = {
 
 function initialThemePref(): ThemePref {
   const stored = readString(STORAGE_KEYS.theme);
-  return stored === "light" || stored === "dark" || stored === "auto" ? stored : "auto";
+  return stored === "light" || stored === "dark" ? stored : "light";
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -94,7 +94,7 @@ export const useAppStore = create<AppState>((set) => ({
   lang: "uz_lat",
   themePref: initialThemePref(),
   resolvedTheme: "light",
-  activeTab: "himoya",
+  activeTab: "home",
   activeMode: "citizen",
   recognitionOpen: false,
   recognitionInitialMode: "document",

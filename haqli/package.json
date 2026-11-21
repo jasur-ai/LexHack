@@ -1,0 +1,11 @@
+{
+  "name": "haqli",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node dev.js",
+    "start": "node dev.js",
+    "build": "npm --prefix web run build"
+  }
+}

@@ -26,11 +26,15 @@ UZ_TZ = timezone(timedelta(hours=5))
 
 _FONT_REG = "HaqliSans"
 _FONT_BOLD = "HaqliSans-Bold"
+_ACTIVE_REG = _FONT_REG
+_ACTIVE_BOLD = _FONT_BOLD
 _FONT_INITIALIZED = False
 _RESOLVED_FONT_PATH = ""
 
 _CANDIDATE_REGULAR = [
     Path(__file__).resolve().parent / "fonts" / "NotoSans-Regular.ttf",
+    Path("/Library/Fonts/Arial Unicode.ttf"),
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
     Path("C:/Windows/Fonts/arial.ttf"),
     Path("C:/Windows/Fonts/segoeui.ttf"),
     Path("/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"),
@@ -38,6 +42,8 @@ _CANDIDATE_REGULAR = [
 ]
 _CANDIDATE_BOLD = [
     Path(__file__).resolve().parent / "fonts" / "NotoSans-Bold.ttf",
+    Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+    Path("/Library/Fonts/Arial Unicode.ttf"),
     Path("C:/Windows/Fonts/arialbd.ttf"),
     Path("C:/Windows/Fonts/segoeuib.ttf"),
     Path("/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf"),
@@ -46,9 +52,9 @@ _CANDIDATE_BOLD = [
 
 
 def _ensure_fonts() -> tuple[str, str]:
-    global _FONT_INITIALIZED, _RESOLVED_FONT_PATH
+    global _FONT_INITIALIZED, _RESOLVED_FONT_PATH, _ACTIVE_REG, _ACTIVE_BOLD
     if _FONT_INITIALIZED:
-        return _FONT_REG, _FONT_BOLD
+        return _ACTIVE_REG, _ACTIVE_BOLD
 
     reg_path = next((p for p in _CANDIDATE_REGULAR if p.exists()), None)
     bold_path = next((p for p in _CANDIDATE_BOLD if p.exists()), reg_path)
@@ -56,14 +62,19 @@ def _ensure_fonts() -> tuple[str, str]:
     if reg_path is not None:
         pdfmetrics.registerFont(TTFont(_FONT_REG, str(reg_path)))
         pdfmetrics.registerFont(TTFont(_FONT_BOLD, str(bold_path or reg_path)))
+        pdfmetrics.registerFontFamily(_FONT_REG, normal=_FONT_REG, bold=_FONT_BOLD, italic=_FONT_REG, boldItalic=_FONT_BOLD)
         _RESOLVED_FONT_PATH = str(reg_path)
+        _ACTIVE_REG = _FONT_REG
+        _ACTIVE_BOLD = _FONT_BOLD
         _FONT_INITIALIZED = True
-        return _FONT_REG, _FONT_BOLD
+        return _ACTIVE_REG, _ACTIVE_BOLD
 
     # Fallback to built-in Helvetica only if zero TTF fonts exist on host
     _RESOLVED_FONT_PATH = "builtin:Helvetica"
+    _ACTIVE_REG = "Helvetica"
+    _ACTIVE_BOLD = "Helvetica-Bold"
     _FONT_INITIALIZED = True
-    return "Helvetica", "Helvetica-Bold"
+    return _ACTIVE_REG, _ACTIVE_BOLD
 
 
 def check_font_glyph_coverage() -> dict[str, Any]:
@@ -147,11 +158,11 @@ def render_haqli_pdf(
         canvas.setKeywords(f"HaqliDocId:{doc_id} HaqliSeal:{seal_signature}")
         w, h = A4
         # Top thin teal rule
-        canvas.setStrokeColor(colors.HexColor("#0F766E"))
+        canvas.setStrokeColor(colors.HexColor("#0074FF"))
         canvas.setLineWidth(1.5)
         canvas.line(20 * mm, h - 14 * mm, w - 20 * mm, h - 14 * mm)
         canvas.setFont(bold_font, 9)
-        canvas.setFillColor(colors.HexColor("#0F766E"))
+        canvas.setFillColor(colors.HexColor("#0074FF"))
         canvas.drawString(20 * mm, h - 12 * mm, "haqli")
         canvas.setFont(reg_font, 8)
         canvas.setFillColor(colors.HexColor("#4A5568"))

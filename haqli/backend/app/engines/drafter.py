@@ -93,25 +93,80 @@ def draft_dispute_documents(
         "traffic": "YHXX yuqori turuvchi organiga yoki Ma'muriy sudga",
         "debt": "Fuqarolik ishlari bo'yicha sudga",
     }
-    complaint_uz = (
-        f"Kimga: {organ_map_uz.get(category, 'Vakolatli davlat organiga')}\n"
-        f"Arizachi: {citizen_name}\n\n"
-        f"SHIKOYAT ARIZASI\n"
-        f"'{respondent_name}' tomonidan {incident_date.isoformat()} sanasidan buyon huquqlarim buzilib, "
-        f"{_fmt_money(claim_amount_uzs)} so'm to'lanmasdan kelinmoqda ({delay_days} kun kechikish). "
-        f"Qonuniy asos ({cite_str}) bo'yicha chora ko'rishingizni va jami {_fmt_money(total_uzs)} so'mni undirishda "
-        f"yordam berishingizni so'rayman.\n\n"
-        f"Yo'riqnoma: Ushbu matnni nusxalab my.gov.uz portalidagi murojaatlar bo'limiga joylashtiring."
-    )
-    complaint_ru = (
-        f"Кому: В уполномоченный государственный орган (через портал my.gov.uz)\n"
-        f"Заявитель: {citizen_name}\n\n"
-        f"ЖАЛОБА\n"
-        f"Со стороны '{respondent_name}' с {incident_date.isoformat()} нарушаются мои права: не выплачена сумма "
-        f"{_fmt_money(claim_amount_uzs)} сум (просрочка {delay_days} дн.). На основании ({cite_str}) прошу принять меры "
-        f"и содействовать взысканию итоговой суммы {_fmt_money(total_uzs)} сум.\n\n"
-        f"Инструкция: скопируйте текст и подайте через раздел обращений на my.gov.uz."
-    )
+
+    if category == "traffic":
+        limitation_text_uz = ""
+        limitation_text_ru = ""
+        if delay_days > 10:
+            limitation_text_uz = (
+                "\n\nMUDDATNI TIKLASH TO'G'RISIDA ILTIMOSNOMA (MJtK 316-modda):\n"
+                "Qaror qabul qilinganligi to'g'risidagi xabarnoma o'z vaqtida yetkazilmaganligi sababli, "
+                "10 kunlik shikoyat berish muddatini uzrli deb topib, qayta tiklashingizni so'rayman.\n"
+            )
+            limitation_text_ru = (
+                "\n\nХОДАТАЙСТВО О ВОССТАНОВЛЕНИИ СРОКА (ст. 316 КоАО):\n"
+                "В связи с несвоевременным вручением постановления, прошу признать причину пропуска 10-дневного срока уважительной и восстановить срок обжалования.\n"
+            )
+
+        complaint_uz = (
+            f"Kimga: {organ_map_uz.get(category, 'YHXX yuqori turuvchi organiga / Ma\'muriy sudga')}\n"
+            f"Arizachi: {citizen_name}\n"
+            f"Javobgar / Qaror chiqargan organ: {respondent_name}\n"
+            f"Sana: {today_str}\n\n"
+            f"YHXX MA'MURIY QARORI USTIDAN SHIKOYAT ARIZASI\n"
+            f"(O'zR MJtK 315-moddasiga muvofiq, shikoyat bo'yicha davlat boji to'lanmaydi — 0 so'm)\n\n"
+            f"1. Holat bayoni:\n"
+            f"{respondent_name} tomonidan {incident_date.isoformat()} sanasida chiqarilgan qarorga asosan "
+            f"{_fmt_money(claim_amount_uzs)} so'm miqdorida ma'muriy jarima qo'llanilgan. "
+            f"Tafsilotlar: {description or 'Qaror asossiz yoki xabarnoma kechikkan'}.\n"
+            f"{limitation_text_uz}\n"
+            f"2. Qonuniy asoslar:\n"
+            f"- {cite_str}\n"
+            f"- MJtK 315-moddasi (Davlat boji to'lanmasligi: 0 so'm)\n"
+            f"- MJtK 271-moddasi (Ma'muriy ish yuritishni istisno etuvchi holatlar)\n\n"
+            f"3. Talab:\n"
+            f"Mazkur ma'muriy jarima qarorini bekor qilishingizni va ish yuritishni tugatishingizni so'rayman.\n\n"
+            f"Yo'riqnoma: Ushbu matnni nusxalab my.gov.uz yoki e-sud.uz portaliga joylashtiring."
+        )
+        complaint_ru = (
+            f"Кому: В вышестоящий орган СБДД / Административный суд\n"
+            f"Заявитель: {citizen_name}\n"
+            f"Орган, вынесший постановление: {respondent_name}\n"
+            f"Дата: {today_str}\n\n"
+            f"ЖАЛОБА НА ПОСТАНОВЛЕНИЕ ПО ДЕЛУ ОБ АДМИНИСТРАТИВНОМ ПРАВОНАРУШЕНИИ\n"
+            f"(Согласно ст. 315 КоАО РУз, государственная пошлина по жалобе не взимается — 0 сум)\n\n"
+            f"1. Обстоятельства:\n"
+            f"Постановлением от {incident_date.isoformat()} наложен штраф в размере {_fmt_money(claim_amount_uzs)} сум. "
+            f"Основания несогласия: {description or 'Постановление вынесено необоснованно'}.\n"
+            f"{limitation_text_ru}\n"
+            f"2. Правовые основания:\n"
+            f"- {cite_str}\n"
+            f"- ст. 315 КоАО (Освобождение от уплаты пошлины: 0 сум)\n"
+            f"- ст. 271 КоАО (Обстоятельства, исключающие производство по делу)\n\n"
+            f"3. Требование:\n"
+            f"Прошу отменить указанное постановление и прекратить производство по делу.\n\n"
+            f"Инструкция: скопируйте текст и подайте через my.gov.uz или e-sud.uz."
+        )
+    else:
+        complaint_uz = (
+            f"Kimga: {organ_map_uz.get(category, 'Vakolatli davlat organiga')}\n"
+            f"Arizachi: {citizen_name}\n\n"
+            f"SHIKOYAT ARIZASI\n"
+            f"'{respondent_name}' tomonidan {incident_date.isoformat()} sanasidan buyon huquqlarim buzilib, "
+            f"{_fmt_money(claim_amount_uzs)} so'm to'lanmasdan kelinmoqda ({delay_days} kun kechikish). "
+            f"Qonuniy asos ({cite_str}) bo'yicha chora ko'rishingizni va jami {_fmt_money(total_uzs)} so'mni undirishda "
+            f"yordam berishingizni so'rayman.\n\n"
+            f"Yo'riqnoma: Ushbu matnni nusxalab my.gov.uz portalidagi murojaatlar bo'limiga joylashtiring."
+        )
+        complaint_ru = (
+            f"Кому: В уполномоченный государственный орган (через портал my.gov.uz)\n"
+            f"Заявитель: {citizen_name}\n\n"
+            f"ЖАЛОБА\n"
+            f"Со стороны '{respondent_name}' с {incident_date.isoformat()} нарушаются мои права: не выплачена сумма "
+            f"{_fmt_money(claim_amount_uzs)} сум (просрочка {delay_days} дн.). На основании ({cite_str}) прошу принять меры "
+            f"и содействовать взысканию итоговой суммы {_fmt_money(total_uzs)} сум.\n\n"
+            f"Инструкция: скопируйте текст и подайте через раздел обращений на my.gov.uz."
+        )
 
     return {
         "assessment": localize_text(assessment_uz, locale, assessment_ru),

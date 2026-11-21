@@ -5,8 +5,12 @@ import { authenticate } from "./lib/api";
 import { useAppStore } from "./lib/store";
 import { initTelegramRuntime } from "./tma/sdk";
 import { Button } from "./ui/Button";
-import { AppShell } from "./features/layout/AppShell";
+import { AppShell, HaqliLogo } from "./features/layout/AppShell";
+import { HomeView } from "./features/home/HomeView";
+import { ServicesView } from "./features/services/ServicesView";
+import { AgentView } from "./features/chat/AgentView";
 import { HimoyaView } from "./features/himoya/HimoyaView";
+import { JarimaView } from "./features/jarima/JarimaView";
 import { TilxatView } from "./features/tilxat/TilxatView";
 import { ScannerView } from "./features/scanner/ScannerView";
 import { RadarView } from "./features/radar/RadarView";
@@ -21,7 +25,6 @@ const queryClient = new QueryClient();
 function HaqliMainApp() {
   const { t, i18n } = useTranslation();
   const token = useAppStore((s) => s.token);
-  const themePref = useAppStore((s) => s.themePref);
   const setResolvedTheme = useAppStore((s) => s.setResolvedTheme);
   const activeTab = useAppStore((s) => s.activeTab);
   const activeMode = useAppStore((s) => s.activeMode);
@@ -30,18 +33,9 @@ function HaqliMainApp() {
   const [bootAttempt, setBootAttempt] = useState(0);
 
   useEffect(() => {
-    const tgScheme = initTelegramRuntime();
-    let next: "light" | "dark" = "light";
-    if (themePref === "light" || themePref === "dark") {
-      next = themePref;
-    } else if (tgScheme) {
-      next = tgScheme;
-    } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-      next = "dark";
-    }
-    document.documentElement.setAttribute("data-theme", next);
-    setResolvedTheme(next);
-  }, [themePref, setResolvedTheme]);
+    document.documentElement.setAttribute("data-theme", "light");
+    setResolvedTheme("light");
+  }, [setResolvedTheme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,8 +55,8 @@ function HaqliMainApp() {
   if (!token) {
     return (
       <div className="mx-auto max-w-md px-4 py-16 space-y-4">
-        <div className="text-center text-2xl font-bold" style={{ color: "var(--primary)" }}>
-          haqli
+        <div className="flex justify-center py-2">
+          <HaqliLogo className="h-10 w-auto" />
         </div>
         {bootError ? (
           <div className="haqli-card p-4 space-y-3 text-center">
@@ -86,16 +80,14 @@ function HaqliMainApp() {
 
   return (
     <AppShell>
-      {activeMode === "advocate" ? (
-        <AdvocateView />
-      ) : (
-        <>
-          {activeTab === "himoya" && <HimoyaView />}
-          {activeTab === "tilxat" && <TilxatView />}
-          {activeTab === "scanner" && <ScannerView />}
-          {activeTab === "radar" && <RadarView />}
-        </>
-      )}
+      {activeTab === "home" && <HomeView />}
+      {activeTab === "services" && <ServicesView />}
+      {activeTab === "agent" && <AgentView />}
+      {activeTab === "jarima" && <JarimaView />}
+      {activeTab === "himoya" && <HimoyaView />}
+      {activeTab === "tilxat" && <TilxatView />}
+      {activeTab === "scanner" && <ScannerView />}
+      {activeTab === "radar" && <RadarView />}
       <RecognitionSheet />
       <ToastStack />
     </AppShell>

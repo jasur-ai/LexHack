@@ -24,7 +24,7 @@ DocType = Literal[
     "passport_data_page",
     "unknown",
 ]
-RouteTarget = Literal["himoya", "tilxat", "skaner", "none"]
+RouteTarget = Literal["himoya", "tilxat", "skaner", "jarima", "none"]
 LangDetected = Literal["uz", "ru", "mixed"]
 
 

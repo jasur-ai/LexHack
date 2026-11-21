@@ -154,7 +154,7 @@ export interface RecognitionStageEventDTO {
 }
 
 export interface RouteHintDTO {
-  target: "himoya" | "tilxat" | "skaner" | "none";
+  target: "himoya" | "tilxat" | "skaner" | "jarima" | "none";
   category: string | null;
   prefill: Record<string, unknown>;
 }
@@ -286,7 +286,11 @@ export function authenticate(): Promise<AuthResponse> {
       const resp = await fetch(AUTH_PATH, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: getTelegramInitData(), deviceId: getDeviceId() }),
+        body: JSON.stringify({
+          initData: getTelegramInitData(),
+          deviceId: getDeviceId(),
+          demoName: "Azizbek Karimov",
+        }),
       });
       if (!resp.ok) throw new ApiError(resp.status, await readErrorDetail(resp));
       const data = (await resp.json()) as AuthResponse;
@@ -344,6 +348,7 @@ export const api = {
   },
 
   patchPreferences(payload: {
+    fullName?: string;
     language?: LangCode;
     role?: UserRole;
     inviteCode?: string;

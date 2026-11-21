@@ -215,16 +215,19 @@ export function HimoyaView() {
       <div className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{t("himoya.title")}</h1>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/50">
+                2-MODUL
+              </span>
+              <Chip tone="primary" className="font-mono-tabular">
+                {t("himoya.bhmChip", { bhm: formatUzs(constants.bhm, lang) })}
+              </Chip>
+              {constants.bhmStatus !== "verified" && <NeedsReviewChip />}
+            </div>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">{t("himoya.title")}</h1>
             <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
               {t("himoya.subtitle")}
             </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Chip tone="primary" className="font-mono-tabular">
-              {t("himoya.bhmChip", { bhm: formatUzs(constants.bhm, lang) })}
-            </Chip>
-            {constants.bhmStatus !== "verified" && <NeedsReviewChip />}
           </div>
         </div>
 
@@ -276,7 +279,7 @@ export function HimoyaView() {
                 }}
               >
                 <div className="min-w-0">
-                  <div className="font-semibold text-sm truncate">
+                  <div className="font-semibold text-sm leading-snug break-words">
                     {c.respondentName || t(`himoya.categories.${c.category}.title`)}
                   </div>
                   <div className="text-xs font-mono-tabular" style={{ color: "var(--text-muted)" }}>
@@ -546,7 +549,7 @@ export function HimoyaView() {
                 </span>
                 {ci.status !== "verified" && <NeedsReviewChip />}
               </div>
-              <p className="mt-1 text-xs line-clamp-2" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
                 {ci.summary}
               </p>
             </button>

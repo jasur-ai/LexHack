@@ -8,6 +8,10 @@
     "advocate": "Advokat"
   },
   "nav": {
+    "home": "Asosiy",
+    "services": "Xizmatlar",
+    "agent": "AI Agent",
+    "jarima": "Jarima",
     "himoya": "Himoya",
     "tilxat": "Tilxat",
     "recognize": "Tanib olish",
@@ -50,11 +54,11 @@
     "bhmChip": "BHM: {{bhm}}",
     "recentTitle": "So'nggi ishlar va qoralamalar",
     "categories": {
-      "labor": { "title": "Ish haqi kechikishi", "desc": "To'lanmagan maosh, kompensatsiya, noqonuniy bo'shatish" },
-      "consumer": { "title": "Iste'molchi huquqi", "desc": "Nosoz tovar, kafolat, kunlik 1% penya hisobi" },
-      "rental": { "title": "Ijara va depozit", "desc": "Kvartira depozitini qaytarish, noqonuniy chiqarish" },
-      "traffic": { "title": "YHXX jarima shikoyati", "desc": "10 kunlik shikoyat va 50%/30% chegirma oynasi" },
-      "debt": { "title": "Qarzni undirish", "desc": "Tilxat yoki shartnoma bo'yicha muddati o'tgan qarz" }
+      "consumer": { "title": "Iste'molchi huquqi", "desc": "Nosoz tovar, e-tijorat, kunlik 1% penya hisobi (14-modda)" },
+      "debt": { "title": "Kommunal va Nasiya ortiqcha to'lovi", "desc": "Asossiz gaz/svet qarzdorligi, noqonuniy jarimalar va qarz" },
+      "labor": { "title": "Ish haqi kechikishi", "desc": "To'lanmagan oylik maosh, noqonuniy bo'shatish, kompensatsiya" },
+      "rental": { "title": "Yangi uy-joy va Ijara", "desc": "Quruvchi kechikishi (ulush kiritish), depozitni qaytarish" },
+      "traffic": { "title": "YHXX jarima shikoyati", "desc": "10 kunlik shikoyat oynasi, 5 ta asos, 0 so'm davlat boji" }
     },
     "wizard": {
       "step1": "Kim bilan?",
@@ -237,6 +241,7 @@
       "validate": "Tekshirish"
     },
     "cta": {
+      "jarima": "Jarima shikoyatini tayyorlash",
       "himoya": "Himoya'da davom etish",
       "tilxat": "Tilxatni to'ldirish",
       "scanner": "Shartnomani tekshirish"

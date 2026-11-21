@@ -88,7 +88,13 @@ export function RadarView() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t("radar.title")}</h1>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/50">
+              5-MODUL
+            </span>
+            <Chip tone="primary">Shaxsiy Normativ Xabarlar</Chip>
+          </div>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight">{t("radar.title")}</h1>
           <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>
             {t("radar.subtitle")}
           </p>
