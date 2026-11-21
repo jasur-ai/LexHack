@@ -55,14 +55,14 @@ export function HomeView() {
       },
       renderRight: () => (
         <div className="flex items-baseline gap-2 relative z-10 self-end md:self-center">
-          <span className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tight">
+          <span className="text-6xl sm:text-7xl font-black text-white leading-none tracking-tight">
             32
           </span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-white">
+          <span className="text-3xl sm:text-4xl font-extrabold text-white">
             -o'rinda
           </span>
-          <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#fde047] text-slate-900 text-xs font-black px-2.5 py-1 shadow-sm">
-            <TrendingUp className="h-3.5 w-3.5" />
+          <span className="ml-3 inline-flex items-center gap-1.5 rounded-full bg-[#fde047] text-slate-900 text-xs sm:text-sm font-black px-3 py-1 shadow-md">
+            <TrendingUp className="h-4 w-4" />
             <span>TOP-17%</span>
           </span>
         </div>
@@ -81,22 +81,22 @@ export function HomeView() {
         setActiveTab("services");
       },
       renderRight: () => (
-        <div className="grid grid-cols-2 gap-2 relative z-10 self-stretch md:self-center shrink-0">
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2.5 text-center">
-            <div className="text-lg sm:text-xl font-black text-white">0 so'm</div>
-            <div className="text-[10px] text-white/80 font-medium">Davlat boji</div>
+        <div className="grid grid-cols-2 gap-2.5 relative z-10 self-stretch md:self-center shrink-0">
+          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
+            <div className="text-xl sm:text-2xl font-black text-white">0 so'm</div>
+            <div className="text-[11px] text-white/80 font-medium mt-0.5">Davlat boji</div>
           </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2.5 text-center">
-            <div className="text-lg sm:text-xl font-black text-white">60 soniya</div>
-            <div className="text-[10px] text-white/80 font-medium">Tayyor PDF</div>
+          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
+            <div className="text-xl sm:text-2xl font-black text-white">60 soniya</div>
+            <div className="text-[11px] text-white/80 font-medium mt-0.5">Tayyor PDF</div>
           </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2.5 text-center">
-            <div className="text-lg sm:text-xl font-black text-emerald-300">100%</div>
-            <div className="text-[10px] text-white/80 font-medium">Lex.uz asosi</div>
+          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
+            <div className="text-xl sm:text-2xl font-black text-emerald-300">100%</div>
+            <div className="text-[11px] text-white/80 font-medium mt-0.5">Lex.uz asosi</div>
           </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2.5 text-center">
-            <div className="text-lg sm:text-xl font-black text-yellow-300">24/7</div>
-            <div className="text-[10px] text-white/80 font-medium">AI maslahat</div>
+          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
+            <div className="text-xl sm:text-2xl font-black text-yellow-300">24/7</div>
+            <div className="text-[11px] text-white/80 font-medium mt-0.5">AI maslahat</div>
           </div>
         </div>
       ),
@@ -144,13 +144,13 @@ export function HomeView() {
         setAiPanelOpen(true);
       },
       renderRight: () => (
-        <div className="flex flex-col items-center justify-center relative z-10 p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shrink-0">
-          <div className="relative flex items-center justify-center h-12 w-12 rounded-2xl bg-white text-[#0074ff] shadow-lg mb-2">
-            <Bot className="h-7 w-7" />
+        <div className="flex flex-col items-center justify-center relative z-10 p-4 sm:p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shrink-0">
+          <div className="relative flex items-center justify-center h-14 w-14 rounded-2xl bg-white text-[#0074ff] shadow-lg mb-2.5">
+            <Bot className="h-8 w-8" />
             <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
           </div>
-          <span className="text-xs font-bold text-white tracking-wide">Haqly AI</span>
-          <span className="text-[10px] text-cyan-200">24/7 Qonuniy Agent</span>
+          <span className="text-sm font-bold text-white tracking-wide">Haqly AI</span>
+          <span className="text-xs text-cyan-200">24/7 Qonuniy Agent</span>
         </div>
       ),
     },
@@ -191,48 +191,48 @@ export function HomeView() {
         }}
         role="button"
         tabIndex={0}
-        className={`rounded-3xl bg-gradient-to-r ${activeSlide.bgGradient} p-5 sm:p-7 text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden group select-none min-h-[160px] sm:min-h-[175px]`}
+        className={`rounded-3xl bg-gradient-to-r ${activeSlide.bgGradient} p-6 sm:p-8 md:p-10 pb-10 sm:pb-12 text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group select-none min-h-[220px] sm:min-h-[250px] md:min-h-[270px]`}
       >
         {/* Glow Accents */}
-        <div className="absolute right-36 -top-12 w-48 h-48 rounded-full bg-white/10 blur-xl pointer-events-none" />
-        <div className="absolute right-0 -bottom-10 w-64 h-64 rounded-full bg-cyan-300/10 blur-2xl pointer-events-none" />
+        <div className="absolute right-36 -top-12 w-56 h-56 rounded-full bg-white/10 blur-xl pointer-events-none" />
+        <div className="absolute right-0 -bottom-10 w-72 h-72 rounded-full bg-cyan-300/10 blur-2xl pointer-events-none" />
 
         {/* Slide Content */}
-        <div className="flex items-start sm:items-center gap-4 relative z-10 flex-1 min-w-0">
+        <div className="flex items-start sm:items-center gap-5 sm:gap-6 relative z-10 flex-1 min-w-0">
           {/* Logo badge */}
-          <div className="h-13 w-28 sm:h-15 sm:w-34 rounded-2xl bg-white shadow-md flex items-center justify-center p-2.5 shrink-0 group-hover:scale-105 transition-transform">
+          <div className="h-15 w-30 sm:h-18 sm:w-38 rounded-2xl bg-white shadow-md flex items-center justify-center p-3 shrink-0 group-hover:scale-105 transition-transform">
             <div className="flex items-center gap-1.5 font-bold text-slate-800">
-              <div className="h-6 w-6 rounded-md bg-[#0074ff] text-white flex items-center justify-center text-xs font-black shadow-xs">
+              <div className="h-7 w-7 rounded-lg bg-[#0074ff] text-white flex items-center justify-center text-xs font-black shadow-xs">
                 ✓
               </div>
-              <span className="tracking-tight text-[#0074ff] font-extrabold text-sm sm:text-base">
+              <span className="tracking-tight text-[#0074ff] font-black text-sm sm:text-base">
                 haqly.uz
               </span>
             </div>
           </div>
 
-          <div className="space-y-1 min-w-0 flex-1">
+          <div className="space-y-2 min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 text-white px-2.5 py-0.5 rounded-full border border-white/25">
+              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-white/20 text-white px-3 py-0.5 rounded-full border border-white/25">
                 {activeSlide.badge}
               </span>
               {activeSlide.badgeSub && (
-                <span className="text-xs text-white/80 font-medium">
+                <span className="text-xs sm:text-sm text-white/85 font-medium">
                   {activeSlide.badgeSub}
                 </span>
               )}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight">
               {activeSlide.title}
             </h2>
-            <p className="text-xs sm:text-sm text-white/90 line-clamp-2 leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base text-white/90 line-clamp-3 leading-relaxed">
               {activeSlide.subtitle}
             </p>
             {activeSlide.actionText && (
-              <div className="pt-1">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3 py-1 rounded-xl transition-colors">
+              <div className="pt-1.5">
+                <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-3.5 py-1.5 rounded-xl transition-colors shadow-2xs">
                   <span>{activeSlide.actionText}</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-4 w-4" />
                 </span>
               </div>
             )}
