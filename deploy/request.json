@@ -1,7 +1,7 @@
 {
-  "nonce": 5,
-  "branch": "arena/8a21e194-lexhack",
+  "nonce": 6,
+  "branch": "arena/c6501a1e-lexhack",
   "only": [],
   "mode": "deploy",
-  "note": "Redeploy with the premise checks (follows an already queued autodeploy)"
+  "note": "Redeploy after the counter-audit re-test fixes (false concept triggers, named acts, one-window and exit leads, quotes)"
 }

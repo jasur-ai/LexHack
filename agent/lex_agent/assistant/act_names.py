@@ -41,6 +41,15 @@ EN_TITLES: dict[str, str] = {
     "2006789": "Law on Guarantees of Freedom of Entrepreneurship",
     "4494709": "Law on Protection of Women from Harassment and Violence",
     "7886679": "Law on Social Insurance",
+    "2833860": "Law on Electronic Government",
+    "3492199": "Law on Administrative Procedures",
+    "2381133": "Law on Openness of State Authorities and Administration",
+    "5382974": "Law on Public Procurement",
+    "2931253": "Law on Accounting",
+    "6141486": "Law on Tax Consulting",
+    "1022944": "Law on Copyright and Related Rights",
+    "2382409": "Law on Joint-Stock Companies and Protection of Shareholders' Rights",
+    "5957612": "Law on Insolvency",
     "practical-facts": "Practical figures (BHM, minimum wage, rates)",
 }
 
@@ -51,9 +60,21 @@ def en_title(canonical_id: str | None) -> str | None:
     return EN_TITLES.get(str(canonical_id or ""))
 
 
+_SUPERSCRIPT_TAIL = re.compile(r"(\d)([¹²³⁴⁵⁶⁷⁸⁹⁰]+)")
+_SUP_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+
+
+def plain_article(article: str) -> str:
+    """'27¹-modda' -> '27-1-modda', 'Статья 215⁷' -> 'Статья 215-7'.
+
+    Superscripts are lost in plain text, SMS and copy-paste ('215⁷' becomes '2157'), so answers write the
+    unambiguous hyphenated form that people also type."""
+    return _SUPERSCRIPT_TAIL.sub(lambda m: f"{m.group(1)}-{m.group(2).translate(_SUP_DIGITS)}", article)
+
+
 def en_article(article: str | None) -> str:
-    """'217-modda' / 'Статья 217' -> 'art. 217'."""
+    """'217-modda' / 'Статья 217' -> 'art. 217'; '27¹-modda' -> 'art. 27-1'."""
     if not article:
         return ""
     m = _ART_RE.search(article)
-    return f"art. {m.group(1)}" if m else article
+    return f"art. {plain_article(m.group(1))}" if m else article

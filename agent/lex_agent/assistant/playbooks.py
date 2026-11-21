@@ -564,6 +564,30 @@ LEADS: dict[str, Lead] = {
         "нарушении права.",
         "The general limitation period is 3 years from the day you learned, or should have learned, of the violation.",
         "111189:150;111189:154"),
+    "civil.loan.interest": _l(
+        "Qarz beruvchi foizni shartnomada belgilangan miqdor va tartibda oladi (qonunda boshqacha belgilanmagan "
+        "boʻlsa); foiz toʻlash muddati yozilmagan boʻlsa, foiz asosiy qarzni qaytarish muddatida toʻlanadi.",
+        "Займодавец получает проценты в размере и порядке, определённых договором (если иное не предусмотрено законом); "
+        "если порядок уплаты не определён, проценты выплачиваются в сроки возврата основного долга.",
+        "The lender receives interest in the amount and manner set by the loan agreement (unless the law provides "
+        "otherwise); if no schedule is set, interest is paid when the principal is repaid.",
+        "180552:734"),
+    "civil.loan.form": _l(
+        "Fuqarolar oʻrtasidagi qarz 10 BHM dan ortiq boʻlsa, shartnoma oddiy yozma shaklda tuzilishi shart (tilxat ham "
+        "yozma shakl hisoblanadi); taraflardan biri yuridik shaxs boʻlsa — summadan qatʼi nazar yozma shaklda.",
+        "Заём между гражданами на сумму свыше 10 БРВ должен быть оформлен в простой письменной форме (расписка тоже "
+        "считается письменной формой); если одна из сторон — юрлицо, письменная форма обязательна независимо от суммы.",
+        "A loan between citizens above 10 BCA (basic calculation amounts) must be made in simple written form (a "
+        "signed receipt counts); if one party is a legal entity, writing is required whatever the amount.",
+        "180552:733"),
+    "civil.limitation.agreement": _l(
+        "Daʼvo muddati va uni hisoblash tartibini taraflar kelishuv (shartnoma) bilan oʻzgartira olmaydi — bunday shart "
+        "haqiqiy emas; umumiy daʼvo muddati — 3 yil.",
+        "Сроки исковой давности и порядок их исчисления нельзя изменить соглашением сторон — такое условие договора "
+        "недействительно; общий срок исковой давности — 3 года.",
+        "Limitation periods and the way they are counted cannot be changed by agreement of the parties — such a "
+        "contract term is void; the general limitation period is 3 years.",
+        "111189:152;111189:150"),
     "civil.unjust_enrichment": _l(
         "Asossiz olingan mol-mulk (masalan, xato oʻtkazilgan pul) egasiga qaytarilishi shart; ixtiyoriy qaytarmasa — "
         "sud orqali undiriladi.",
@@ -727,6 +751,34 @@ LEADS: dict[str, Lead] = {
         "Everyone has the right to seek, receive and impart any information; it may be restricted only by law and only "
         "as far as necessary.",
         "6445145:33"),
+    "rights.freedom_of_movement": _l(
+        "Har kim Oʻzbekiston tashqarisiga erkin chiqish va qaytib kelish huquqiga ega; bu huquq faqat qonunda "
+        "belgilangan hollarda (masalan, sud qarori yoki ijro ishi boʻyicha) cheklanishi mumkin.",
+        "Каждый имеет право свободно выезжать за пределы Узбекистана и возвращаться; ограничить это право можно только "
+        "в случаях, установленных законом (например, по решению суда или в исполнительном производстве).",
+        "Everyone may freely leave Uzbekistan and return; this right can be restricted only in cases set by law (for "
+        "example, by a court decision or in enforcement proceedings).",
+        "6445145:32"),
+    "rights.one_window": _l(
+        "Yoʻq — boshqa davlat organlarida bor hujjat va maʼlumotlarni davlat organi «bir darcha» prinsipi boʻyicha "
+        "idoralararo elektron hamkorlik orqali oʻzi oladi, ariza beruvchidan talab qilmaydi.",
+        "Нет — документы и сведения, которые есть в других госорганах, орган получает сам по принципу «одно окно» через "
+        "межведомственное электронное взаимодействие, не требуя их от заявителя.",
+        "No — under the one-window principle the agency obtains documents and data held by other state bodies itself, "
+        "through interagency electronic exchange, without requiring them from the applicant.",
+        "2833860:8;3492199:14"),
+    "rights.data_localization": _l(
+        "Biometrik va genetik maʼlumotlar hamda Oʻzbekistondagi telekommunikatsiya operatorlari foydalanuvchilarining "
+        "maʼlumotlari Oʻzbekiston hududida saqlanishi shart; boshqa shaxsga doir maʼlumotlarni chet elda saqlash uchun "
+        "shartlardan biri bajarilishi kerak (teng himoyani taʼminlovchi davlat, standart shartnomaviy shartlar yoki "
+        "xalqaro standartlar).",
+        "Биометрические и генетические данные, а также данные пользователей операторов связи в Узбекистане должны "
+        "храниться на территории Узбекистана; остальные персональные данные можно хранить за рубежом только при одном "
+        "из условий (страна с адекватной защитой, стандартные договорные условия или международные стандарты).",
+        "Biometric and genetic data, and data of users of telecom operators in Uzbekistan, must be stored in "
+        "Uzbekistan; other personal data may be stored abroad only if one of the conditions is met (a country with "
+        "adequate protection, standard contractual clauses or binding corporate rules, or international standards).",
+        "4396419:27.1"),
     "migration.dual_citizenship": _l(
         "Oʻzbekiston Respublikasi fuqarosining boshqa davlat fuqaroligiga mansubligi tan olinmaydi.",
         "Принадлежность гражданина Республики Узбекистан к гражданству иностранного государства не признаётся.",
@@ -845,6 +897,28 @@ _LEAD_ALIASES: dict[str, str] = {
     "consumer.rights": "consumer",
     "social.pension_general": "social.pension_age",
 }
+
+
+def leads_for(concept_ids: list[str], *, limit: int = 3) -> list[tuple[dict[str, str], list[tuple[str, str]]]]:
+    """Leads of several situations of one question: the first situation's lead (as :func:`lead_for`), then the
+    leads of the other situations that rest on different articles (a lead repeating an earlier one's basis is a
+    sub-situation of it and is skipped). Empty when the first situation has no lead."""
+    out: list[tuple[dict[str, str], list[tuple[str, str]]]] = []
+    seen: set[tuple[str, str]] = set()
+    for n, cid in enumerate(concept_ids):
+        got = lead_for([cid])
+        if got is None:
+            if n == 0:
+                return []
+            continue
+        texts, pairs = got
+        if seen & set(pairs):
+            continue
+        seen |= set(pairs)
+        out.append((texts, pairs))
+        if len(out) >= limit:
+            break
+    return out
 
 
 def lead_for(concept_ids: list[str]) -> tuple[dict[str, str], list[tuple[str, str]]] | None:
