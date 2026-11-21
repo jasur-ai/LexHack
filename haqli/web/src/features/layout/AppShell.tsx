@@ -128,8 +128,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [consentSaving, setConsentSaving] = useState(false);
   const [erasing, setErasing] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [servicesSectionOpen, setServicesSectionOpen] = useState(true);
-  const [sohalarOpen, setSohalarOpen] = useState(true);
   const [mapOpen, setMapOpen] = useState(false);
   const [paymentInfoOpen, setPaymentInfoOpen] = useState(false);
   const [mobileAppOpen, setMobileAppOpen] = useState(false);
@@ -418,240 +416,124 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </button>
 
-          {/* Xizmatlar ⌄ (5 ta Himoya Moduli bo'yicha) */}
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={() => setServicesSectionOpen((v) => !v)}
-              className="w-full flex items-center justify-between px-2.5 py-1.5 text-left text-xs font-bold text-slate-800 hover:text-slate-900 cursor-pointer group"
-            >
-              <span className="flex items-center gap-1.5 uppercase text-[11px] tracking-wider text-slate-600 group-hover:text-slate-900 font-bold">
-                Xizmatlar
-              </span>
-              <ChevronDown
-                className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
-                  servicesSectionOpen ? "rotate-0" : "-rotate-90"
-                }`}
-              />
-            </button>
-
-            {servicesSectionOpen && (
-              <div className="mt-1 divide-y divide-slate-100/90 rounded-xl border border-slate-100 bg-white overflow-hidden shadow-2xs">
-                {/* 1. Ommabop xizmatlar */}
+          {/* 5 ta Himoya Moduli va Asosiy Xizmatlar Ro'yxati */}
+          <div className="mt-2 divide-y divide-slate-100/90 rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-2xs">
+            {/* 5 ta Himoya Moduli */}
+            {desktopModules.map(({ id, num, label, badge, Icon }) => {
+              const active = activeMode === "citizen" && activeTab === id;
+              return (
                 <button
+                  key={id}
                   type="button"
                   onClick={() => {
                     haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("ommabop");
+                    if (activeMode !== "citizen") setActiveMode("citizen");
+                    setActiveTab(id);
                     onItemClick?.();
                   }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "ommabop"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left transition-all cursor-pointer ${
+                    active
+                      ? "bg-blue-50/80 text-[#0074ff] font-bold"
+                      : "text-slate-700 hover:bg-slate-50/90 font-medium"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Award className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Ommabop xizmatlar</span>
+                    <div
+                      className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                        active
+                          ? "bg-[#0074ff] text-white shadow-xs"
+                          : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                      }`}
+                    >
+                      <Icon className="h-4.5 w-4.5" />
+                    </div>
+                    <span className="text-sm truncate">{label}</span>
                   </div>
-                </button>
-
-                {/* 2. Sohalar (5 ta Himoya Moduli) */}
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      haptics.selection();
-                      setSohalarOpen((v) => !v);
-                      setActiveTab("services");
-                      setServicesCategory("sohalar");
-                    }}
-                    className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                      activeTab === "services" && servicesCategory === "sohalar"
-                        ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                        : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  <span
+                    className={`text-[10.5px] font-mono px-2 py-0.5 rounded-md shrink-0 font-bold ${
+                      active
+                        ? "bg-blue-100 text-[#0074ff]"
+                        : "bg-slate-100 text-slate-500"
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <LayoutGrid className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                      <span className="text-xs truncate">Sohalar</span>
-                    </div>
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 text-slate-400 transition-transform ${
-                        sohalarOpen ? "rotate-0" : "-rotate-90"
-                      }`}
-                    />
-                  </button>
+                    {badge}
+                  </span>
+                </button>
+              );
+            })}
 
-                  {sohalarOpen && (
-                    <div className="pl-4 pr-2 py-1 bg-slate-50/50 border-t border-slate-100 space-y-0.5">
-                      {desktopModules.map(({ id, num, label, badge, Icon }) => {
-                        const active = activeMode === "citizen" && activeTab === id;
-                        return (
-                          <button
-                            key={id}
-                            type="button"
-                            onClick={() => {
-                              haptics.selection();
-                              if (activeMode !== "citizen") setActiveMode("citizen");
-                              setActiveTab(id);
-                              onItemClick?.();
-                            }}
-                            className={`w-full flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors cursor-pointer ${
-                              active
-                                ? "bg-blue-50 text-[#0074ff] font-semibold"
-                                : "text-slate-600 hover:bg-white hover:text-slate-900"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Icon className={`h-3.5 w-3.5 shrink-0 ${active ? "text-[#0074ff]" : "text-slate-400"}`} />
-                              <span className="text-[11px] truncate">{label}</span>
-                            </div>
-                            <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 shrink-0">
-                              {badge}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+            {/* 6. Telegram mini ilova */}
+            <button
+              type="button"
+              onClick={() => {
+                haptics.selection();
+                setMobileAppOpen(true);
+                onItemClick?.();
+              }}
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left text-slate-700 hover:bg-slate-50/90 font-medium transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Send className="h-4.5 w-4.5" />
                 </div>
-
-                {/* 3. Xizmatlar uchun to'lov */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("tolov");
-                    setPaymentInfoOpen(true);
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "tolov"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <CreditCard className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Xizmatlar uchun to'lov</span>
-                  </div>
-                </button>
-
-                {/* 4. Arizani tekshirish */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("tekshirish");
-                    openRecognition("verify");
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "tekshirish"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <ListChecks className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Arizani tekshirish</span>
-                  </div>
-                </button>
-
-                {/* 5. Joylar xaritasi */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("xarita");
-                    setMapOpen(true);
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "xarita"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <MapPin className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Joylar xaritasi</span>
-                  </div>
-                </button>
-
-                {/* 6. Yagona reyestr */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("reyestr");
-                    setProfileTab("history");
-                    setProfileOpen(true);
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "reyestr"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Yagona reyestr</span>
-                  </div>
-                </button>
-
-                {/* 7. Proaktiv va kompozit xizmatlar */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("kompozit");
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "kompozit"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileCheck className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Proaktiv va kompozit xizmatlar</span>
-                  </div>
-                </button>
-
-                {/* 8. Mobil ilovalar */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    haptics.selection();
-                    setActiveTab("services");
-                    setServicesCategory("mobil");
-                    setMobileAppOpen(true);
-                    onItemClick?.();
-                  }}
-                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                    activeTab === "services" && servicesCategory === "mobil"
-                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Smartphone className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
-                    <span className="text-xs truncate">Mobil ilovalar</span>
-                  </div>
-                </button>
+                <span className="text-sm truncate">Telegram mini ilova</span>
               </div>
-            )}
+            </button>
+
+            {/* 7. Arizalar holati */}
+            <button
+              type="button"
+              onClick={() => {
+                haptics.selection();
+                openRecognition("verify");
+                onItemClick?.();
+              }}
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left text-slate-700 hover:bg-slate-50/90 font-medium transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <ListChecks className="h-4.5 w-4.5" />
+                </div>
+                <span className="text-sm truncate">Arizalar holati</span>
+              </div>
+            </button>
+
+            {/* 8. Xizmat uchun to'lov */}
+            <button
+              type="button"
+              onClick={() => {
+                haptics.selection();
+                setPaymentInfoOpen(true);
+                onItemClick?.();
+              }}
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left text-slate-700 hover:bg-slate-50/90 font-medium transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <CreditCard className="h-4.5 w-4.5" />
+                </div>
+                <span className="text-sm truncate">Xizmat uchun to'lov</span>
+              </div>
+            </button>
+
+            {/* 9. Yangilangan hujjatlar va qonunlar */}
+            <button
+              type="button"
+              onClick={() => {
+                haptics.selection();
+                setProfileTab("history");
+                setProfileOpen(true);
+                onItemClick?.();
+              }}
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left text-slate-700 hover:bg-slate-50/90 font-medium transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <FileText className="h-4.5 w-4.5" />
+                </div>
+                <span className="text-sm truncate">Yangilangan hujjatlar va qonunlar</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
