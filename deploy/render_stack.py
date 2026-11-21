@@ -139,14 +139,42 @@ def _create(render: Render, owner_id: str, spec: dict[str, Any], stack: dict[str
 
 def _update(render: Render, svc: dict[str, Any], spec: dict[str, Any], branch: str, env_plain: dict[str, str], secret_defaults: dict[str, str], passthrough: dict[str, str]) -> None:
     sid = svc["id"]
-    patch: dict[str, Any] = {
-        "branch": branch,
-        "rootDir": spec["rootDir"],
-        "autoDeploy": "yes",
-        "serviceDetails": {"healthCheckPath": spec["healthCheckPath"], "envSpecificDetails": _docker_details(spec)},
-    }
-    render.call("PATCH", f"/services/{sid}", patch)
-    existing = {row["envVar"]["key"]: row["envVar"].get("value", "") for row in render.call("GET", f"/services/{sid}/env-vars", params={"limit": 100}) or []}
+    # One field group per request: a rejected optional setting must not block the deploy
+    for label, patch in (
+        ("branch", {"branch": branch}),
+        ("health check", {"serviceDetails": {"healthCheckPath": spec["healthCheckPath"]}}),
+        ("docker paths", {"serviceDetails": {"envSpecificDetails": _docker_details(spec)}}),
+    ):
+        if label != "branch" and svc.get("branch") == branch and label == "docker paths":
+            continue
+        try:
+            render.call("PATCH", f"/services/{sid}", patch)
+        except RenderError as exc:
+            if label == "branch":
+                raise
+            print(f"  {spec['name']}: {label} not updated ({exc})")
+    wanted = spec.get("plan", "starter")
+    current = (svc.get("serviceDetails") or {}).get("plan")
+    if wanted != current:
+        # A free service is moved to the paid plan as soon as the workspace has a payment method
+        try:
+            render.call("PATCH", f"/services/{sid}", {"serviceDetails": {"plan": wanted}})
+            print(f"  {spec['name']}: plan {current} -> {wanted}")
+            if spec.get("disk") and wanted != "free":
+                try:
+                    render.call("POST", "/disks", {**spec["disk"], "serviceId": sid})
+                    print(f"  {spec['name']}: disk {spec['disk']['name']} attached at {spec['disk']['mountPath']}")
+                except RenderError as exc:
+                    print(f"  {spec['name']}: disk not attached ({exc})")
+        except RenderError as exc:
+            reason = "paid plan needs a payment method" if exc.status == 402 else str(exc)
+            print(f"  {spec['name']}: stays on {current} ({reason})")
+    rows = render.call("GET", f"/services/{sid}/env-vars", params={"limit": 100}) or []
+    existing = {}
+    for row in rows:
+        var = row.get("envVar", row) if isinstance(row, dict) else {}
+        if var.get("key"):
+            existing[var["key"]] = var.get("value", "")
     merged = dict(existing)
     merged.update(env_plain)
     merged.update({k: v for k, v in passthrough.items() if v})
@@ -193,6 +221,21 @@ def _print_logs(render: Render, owner_id: str, service_id: str, status: str) -> 
 
 
 def main() -> int:
+    try:
+        return _main()
+    except Exception as exc:  # the error is written to the result file so the workflow can report it
+        exc = RenderError(getattr(exc, "status", 0), f"{type(exc).__name__}: {exc}") if not isinstance(exc, RenderError) else exc
+        print(f"Render API error: {exc}", file=sys.stderr)
+        out = Path(next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--out=")), "render-result.json"))
+        if "--out" in sys.argv:
+            out = Path(sys.argv[sys.argv.index("--out") + 1])
+        previous = json.loads(out.read_text(encoding="utf-8")) if out.exists() else {}
+        previous["error"] = str(exc)
+        out.write_text(json.dumps(previous, indent=2) + "\n", encoding="utf-8")
+        return 1
+
+
+def _main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--stack", default="deploy/stack.json")
     parser.add_argument("--branch", required=True)
@@ -257,6 +300,7 @@ def main() -> int:
             print(f"Updating {spec['name']} ({svc['id']})")
             _update(render, svc, spec, args.branch, env_plain, secret_defaults, passthrough)
             deploy_id = render.call("POST", f"/services/{svc['id']}/deploys", {"clearCache": "do_not_clear"})["id"]
+            svc = render.find_service(owner["id"], spec["name"]) or svc
             plan = (svc.get("serviceDetails") or {}).get("plan")
             fallback, created = False, False
         url = (svc.get("serviceDetails") or {}).get("url", "")

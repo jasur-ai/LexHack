@@ -21,6 +21,8 @@ def main() -> int:
     if render.exists():
         data = json.loads(render.read_text(encoding="utf-8"))
         lines = [f"workspace {data.get('owner', {}).get('name')} ({data.get('owner', {}).get('type')}), branch {data.get('branch')}"]
+        if data.get("error"):
+            lines.append(f"ERROR: {data['error']}")
         for key, svc in (data.get("services") or {}).items():
             dep = svc.get("deploy") or {}
             lines.append(

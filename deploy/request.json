@@ -1,7 +1,7 @@
 {
-  "nonce": 3,
+  "nonce": 4,
   "branch": "arena/8a21e194-lexhack",
   "only": [],
   "mode": "deploy",
-  "note": "Agent: premise checks (non-existent articles/codes/numbers, repealed rules), legislation concepts, live lex.uz fetches off in the request path"
+  "note": "Redeploy with the premise checks; resilient Render update (per-field patches, errors reported)"
 }
