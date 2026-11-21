@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   ArrowRight,
   Bot,
   Briefcase,
   Car,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   FileCheck2,
   FileText,
@@ -14,24 +12,11 @@ import {
   ShieldAlert,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   Zap,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../lib/store";
 import { haptics } from "../../tma/sdk";
-
-interface BannerSlide {
-  id: string;
-  badge: string;
-  badgeSub?: string;
-  title: string;
-  subtitle: string;
-  bgGradient: string;
-  actionText?: string;
-  onAction?: () => void;
-  renderRight?: () => React.ReactNode;
-}
 
 export function HomeView() {
   const { t } = useTranslation();
@@ -39,255 +24,8 @@ export function HomeView() {
   const setServicesCategory = useAppStore((s) => s.setServicesCategory);
   const setAiPanelOpen = useAppStore((s) => s.setAiPanelOpen);
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const slides: BannerSlide[] = [
-    {
-      id: "rating",
-      badge: "BMT / 2026",
-      badgeSub: "100% Avtonom Fuqarolik Himoyasi",
-      title: "Elektron hukumat reytingi",
-      subtitle: "O'zbekiston 194 ta davlat orasida • Haqly.uz Huquqiy Platformasi",
-      bgGradient: "from-[#0062db] via-[#008ecf] to-[#00c2cb]",
-      onAction: () => {
-        setActiveTab("services");
-      },
-      renderRight: () => (
-        <div className="flex items-baseline gap-2 relative z-10 self-end md:self-center">
-          <span className="text-6xl sm:text-7xl font-black text-white leading-none tracking-tight">
-            32
-          </span>
-          <span className="text-3xl sm:text-4xl font-extrabold text-white">
-            -o'rinda
-          </span>
-          <span className="ml-3 inline-flex items-center gap-1.5 rounded-full bg-[#fde047] text-slate-900 text-xs sm:text-sm font-black px-3 py-1 shadow-md">
-            <TrendingUp className="h-4 w-4" />
-            <span>TOP-17%</span>
-          </span>
-        </div>
-      ),
-    },
-    {
-      id: "about",
-      badge: "O'zbekistonda 1-raqamli",
-      badgeSub: "Avtonom Yuridik Ekotizim",
-      title: "Haqly.uz — 60 soniyada Fuqarolik Himoyasi",
-      subtitle:
-        "Yuristsiz va ortiqcha xarajatsiz: jarimalar, og'zaki/yozma qarzlar, ish haqi nizolari va shartnoma tuzoqlariga qarshi rasmiy qonuniy hujjatlar.",
-      bgGradient: "from-[#0a2540] via-[#004e92] to-[#0074ff]",
-      actionText: "Loyiha imkoniyatlari bilan tanishish",
-      onAction: () => {
-        setActiveTab("services");
-      },
-      renderRight: () => (
-        <div className="grid grid-cols-2 gap-2.5 relative z-10 self-stretch md:self-center shrink-0">
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
-            <div className="text-xl sm:text-2xl font-black text-white">0 so'm</div>
-            <div className="text-[11px] text-white/80 font-medium mt-0.5">Davlat boji</div>
-          </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
-            <div className="text-xl sm:text-2xl font-black text-white">60 soniya</div>
-            <div className="text-[11px] text-white/80 font-medium mt-0.5">Tayyor PDF</div>
-          </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
-            <div className="text-xl sm:text-2xl font-black text-emerald-300">100%</div>
-            <div className="text-[11px] text-white/80 font-medium mt-0.5">Lex.uz asosi</div>
-          </div>
-          <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-3 sm:p-3.5 min-w-[95px] sm:min-w-[110px] text-center">
-            <div className="text-xl sm:text-2xl font-black text-yellow-300">24/7</div>
-            <div className="text-[11px] text-white/80 font-medium mt-0.5">AI maslahat</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: "modules",
-      badge: "5 ta Himoya Moduli",
-      badgeSub: "Sudgacha Hal Qilish",
-      title: "Kundalik muammolarga tayyor qonuniy yechimlar",
-      subtitle:
-        "YHXX radar jarimalari arizasi, 10 BHM ovozli tilxat, ish beruvchiga 1% penya talabnomasi va asossiz kommunal qarzlarni bekor qilish.",
-      bgGradient: "from-[#003973] via-[#0052cc] to-[#00a8cc]",
-      actionText: "Barcha 5 ta modulni ko'rish",
-      onAction: () => {
-        setActiveTab("services");
-      },
-      renderRight: () => (
-        <div className="flex flex-col gap-1.5 relative z-10 self-stretch md:self-center max-w-xs shrink-0 text-xs">
-          <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5 text-white font-medium border border-white/10">
-            <Car className="h-3.5 w-3.5 text-cyan-200 shrink-0" />
-            <span className="truncate">Radar xatolari bo'yicha shikoyat</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5 text-white font-medium border border-white/10">
-            <FileCheck2 className="h-3.5 w-3.5 text-emerald-300 shrink-0" />
-            <span className="truncate">QR-kodli ovozli qarz tilxati</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-xl px-3 py-1.5 text-white font-medium border border-white/10">
-            <Briefcase className="h-3.5 w-3.5 text-yellow-300 shrink-0" />
-            <span className="truncate">Kechikkan oylik uchun 1% penya</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: "ai-agent",
-      badge: "Yangi: Haqly AI",
-      badgeSub: "Suhbatlar Xotirasi Bilan",
-      title: "Haqly AI — Sizning 24/7 Shaxsiy Yuristingiz",
-      subtitle:
-        "O'zR kodekslari bo'yicha istalgan savolingizni bering. To'liq kontekst xotirasi, qonun moddalari tahlili va tayyor arizalarga bir zumda yo'naltirish.",
-      bgGradient: "from-[#1e1b4b] via-[#3730a3] to-[#0284c7]",
-      actionText: "Haqly AI bilan suhbatlashish",
-      onAction: () => {
-        haptics.impact("medium");
-        setAiPanelOpen(true);
-      },
-      renderRight: () => (
-        <div className="flex flex-col items-center justify-center relative z-10 p-4 sm:p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shrink-0">
-          <div className="relative flex items-center justify-center h-14 w-14 rounded-2xl bg-white text-[#0074ff] shadow-lg mb-2.5">
-            <Bot className="h-8 w-8" />
-            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
-          </div>
-          <span className="text-sm font-bold text-white tracking-wide">Haqly AI</span>
-          <span className="text-xs text-cyan-200">24/7 Qonuniy Agent</span>
-        </div>
-      ),
-    },
-  ];
-
-  // Auto-play timer for carousel
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5500);
-    return () => clearInterval(timer);
-  }, [isPaused, slides.length]);
-
-  const handlePrev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    haptics.impact("light");
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  const handleNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    haptics.impact("light");
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const activeSlide = slides[currentSlide] ?? slides[0]!;
-
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* 1. Interactive Scrolling / Carousel Banner */}
-      <div
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        onClick={() => {
-          haptics.selection();
-          if (activeSlide.onAction) activeSlide.onAction();
-        }}
-        role="button"
-        tabIndex={0}
-        className={`rounded-3xl bg-gradient-to-r ${activeSlide.bgGradient} p-6 sm:p-8 md:p-10 pb-10 sm:pb-12 text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden group select-none min-h-[220px] sm:min-h-[250px] md:min-h-[270px]`}
-      >
-        {/* Glow Accents */}
-        <div className="absolute right-36 -top-12 w-56 h-56 rounded-full bg-white/10 blur-xl pointer-events-none" />
-        <div className="absolute right-0 -bottom-10 w-72 h-72 rounded-full bg-cyan-300/10 blur-2xl pointer-events-none" />
-
-        {/* Slide Content */}
-        <div className="flex items-start sm:items-center gap-5 sm:gap-6 relative z-10 flex-1 min-w-0">
-          {/* Logo badge */}
-          <div className="h-15 w-30 sm:h-18 sm:w-38 rounded-2xl bg-white shadow-md flex items-center justify-center p-3 shrink-0 group-hover:scale-105 transition-transform">
-            <div className="flex items-center gap-1.5 font-bold text-slate-800">
-              <div className="h-7 w-7 rounded-lg bg-[#0074ff] text-white flex items-center justify-center text-xs font-black shadow-xs">
-                ✓
-              </div>
-              <span className="tracking-tight text-[#0074ff] font-black text-sm sm:text-base">
-                haqly.uz
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2 min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-white/20 text-white px-3 py-0.5 rounded-full border border-white/25">
-                {activeSlide.badge}
-              </span>
-              {activeSlide.badgeSub && (
-                <span className="text-xs sm:text-sm text-white/85 font-medium">
-                  {activeSlide.badgeSub}
-                </span>
-              )}
-            </div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white leading-tight">
-              {activeSlide.title}
-            </h2>
-            <p className="text-xs sm:text-sm md:text-base text-white/90 line-clamp-3 leading-relaxed">
-              {activeSlide.subtitle}
-            </p>
-            {activeSlide.actionText && (
-              <div className="pt-1.5">
-                <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white bg-white/20 hover:bg-white/30 px-3.5 py-1.5 rounded-xl transition-colors shadow-2xs">
-                  <span>{activeSlide.actionText}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Graphic / Rating Widget */}
-        {activeSlide.renderRight && activeSlide.renderRight()}
-
-        {/* Carousel Navigation Arrows */}
-        <button
-          type="button"
-          onClick={handlePrev}
-          aria-label="Oldingi slayd"
-          className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/25 hover:bg-black/45 text-white flex items-center justify-center backdrop-blur-xs transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer z-20"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          aria-label="Keyingi slayd"
-          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/25 hover:bg-black/45 text-white flex items-center justify-center backdrop-blur-xs transition-opacity opacity-0 group-hover:opacity-100 cursor-pointer z-20"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-
-        {/* Carousel Dots & Counter Bar */}
-        <div
-          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-black/25 backdrop-blur-xs px-2.5 py-1 rounded-full"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {slides.map((s, idx) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => {
-                haptics.impact("light");
-                setCurrentSlide(idx);
-              }}
-              className={`rounded-full transition-all cursor-pointer ${
-                idx === currentSlide
-                  ? "w-6 h-1.5 bg-white shadow-xs"
-                  : "w-1.5 h-1.5 bg-white/45 hover:bg-white/70"
-              }`}
-              title={`Slayd ${idx + 1}`}
-              aria-label={`Slayd ${idx + 1}`}
-            />
-          ))}
-          <span className="text-[9px] font-bold text-white/80 ml-1">
-            {currentSlide + 1}/{slides.length}
-          </span>
-        </div>
-      </div>
-
       {/* 2. Top 6 Service Cards (6-chisi Haqly AI Agent kartochkasi!) */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
