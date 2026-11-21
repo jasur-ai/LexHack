@@ -14,4 +14,4 @@ backend/tests/recognition/fixtures/local/
 web/node_modules/
 web/dist/
 .env
-agent/data/qdrant/collection/lex_uz_legislation/storage.sqlite
+*.tsbuildinfo

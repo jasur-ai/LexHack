@@ -54,7 +54,7 @@ class AuditorLLMClient:
     def _get_http(self) -> httpx.AsyncClient:
         if self._http is None or self._http.is_closed:
             self._http = httpx.AsyncClient(
-                timeout=httpx.Timeout(120.0, connect=12.0),
+                timeout=httpx.Timeout(self.settings.auditor_llm_timeout, connect=12.0),
                 limits=httpx.Limits(max_connections=16, max_keepalive_connections=8, keepalive_expiry=180.0),
             )
         return self._http
@@ -62,6 +62,71 @@ class AuditorLLMClient:
     async def close(self) -> None:
         if self._http and not self._http.is_closed:
             await self._http.aclose()
+
+    @staticmethod
+    def _gemini_generation_config(model: str, temperature: float, max_tokens: int, json_mode: bool) -> dict[str, Any]:
+        """Build a generationConfig that each Gemini family accepts.
+
+        Gemini 3+/4 reject ``thinkingLevel: minimal`` on non-lite models and no longer take a temperature;
+        Gemini 2.5 uses a token ``thinkingBudget`` instead.
+        """
+        low = model.lower()
+        cfg: dict[str, Any] = {"maxOutputTokens": max_tokens}
+        if re.search(r"gemini-(?:3|4)", low):
+            cfg["thinkingConfig"] = {"thinkingLevel": "minimal" if "lite" in low else "low"}
+        else:
+            cfg["temperature"] = temperature
+            if "gemini-2.5" in low:
+                cfg["thinkingConfig"] = {"thinkingBudget": 0 if ("flash" in low and "pro" not in low) else 128}
+        if json_mode:
+            cfg["responseMimeType"] = "application/json"
+        return cfg
+
+    async def _gemini_native(
+        self, system_prompt: str, user_prompt: str, *, json_mode: bool, temperature: float
+    ) -> str:
+        http = self._get_http()
+        models = [self.settings.auditor_llm_model]
+        fallback = (self.settings.auditor_llm_fallback_model or "").strip()
+        if fallback and fallback not in models:
+            models.append(fallback)
+        last_error = ""
+        for model in models:
+            gen_cfg = self._gemini_generation_config(
+                model, temperature, self.settings.auditor_llm_max_tokens, json_mode
+            )
+            for attempt in range(2):
+                payload: dict[str, Any] = {
+                    "systemInstruction": {"parts": [{"text": system_prompt}]},
+                    "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
+                    "generationConfig": gen_cfg,
+                }
+                resp = await http.post(
+                    f"{_GEMINI_NATIVE_BASE}/{model}:generateContent",
+                    headers={"Content-Type": "application/json", "x-goog-api-key": self._api_key()},
+                    json=payload,
+                )
+                if resp.status_code < 400:
+                    data = resp.json()
+                    cands = data.get("candidates") or []
+                    if not cands:
+                        return ""
+                    parts = cands[0].get("content", {}).get("parts") or []
+                    return "".join(
+                        p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought")
+                    ).strip()
+                last_error = f"{resp.status_code}: {resp.text[:300]}"
+                body_low = resp.text.lower()
+                if resp.status_code == 400 and attempt == 0 and ("thinking" in body_low or "temperature" in body_low):
+                    # Unknown model family rules: retry once with the most conservative config.
+                    gen_cfg = {k: v for k, v in gen_cfg.items() if k not in {"thinkingConfig", "temperature"}}
+                    continue
+                break
+            if not last_error.startswith("404"):
+                break
+            logger.warning("Auditor model %s unavailable (404); trying fallback model.", model)
+        logger.warning("Auditor Gemini call failed (%s)", last_error)
+        return ""
 
     async def complete(
         self,
@@ -75,65 +140,37 @@ class AuditorLLMClient:
             return ""
 
         temp = self.settings.auditor_llm_temperature if temperature is None else temperature
-        model = self.settings.auditor_llm_model
-        http = self._get_http()
+        try:
+            if self.is_gemini_native:
+                return await self._gemini_native(system_prompt, user_prompt, json_mode=json_mode, temperature=temp)
 
-        if self.is_gemini_native:
-            url = f"{_GEMINI_NATIVE_BASE}/{model}:generateContent"
-            gen_cfg: dict[str, Any] = {
+            # OpenAI / OpenRouter / Ollama compatible endpoint
+            base = self.settings.auditor_llm_base_url.rstrip("/")
+            body: dict[str, Any] = {
+                "model": self.settings.auditor_llm_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
                 "temperature": temp,
-                "maxOutputTokens": self.settings.auditor_llm_max_tokens,
+                "max_tokens": self.settings.auditor_llm_max_tokens,
             }
-            if re.search(r"gemini-(?:3|4)", model.lower()):
-                gen_cfg["thinkingConfig"] = {"thinkingLevel": "minimal"}
-            elif "gemini-2.5" in model.lower():
-                gen_cfg["thinkingConfig"] = {"thinkingBudget": 0}
             if json_mode:
-                gen_cfg["responseMimeType"] = "application/json"
-
-            payload: dict[str, Any] = {
-                "systemInstruction": {"parts": [{"text": system_prompt}]},
-                "contents": [{"role": "user", "parts": [{"text": user_prompt}]}],
-                "generationConfig": gen_cfg,
-            }
-            resp = await http.post(
-                url,
-                headers={"Content-Type": "application/json", "x-goog-api-key": self._api_key()},
-                json=payload,
+                body["response_format"] = {"type": "json_object"}
+            resp = await self._get_http().post(
+                f"{base}/chat/completions",
+                headers={"Authorization": f"Bearer {self._api_key()}", "Content-Type": "application/json"},
+                json=body,
             )
             if resp.status_code >= 400:
-                logger.warning("Auditor Gemini call failed (%d): %s", resp.status_code, resp.text[:300])
+                logger.warning("Auditor OpenAI-compat call failed (%d): %s", resp.status_code, resp.text[:300])
                 return ""
             data = resp.json()
-            cands = data.get("candidates") or []
-            if not cands:
-                return ""
-            parts = cands[0].get("content", {}).get("parts") or []
-            return "".join(p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought")).strip()
-
-        # OpenAI / OpenRouter / Ollama compatible endpoint
-        base = self.settings.auditor_llm_base_url.rstrip("/")
-        body: dict[str, Any] = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            "temperature": temp,
-            "max_tokens": self.settings.auditor_llm_max_tokens,
-        }
-        if json_mode:
-            body["response_format"] = {"type": "json_object"}
-        resp = await http.post(
-            f"{base}/chat/completions",
-            headers={"Authorization": f"Bearer {self._api_key()}", "Content-Type": "application/json"},
-            json=body,
-        )
-        if resp.status_code >= 400:
-            logger.warning("Auditor OpenAI-compat call failed (%d): %s", resp.status_code, resp.text[:300])
+            return (data.get("choices", [{}])[0].get("message", {}).get("content") or "").strip()
+        except httpx.HTTPError as exc:
+            # Network trouble must degrade to deterministic-only auditing, never crash an audit run.
+            logger.warning("Auditor LLM unreachable (%s: %s)", type(exc).__name__, exc)
             return ""
-        data = resp.json()
-        return (data.get("choices", [{}])[0].get("message", {}).get("content") or "").strip()
 
     async def complete_json(
         self,

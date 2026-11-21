@@ -4,13 +4,14 @@
     "instrument": "O'zbekiston Respublikasi Prezidentining Farmoni",
     "article": "BHM",
     "title_uz": "Bazaviy hisoblash miqdori (BHM)",
-    "summary_uz": "Jarimalar, yig'imlar va shartnomaviy chegaralarni hisoblash uchun qo'llaniladigan rasmiy bazaviy hisoblash miqdori.",
-    "summary_ru": "Официальная базовая расчетная величина (БРВ), применяемая для расчета штрафов, сборов и договорных порогов.",
-    "effective_from": "2024-10-01",
-    "source_ref": "Lex.uz / PF-108",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "summary_uz": "2026-yil 1-sentabrdan bazaviy hisoblash miqdori — 440 000 so'm. Jarimalar, yig'imlar va shartnomaviy chegaralar shu miqdordan hisoblanadi.",
+    "summary_ru": "С 1 сентября 2026 года базовая расчётная величина — 440 000 сумов. От неё рассчитываются штрафы, сборы и договорные пороги.",
+    "effective_from": "2026-09-01",
+    "source_ref": "PF-115 (23.06.2026)",
+    "verified_on": "2026-11-21",
+    "verified_by": "gazeta.uz, 2026-06-23",
+    "status": "verified",
+    "source_url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/"
   },
   {
     "id": "inst_fk_108",
@@ -21,9 +22,10 @@
     "summary_ru": "Сделки между гражданами на сумму выше установленного порога БРВ (включая заем) должны совершаться в простой письменной форме. Несоблюдение лишает стороны права ссылаться на свидетельские показания при споре.",
     "effective_from": "1997-03-01",
     "source_ref": "FK 108-109-moddalar",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/111189"
   },
   {
     "id": "inst_fk_150",
@@ -34,22 +36,24 @@
     "summary_ru": "Общий срок исковой давности по гражданско-правовым спорам составляет три года.",
     "effective_from": "1997-03-01",
     "source_ref": "FK 150-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/111189"
   },
   {
     "id": "inst_fk_242",
     "instrument": "O'zbekiston Respublikasining Fuqarolik kodeksi",
     "article": "242-modda",
     "title_uz": "Majburiyatni bajarish muddati va talabnoma",
-    "summary_uz": "Majburiyatni bajarish muddati aniq belgilanmagan yoki talab qilib olish payti bilan belgilangan hollarda qarzdor kreditorning yozma talabini olgandan keyin qonunda belgilangan muddatda bajarishi shart.",
-    "summary_ru": "При отсутствии точного срока или при предъявлении требования должник обязан исполнить обязательство в установленный законом срок после получения письменного требования.",
+    "summary_uz": "Majburiyatni bajarish muddati ko'rsatilmagan yoki talab qilib olish payti bilan belgilangan bo'lsa, qarzdor uni kreditor talab qilgan kundan boshlab yetti kun ichida bajarishi shart.",
+    "summary_ru": "Если срок исполнения не установлен или определён моментом востребования, должник обязан исполнить обязательство в семидневный срок со дня предъявления требования кредитором.",
     "effective_from": "1997-03-01",
     "source_ref": "FK 242-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/111189"
   },
   {
     "id": "inst_fk_260",
@@ -60,9 +64,10 @@
     "summary_ru": "Денежная сумма (штраф или пеня), которую должник обязан уплатить кредитору при неисполнении или просрочке. Несоразмерная неустойка может быть снижена судом (ст. 326).",
     "effective_from": "1997-03-01",
     "source_ref": "FK 260, 326-moddalar",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/111189"
   },
   {
     "id": "inst_fk_535",
@@ -73,9 +78,10 @@
     "summary_ru": "Арендодатель обязан передать имущество в пригодном состоянии. Фиксация состояния жилья актом приема-передачи защищает депозит при возврате.",
     "effective_from": "1997-03-01",
     "source_ref": "FK 535, 600-moddalar",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/180552"
   },
   {
     "id": "inst_fk_732",
@@ -86,9 +92,10 @@
     "summary_ru": "Договор займа считается заключенным с момента передачи денег. Расписка заемщика (тилхат) подтверждает письменную форму договора займа.",
     "effective_from": "1997-03-01",
     "source_ref": "FK 732-733-moddalar",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/180552"
   },
   {
     "id": "inst_fk_734",
@@ -101,7 +108,8 @@
     "source_ref": "FK 734-modda / Mikroqarz qoidalari",
     "verified_on": null,
     "verified_by": null,
-    "status": "needs_review"
+    "status": "needs_review",
+    "source_url": "https://lex.uz/docs/180552"
   },
   {
     "id": "inst_mk_104",
@@ -112,9 +120,10 @@
     "summary_ru": "Трудовой договор заключается в письменной форме в двух экземплярах с обязательным указанием места работы, трудовой функции, размера оплаты и режима рабочего времени.",
     "effective_from": "2023-04-30",
     "source_ref": "MK 104, 106-moddalar",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/6257288"
   },
   {
     "id": "inst_mk_165",
@@ -125,9 +134,10 @@
     "summary_ru": "Работодатель обязан письменно предупредить работника: при сокращении — минимум за 2 месяца, при несоответствии — за 2 недели, при нарушении дисциплины — за 3 дня.",
     "effective_from": "2023-04-30",
     "source_ref": "MK 165-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/6257288"
   },
   {
     "id": "inst_mk_333",
@@ -138,9 +148,10 @@
     "summary_ru": "За каждый день задержки заработной платы работодатель обязан выплатить денежную компенсацию исходя из основной ставки ЦБ.",
     "effective_from": "2023-04-30",
     "source_ref": "MK 333-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/6257288"
   },
   {
     "id": "inst_mk_560",
@@ -151,9 +162,10 @@
     "summary_ru": "Срок обращения по спорам о восстановлении на работе — 3 месяца, по иным трудовым спорам (включая взыскание зарплаты) — 6 месяцев.",
     "effective_from": "2023-04-30",
     "source_ref": "MK 560-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/6257288"
   },
   {
     "id": "inst_consumer_14",
@@ -184,15 +196,16 @@
   {
     "id": "inst_mjtk_315",
     "instrument": "O'zbekiston Respublikasining Ma'muriy javobgarlik to'g'risidagi kodeksi",
-    "article": "315-modda",
+    "article": "316",
     "title_uz": "Ma'muriy jarima qarori ustidan shikoyat berish muddati",
-    "summary_uz": "Ma'muriy huquqbuzarlik to'g'risidagi qaror ustidan nusxa olingan kundan boshlab 10 kun ichida yuqori organga yoki sudga shikoyat berish mumkin.",
-    "summary_ru": "Постановление по делу об административном правонарушении может быть обжаловано в течение 10 дней со дня вручения копии.",
+    "summary_uz": "Ma'muriy huquqbuzarlik bo'yicha qaror ustidan qaror nusxasi olingan kundan e'tiboran o'n kun ichida yuqori organga yoki sudga shikoyat berish mumkin; shikoyat beruvchi davlat bojidan ozod.",
+    "summary_ru": "Постановление по делу об административном правонарушении можно обжаловать в течение десяти дней со дня получения его копии; заявитель освобождается от госпошлины.",
     "effective_from": "1995-04-01",
-    "source_ref": "MJtK 315-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "source_ref": "MJtK 316-modda",
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/97664"
   },
   {
     "id": "inst_mjtk_332_1",
@@ -203,9 +216,10 @@
     "summary_ru": "При добровольной уплате 50% штрафа в течение 15 дней или 70% в течение 30 дней правонарушитель освобождается от уплаты оставшейся части.",
     "effective_from": "2023-05-01",
     "source_ref": "MJtK 332-1-modda",
-    "verified_on": null,
-    "verified_by": null,
-    "status": "needs_review"
+    "verified_on": "2026-11-21",
+    "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+    "status": "verified",
+    "source_url": "https://lex.uz/docs/97664"
   },
   {
     "id": "inst_appeals_28",

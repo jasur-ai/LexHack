@@ -36,6 +36,35 @@ def serve(
     uvicorn.run("lex_agent.api.app:app", host=host, port=port, reload=reload)
 
 
+@app.command("build-index")
+def build_index(force: bool = typer.Option(False, help="Rebuild even if the bundled corpora are unchanged")) -> None:
+    """Index the bundled open legal corpora (Uzbek Latin, Russian, lex.uz snapshots, curated facts)."""
+    rt = AgentRuntime.build()
+    stats_payload = rt.build_index(force=force)
+    console.print_json(json.dumps(stats_payload, ensure_ascii=False))
+
+
+@app.command("eval")
+def eval_retrieval(
+    k: int = typer.Option(5, help="Cut-off rank"),
+    gold: Path = typer.Option(None, help="Path to a gold JSONL file (defaults to eval/retrieval_gold.jsonl)"),
+    show_all: bool = typer.Option(False, help="Print every query, not only misses"),
+) -> None:
+    """Measure retrieval quality (hit@1, hit@k, MRR, latency) on the labelled gold set."""
+    from lex_agent.evaluation import DEFAULT_GOLD, evaluate_retrieval
+
+    rt = AgentRuntime.build()
+    rt.build_index()
+    report = asyncio.run(evaluate_retrieval(rt.retriever, gold or DEFAULT_GOLD, k=k))
+    table = Table(title=f"Retrieval quality ({report['queries']} questions)")
+    for key in ("hit@1", f"hit@{k}", f"mrr@{k}", "p50_ms", "p95_ms"):
+        table.add_row(key, str(report[key]))
+    console.print(table)
+    rows = report["per_query"] if show_all else report["misses"]
+    for row in rows:
+        console.print(f"[{'green' if row['rank'] else 'red'}]{row['rank'] or '✗'}[/] {row['q']}  →  {row['top']}")
+
+
 @app.command()
 def stats() -> None:
     """Display local knowledge base statistics."""
@@ -195,7 +224,9 @@ def audit(
     kind: str = typer.Option("contract", help="contract | employment | court_filing | regulation"),
 ) -> None:
     """Audit a legal document against current Uzbekistan legislation."""
-    from lex_agent.capabilities.document_analyzer import extract_text_from_uploaded_bytes
+    from lex_agent.capabilities.document_analyzer import (
+        extract_text_from_uploaded_bytes,
+    )
 
     text = extract_text_from_uploaded_bytes(file_path.name, file_path.read_bytes())
 

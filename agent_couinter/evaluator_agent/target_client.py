@@ -79,6 +79,7 @@ class TargetAgentClient:
             "query": question,
             "enable_live_lex": True,
             "max_hops": 2,
+            "answer_style": self.settings.target_agent_answer_style,
         }
         if language is not None:
             payload["response_language"] = language.value
@@ -99,12 +100,31 @@ class TargetAgentClient:
                 )
             data = resp.json()
             ver = data.get("verification") or {}
+            citations = list(data.get("citations") or [])
+            # Agent >= 2.0 also returns the numbered sources behind the [n] markers; audit them too.
+            known = {(str(c.get("doc_id")), str(c.get("article"))) for c in citations}
+            for src in data.get("sources") or []:
+                key = (str(src.get("doc_id")), str(src.get("article")))
+                if key in known:
+                    continue
+                known.add(key)
+                citations.append(
+                    {
+                        "doc_id": src.get("doc_id"),
+                        "doc_title": src.get("full_title") or src.get("title"),
+                        "article": src.get("article"),
+                        "url": src.get("url"),
+                        "status": src.get("status"),
+                    }
+                )
             return TargetAgentObservation(
                 target_url=endpoint,
                 answer_text=str(data.get("answer") or ""),
-                reported_citations=list(data.get("citations") or []),
+                reported_citations=citations,
                 reported_confidence=ver.get("confidence_score"),
                 reported_verified=ver.get("passed"),
+                answer_mode=data.get("mode"),
+                sources_count=len(data.get("sources") or []),
                 latency_ms=elapsed,
             )
         except Exception as exc:

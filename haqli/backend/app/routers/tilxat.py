@@ -21,6 +21,7 @@ from app.engines.rules import amount_in_words, check_written_form, load_constant
 from app.models.entities import TilxatAgreement, User
 from app.routers.deps import get_current_user, write_audit_log
 from app.schemas.api import TilxatCreateRequest, TilxatParseRequest, TilxatPublicSignRequest
+from app.security.canonical import tilxat_draft_payload, tilxat_signed_payload
 from app.security.crypto import get_crypto
 from app.security.telegram_auth import TelegramAuthError, validate_init_data
 from app.services.jobs import tilxat_ws_hub
@@ -133,15 +134,15 @@ async def create_tilxat(
     prev_res = await db.execute(select(TilxatAgreement.doc_hash).order_by(desc(TilxatAgreement.created_at)).limit(1))
     prev_hash = prev_res.scalar_one_or_none() or ("0" * 64)
 
-    canonical = {
-        "docType": req.doc_type,
-        "partyA": req.party_a_name,
-        "partyB": req.party_b_name,
-        "amountUzs": str(req.amount_uzs),
-        "dueDate": req.due_date.isoformat(),
-        "penalty": str(req.daily_penalty_percent),
-        "terms": summary,
-    }
+    canonical = tilxat_draft_payload(
+        doc_type=req.doc_type,
+        party_a=req.party_a_name,
+        party_b=req.party_b_name,
+        amount_uzs=req.amount_uzs,
+        due_date=req.due_date,
+        penalty_percent=req.daily_penalty_percent,
+        terms=summary,
+    )
     doc_hash = crypto.chain_hash(prev_hash, canonical)
     seal = crypto.sign_seal(doc_hash)
 
@@ -248,14 +249,14 @@ async def sign_public_tilxat(
     t.status = "signed"
 
     # Re-seal canonical hash including both signatures
-    signed_payload = {
-        "id": t.id,
-        "prevHash": t.doc_hash,
-        "partyATg": t.party_a_tg_id,
-        "partyBTg": t.party_b_tg_id,
-        "signedAt": t.party_b_signed_at.isoformat(),
-        "amountUzs": str(t.amount_uzs),
-    }
+    signed_payload = tilxat_signed_payload(
+        tilxat_id=t.id,
+        prev_hash=t.doc_hash,
+        party_a_tg=t.party_a_tg_id,
+        party_b_tg=t.party_b_tg_id,
+        signed_at=t.party_b_signed_at,
+        amount_uzs=t.amount_uzs,
+    )
     t.chain_prev_hash = t.doc_hash
     t.doc_hash = crypto.chain_hash(t.chain_prev_hash, signed_payload)
     t.seal_signature = crypto.sign_seal(t.doc_hash)

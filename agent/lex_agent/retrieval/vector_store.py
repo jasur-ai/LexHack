@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import date, datetime
+from datetime import date
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
@@ -39,6 +39,16 @@ class QdrantVectorStore:
         self._client: QdrantClient | None = None
         self._initialized = False
 
+    @property
+    def enabled(self) -> bool:
+        """Dense search is meaningful only with real neural embeddings (hash vectors are random noise)."""
+        mode = self.settings.vector_search_mode
+        if mode == "off":
+            return False
+        if mode == "on":
+            return True
+        return not self.embedder.is_hash_fallback
+
     def _get_client(self) -> QdrantClient:
         if self._client is None:
             mode = self.settings.qdrant_mode
@@ -69,7 +79,7 @@ class QdrantVectorStore:
 
     async def upsert_chunks(self, chunks: list[LegalChunk]) -> int:
         """Embed and upsert a batch of `LegalChunk` records into Qdrant."""
-        if not chunks:
+        if not chunks or not self.enabled:
             return 0
 
         texts = [
@@ -118,6 +128,8 @@ class QdrantVectorStore:
         filters: RetrievalFilter | None = None,
     ) -> list[RetrievedChunk]:
         """Execute semantic vector search with Qdrant payload filters and post-verification."""
+        if not self.enabled:
+            return []
         client = self._get_client()
         if not client.collection_exists(self.collection_name):
             return []
@@ -208,6 +220,8 @@ class QdrantVectorStore:
         return qmodels.Filter(must=must or None, must_not=must_not or None)
 
     def count(self) -> int:
+        if not self.enabled and self._client is None:
+            return 0
         client = self._get_client()
         if not client.collection_exists(self.collection_name):
             return 0

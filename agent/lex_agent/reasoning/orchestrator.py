@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import time
 from collections.abc import AsyncIterator
 from datetime import date
@@ -11,15 +12,25 @@ from typing import Any
 
 from lex_agent.config import Settings, get_settings
 from lex_agent.language.comparator import LegalLanguageComparator
+from lex_agent.language.transliterator import to_searchable_uzbek_latin
 from lex_agent.llm.client import LLMClient
 from lex_agent.models import (
     AgentQueryRequest,
     AgentResponse,
+    AnswerSections,
     HopTrace,
     Language,
     RetrievalFilter,
     RetrievedChunk,
+    SourceItem,
     TranslationCompareRequest,
+)
+from lex_agent.reasoning.answer_cache import AnswerCache, normalize_question
+from lex_agent.reasoning.answer_composer import (
+    build_concise_messages,
+    compose_extractive_answer,
+    parse_answer_sections,
+    source_items,
 )
 from lex_agent.reasoning.citation_guard import CitationVerificationGuard
 from lex_agent.reasoning.decomposer import LegalQueryDecomposer
@@ -90,6 +101,7 @@ class LegalAgentOrchestrator:
         self.decomposer = LegalQueryDecomposer(llm)
         self.norm_resolver = NormConflictResolver()
         self.citation_guard = CitationVerificationGuard()
+        self.cache = AnswerCache(max_items=self.settings.answer_cache_size, ttl_sec=self.settings.answer_cache_ttl_sec)
 
     async def answer(self, request: AgentQueryRequest) -> AgentResponse:
         """Execute full multi-hop legal reasoning and return the complete verified `AgentResponse`."""
@@ -97,16 +109,103 @@ class LegalAgentOrchestrator:
         async for event in self.answer_stream(request):
             if event.get("type") == "done":
                 final_resp = event["response"]
-        assert final_resp is not None
+        if final_resp is None:  # pragma: no cover - answer_stream always ends with "done"
+            raise RuntimeError("The answer pipeline finished without a result")
         return final_resp
 
+    def _cache_key(self, request: AgentQueryRequest, style: str) -> str | None:
+        if request.compare_translations:
+            return None
+        return "|".join(
+            [
+                normalize_question(request.query),
+                normalize_question(self._follow_up_context(request) or ""),
+                request.response_language.value if request.response_language else "auto",
+                style,
+                request.as_of_date.isoformat() if request.as_of_date else "today",
+                "rep" if request.include_repealed else "cur",
+                self.llm.active_mode_label,
+            ]
+        )
+
+    @staticmethod
+    def _follow_up_context(request: AgentQueryRequest) -> str | None:
+        """The previous question, when the current one is a short follow-up that needs it to be understood."""
+        context = (request.context or "").strip()
+        if not context or normalize_question(context) == normalize_question(request.query):
+            return None
+        return context if len(request.query.split()) <= 8 else None
+
+    def _attach_article_leads(self, evidence: list[RetrievedChunk]) -> None:
+        """For continuation parts of long articles, attach the article's opening text (part 1) for summaries."""
+        wanted: dict[str, RetrievedChunk] = {}
+        for item in evidence:
+            cid = item.chunk.chunk_id
+            m = re.match(r"^(.*)#(\d+)$", cid)
+            if m and m.group(2) != "1":
+                wanted[f"{m.group(1)}#1"] = item
+        if not wanted:
+            return
+        try:
+            firsts = self.retriever.bm25_store.get_chunks_by_ids(list(wanted))
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("Lead lookup failed: %s", exc)
+            return
+        for first_id, item in wanted.items():
+            first = firsts.get(first_id)
+            if first is not None:
+                item.chunk.extra = {**(item.chunk.extra or {}), "lead_text": first.text.partition("\n")[2] or first.text}
+
+    async def _stream_llm(self, messages: list[dict[str, str]], *, max_tokens: int) -> AsyncIterator[str]:
+        """Stream tokens with a first-token deadline and an overall deadline (raises asyncio.TimeoutError)."""
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.settings.llm_request_timeout
+        agen = self.llm.stream_complete(messages, max_tokens=max_tokens).__aiter__()
+        first = True
+        try:
+            while True:
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    raise asyncio.TimeoutError("LLM overall deadline exceeded")
+                timeout = min(self.settings.llm_first_token_timeout, remaining) if first else remaining
+                try:
+                    token = await asyncio.wait_for(agen.__anext__(), timeout=timeout)
+                except StopAsyncIteration:
+                    return
+                first = False
+                yield token
+        finally:
+            try:
+                await agen.aclose()
+            except Exception:  # pragma: no cover - best effort cleanup
+                pass
+
     async def answer_stream(self, request: AgentQueryRequest) -> AsyncIterator[dict[str, Any]]:
-        """Execute multi-hop legal reasoning while yielding live thinking steps, streamed tokens, and verified result."""
+        """Execute multi-hop legal reasoning while yielding live thinking steps, sources, streamed tokens and result."""
         t0 = time.perf_counter()
+        style = request.answer_style or self.settings.answer_style_default
+        concise = style == "concise"
         max_hops = request.max_hops or self.settings.agent_max_hops
+        if concise:
+            max_hops = min(max_hops, 2)
 
         def _elapsed_ms() -> int:
             return int((time.perf_counter() - t0) * 1000)
+
+        cache_key = self._cache_key(request, style)
+        cached: AgentResponse | None = self.cache.get(cache_key)
+        if cached is not None:
+            for step_no, label in enumerate(
+                ["Savol tahlil qilindi", "Mos normalar topildi", "Havolalar tekshirildi", "Normalar saralandi"],
+                start=1,
+            ):
+                yield {"type": "step", "step": step_no, "total": 5, "status": "done", "label": label, "elapsed_ms": _elapsed_ms()}
+            yield {"type": "sources", "sources": [src.model_dump() for src in cached.sources]}
+            yield {"type": "token", "text": cached.answer}
+            yield {"type": "step", "step": 5, "total": 5, "status": "done", "label": "Tayyor (keshdan)", "elapsed_ms": _elapsed_ms()}
+            response = cached.model_copy(update={"mode": "cache", "elapsed_ms": _elapsed_ms()})
+            yield {"type": "done", "response": response, "elapsed_ms": _elapsed_ms()}
+            return
 
         # STEP 1: Decompose query & detect language/branches/dates
         yield {
@@ -145,16 +244,30 @@ class LegalAgentOrchestrator:
             "step": 2,
             "total": 5,
             "status": "running",
-            "label": "Lex.uz qonunchilik bazasidan gibrid qidiruv bajarilmoqda...",
+            "label": "Qonunchilik bazasidan qidiruv bajarilmoqda...",
             "elapsed_ms": _elapsed_ms(),
         }
 
+        follow_up_context = self._follow_up_context(request)
         hop1_queries: list[str] = [request.query]
+        if follow_up_context:
+            # "Muddatlar qanday?" alone matches nothing useful; searched together with the previous question it
+            # lands in the right act and article.
+            hop1_queries.insert(0, f"{follow_up_context} {request.query}")
         for sq in plan.sub_queries[:2]:
             hop1_queries.extend(sq.search_queries_uz[:1])
             hop1_queries.extend(sq.search_queries_ru[:1])
             hop1_queries.extend(sq.search_queries_en[:1])
-        hop1_queries = list(dict.fromkeys(q.strip() for q in hop1_queries if q.strip()))[:4]
+        # Drop pure script variants of the question: the retriever already matches Latin <-> Cyrillic itself.
+        seen_forms: set[str] = set()
+        unique_queries: list[str] = []
+        for q in hop1_queries:
+            q = q.strip()
+            form = to_searchable_uzbek_latin(q).lower()
+            if q and form not in seen_forms:
+                seen_forms.add(form)
+                unique_queries.append(q)
+        hop1_queries = unique_queries[:4]
 
         hop1_results = await asyncio.gather(
             *[
@@ -172,9 +285,12 @@ class LegalAgentOrchestrator:
 
         hop1_live_fetched: list[str] = []
         hop1_added = 0
-        for hits, live_ids in hop1_results:
+        for q_idx, (hits, live_ids) in enumerate(hop1_results):
             hop1_live_fetched.extend(live_ids)
             for h in hits:
+                if q_idx > 0:
+                    # Secondary (transliterated / translated) queries support but never outrank the original wording
+                    h.final_score *= 0.92
                 if h.chunk.chunk_id not in evidence_map or h.final_score > evidence_map[h.chunk.chunk_id].final_score:
                     if h.chunk.chunk_id not in evidence_map:
                         hop1_added += 1
@@ -191,7 +307,7 @@ class LegalAgentOrchestrator:
 
         top_preview = ", ".join(
             dict.fromkeys(
-                f"{r.chunk.doc_title[:36]} ({r.chunk.article or 'umumiy'})"
+                f"{(r.chunk.extra or {}).get('short_title') or r.chunk.doc_title[:36]} ({r.chunk.article or 'umumiy'})"
                 for r in sorted(evidence_map.values(), key=lambda x: x.final_score, reverse=True)[:3]
             )
         )
@@ -210,7 +326,7 @@ class LegalAgentOrchestrator:
             "step": 3,
             "total": 5,
             "status": "running",
-            "label": "Moddalararo havolalar (cross-reference) tekshirilmoqda...",
+            "label": "Moddalararo havolalar tekshirilmoqda...",
             "elapsed_ms": _elapsed_ms(),
         }
 
@@ -273,14 +389,21 @@ class LegalAgentOrchestrator:
             if hop_added == 0:
                 break
 
-        # Optional LLM tool-calling supplement only if evidence is still very sparse
-        if not self.llm.is_mock and len(evidence_map) < 4 and max_hops >= 2:
-            tool_added = await self._run_tool_calling_supplement(
-                query=request.query,
-                evidence_map=evidence_map,
-                filters=base_filter,
-                enable_live_lex=request.enable_live_lex,
-            )
+        # Optional LLM tool-calling supplement (detailed mode only, and only if evidence is still very sparse)
+        if not concise and not self.llm.is_mock and len(evidence_map) < 4 and max_hops >= 2:
+            try:
+                tool_added = await asyncio.wait_for(
+                    self._run_tool_calling_supplement(
+                        query=request.query,
+                        evidence_map=evidence_map,
+                        filters=base_filter,
+                        enable_live_lex=request.enable_live_lex,
+                    ),
+                    timeout=self.settings.llm_first_token_timeout,
+                )
+            except Exception as exc:
+                logger.info("Tool-calling supplement skipped: %s", exc)
+                tool_added = 0
             if tool_added > 0:
                 hop_traces.append(
                     HopTrace(
@@ -295,7 +418,7 @@ class LegalAgentOrchestrator:
             "step": 3,
             "total": 5,
             "status": "done",
-            "label": f"Cross-reference tahlili yakunlandi ({total_refs_followed} ta havola tekshirildi)",
+            "label": f"Havolalar tahlili yakunlandi ({total_refs_followed} ta havola tekshirildi)",
             "elapsed_ms": _elapsed_ms(),
         }
 
@@ -305,7 +428,7 @@ class LegalAgentOrchestrator:
             "step": 4,
             "total": 5,
             "status": "running",
-            "label": "Qonunlar iyerarxiyasi (O'RQ-682) va amal qilish holati tekshirilmoqda...",
+            "label": "Qonunlar iyerarxiyasi va amal qilish holati tekshirilmoqda...",
             "elapsed_ms": _elapsed_ms(),
         }
 
@@ -313,21 +436,24 @@ class LegalAgentOrchestrator:
             list(evidence_map.values()),
             as_of_date=effective_as_of,
         )
-        # Keep the 6 most tightly relevant excerpts for fast TTFT and laser-focused legal synthesis
-        top_evidence = ordered_evidence[:6]
+        top_evidence = ordered_evidence[: (5 if concise else 6)]
+        self._attach_article_leads(top_evidence)
 
         translation_warnings: list[str] = []
         if (request.compare_translations or plan.requires_translation_comparison) and self.comparator and top_evidence:
             primary_doc_id = top_evidence[0].chunk.doc_id
             primary_article = top_evidence[0].chunk.article
             try:
-                comp = await self.comparator.translate_and_compare(
-                    TranslationCompareRequest(
-                        doc_id=primary_doc_id,
-                        article=primary_article,
-                        target_language=response_lang,
-                        verify_against_uz_primary=True,
-                    )
+                comp = await asyncio.wait_for(
+                    self.comparator.translate_and_compare(
+                        TranslationCompareRequest(
+                            doc_id=primary_doc_id,
+                            article=primary_article,
+                            target_language=response_lang,
+                            verify_against_uz_primary=True,
+                        )
+                    ),
+                    timeout=self.settings.llm_request_timeout,
                 )
                 for disc in comp.discrepancies:
                     translation_warnings.append(
@@ -337,6 +463,7 @@ class LegalAgentOrchestrator:
             except Exception as exc:
                 logger.debug("Translation comparison skipped: %s", exc)
 
+        sources = [SourceItem(**item) for item in source_items(top_evidence)]
         yield {
             "type": "step",
             "step": 4,
@@ -345,33 +472,63 @@ class LegalAgentOrchestrator:
             "label": f"{len(top_evidence)} ta eng aniq norma saralandi ({len(conflict_resolutions)} ta iyerarxiya qoidasi)",
             "elapsed_ms": _elapsed_ms(),
         }
+        yield {"type": "sources", "sources": [src.model_dump() for src in sources]}
 
-        # STEP 5: Stream grounded legal answer + verify citations
+        # STEP 5: Stream grounded legal answer (LLM) or compose an extractive answer, then verify citations
         yield {
             "type": "step",
             "step": 5,
             "total": 5,
             "status": "running",
-            "label": "Rasmiy huquqiy xulosa shakllantirilmoqda...",
+            "label": "Javob tayyorlanmoqda...",
             "elapsed_ms": _elapsed_ms(),
         }
 
-        messages = self._build_synthesis_messages(
-            query=request.query,
-            response_lang=response_lang,
-            evidence=top_evidence,
-            conflicts=conflict_resolutions,
-            temporal_warnings=temporal_warnings,
-            translation_warnings=translation_warnings,
-            as_of_date=effective_as_of,
-        )
-
-        chunks_out: list[str] = []
-        async for token in self.llm.stream_complete(messages):
-            chunks_out.append(token)
-            yield {"type": "token", "text": token}
-
-        answer_text = "".join(chunks_out).strip()
+        mode = "llm"
+        answer_text = ""
+        if self.llm.is_mock or not top_evidence:
+            mode = "extractive"
+            answer_text = compose_extractive_answer(
+                query=request.query, response_lang=response_lang, evidence=top_evidence, branches=plan.branches
+            )
+            yield {"type": "token", "text": answer_text}
+        else:
+            if concise:
+                messages = build_concise_messages(
+                    query=request.query,
+                    response_lang=response_lang,
+                    evidence=top_evidence,
+                    warnings=temporal_warnings + translation_warnings,
+                    as_of_date=effective_as_of,
+                    context=follow_up_context,
+                )
+                max_tokens = 1100
+            else:
+                messages = self._build_synthesis_messages(
+                    query=request.query,
+                    response_lang=response_lang,
+                    evidence=top_evidence,
+                    conflicts=conflict_resolutions,
+                    temporal_warnings=temporal_warnings,
+                    translation_warnings=translation_warnings,
+                    as_of_date=effective_as_of,
+                )
+                max_tokens = self.settings.llm_max_tokens
+            chunks_out: list[str] = []
+            try:
+                async for token in self._stream_llm(messages, max_tokens=max_tokens):
+                    chunks_out.append(token)
+                    yield {"type": "token", "text": token}
+                answer_text = "".join(chunks_out).strip()
+                if not answer_text:
+                    raise RuntimeError("LLM returned an empty answer")
+            except Exception as exc:
+                logger.warning("LLM synthesis failed (%s: %s); falling back to extractive answer.", type(exc).__name__, exc)
+                mode = "extractive"
+                answer_text = compose_extractive_answer(
+                    query=request.query, response_lang=response_lang, evidence=top_evidence, branches=plan.branches
+                )
+                yield {"type": "replace_answer", "text": answer_text, "mode": "extractive"}
 
         verification = self.citation_guard.verify(
             answer_text,
@@ -380,13 +537,14 @@ class LegalAgentOrchestrator:
             translation_warnings=translation_warnings,
         )
 
-        # Only invoke a self-correction pass when fabricated URLs or severe ungrounded claims exist
+        # Only invoke a self-correction pass (detailed mode) when fabricated references exist
         if (
-            self.settings.agent_strict_citation_mode
+            not concise
+            and mode == "llm"
+            and self.settings.agent_strict_citation_mode
             and not verification.passed
             and verification.confidence_score < 0.75
             and verification.unverified_references
-            and not self.llm.is_mock
         ):
             yield {
                 "type": "step",
@@ -396,26 +554,41 @@ class LegalAgentOrchestrator:
                 "label": "Sitata nazorati: tasdiqlanmagan havolalar tozalanmoqda...",
                 "elapsed_ms": _elapsed_ms(),
             }
-            answer_text = await self._self_correct_answer(
-                draft_answer=answer_text,
-                unverified_refs=verification.unverified_references,
-                evidence=top_evidence,
-                response_lang=response_lang,
-            )
-            verification = self.citation_guard.verify(
-                answer_text,
-                top_evidence,
-                temporal_warnings=temporal_warnings,
-                translation_warnings=translation_warnings,
-            )
-            yield {"type": "replace_answer", "text": answer_text}
+            try:
+                corrected = await asyncio.wait_for(
+                    self._self_correct_answer(
+                        draft_answer=answer_text,
+                        unverified_refs=verification.unverified_references,
+                        evidence=top_evidence,
+                        response_lang=response_lang,
+                    ),
+                    timeout=self.settings.llm_request_timeout,
+                )
+                if corrected.strip():
+                    answer_text = corrected.strip()
+                    verification = self.citation_guard.verify(
+                        answer_text,
+                        top_evidence,
+                        temporal_warnings=temporal_warnings,
+                        translation_warnings=translation_warnings,
+                    )
+                    yield {"type": "replace_answer", "text": answer_text}
+            except Exception as exc:
+                logger.info("Self-correction skipped: %s", exc)
+
+        sections: AnswerSections | None = None
+        if concise:
+            parsed = parse_answer_sections(answer_text)
+            if not parsed["structured"]:
+                parsed["answer"] = answer_text
+            sections = AnswerSections(**parsed)
 
         yield {
             "type": "step",
             "step": 5,
             "total": 5,
             "status": "done",
-            "label": f"Tayyor! Sitatalar tekshirildi ({_elapsed_ms() / 1000:.1f}s)",
+            "label": f"Tayyor! Manbalar tekshirildi ({_elapsed_ms() / 1000:.1f}s)",
             "elapsed_ms": _elapsed_ms(),
         }
 
@@ -429,7 +602,15 @@ class LegalAgentOrchestrator:
             hop_traces=hop_traces,
             evidence_count=len(top_evidence),
             as_of_date=effective_as_of,
+            answer_style=style,
+            sections=sections,
+            sources=sources,
+            mode=mode,
+            elapsed_ms=_elapsed_ms(),
         )
+        # Never cache a fallback produced by a transient LLM failure
+        if mode == "llm" or self.llm.is_mock:
+            self.cache.put(cache_key, response)
         yield {"type": "done", "response": response, "elapsed_ms": _elapsed_ms()}
 
     async def _run_tool_calling_supplement(

@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import re
+import time
 from typing import TYPE_CHECKING
 
 from lex_agent.config import Settings, get_settings
 from lex_agent.language.transliterator import detect_language
-from lex_agent.models import RetrievalFilter, RetrievedChunk
+from lex_agent.models import Language, RetrievalFilter, RetrievedChunk
 from lex_agent.retrieval.bm25_store import BM25Store, chunk_matches_filter
+from lex_agent.retrieval.query_expansion import expand_query
 from lex_agent.retrieval.reranker import LegalReranker
 from lex_agent.retrieval.vector_store import QdrantVectorStore
 
@@ -16,6 +20,8 @@ if TYPE_CHECKING:
     from lex_agent.ingestion.pipeline import IngestionPipeline
 
 logger = logging.getLogger(__name__)
+
+LIVE_CIRCUIT_COOLDOWN_SEC = 300
 
 
 class HybridLegalRetriever:
@@ -35,6 +41,7 @@ class HybridLegalRetriever:
         self.vector_store = vector_store
         self.reranker = reranker
         self.ingestion_pipeline = ingestion_pipeline
+        self._live_circuit_open_until = 0.0
 
     async def retrieve(
         self,
@@ -50,37 +57,81 @@ class HybridLegalRetriever:
         """Run fast hybrid search and conditionally augment live from Lex.uz only when local recall is genuinely weak."""
         top_k = top_k or self.settings.agent_top_k
         rerank_top_k = rerank_top_k or self.settings.agent_rerank_top_k
-        use_live = (
-            self.settings.lex_uz_enable_live_fallback
-            if enable_live_fallback is None
-            else enable_live_fallback
+        # The global switch always wins: a request may opt out of live lookups but never force them on.
+        use_live = self.settings.lex_uz_enable_live_fallback and (
+            True if enable_live_fallback is None else enable_live_fallback
         )
 
-        fused = await self._hybrid_search_once(query, top_k=top_k, filters=filters, hop=hop)
+        expansions = expand_query(query)
+        fused = await self._hybrid_search_once(query, top_k=top_k, filters=filters, hop=hop, expansions=expansions)
         live_fetched_ids: list[str] = []
 
         # Only spend network time hitting live Lex.uz if local corpus has < 2 decent matches,
         # and cap live network lookup tightly so an external timeout never stalls answering.
         strong_local = [r for r in fused if r.bm25_score >= 1.5 or r.dense_score >= 0.45]
-        should_try_live = use_live and self.ingestion_pipeline is not None and len(strong_local) < 2
+        should_try_live = (
+            use_live
+            and self.ingestion_pipeline is not None
+            and len(strong_local) < 2
+            and time.monotonic() >= self._live_circuit_open_until
+        )
         if should_try_live:
             try:
-                import asyncio
-
                 live_fetched_ids = await asyncio.wait_for(
                     self._augment_from_live_lex(query, filters=filters, limit=live_fetch_limit),
-                    timeout=7.0,
+                    timeout=self.settings.lex_uz_live_fallback_timeout,
                 )
             except Exception as exc:
-                logger.info("Live Lex.uz quick-fallback skipped (%s); answering from local corpus.", exc)
+                # Circuit breaker: when Lex.uz is slow/unreachable, stop paying the timeout on every question.
+                self._live_circuit_open_until = time.monotonic() + LIVE_CIRCUIT_COOLDOWN_SEC
+                logger.info(
+                    "Live Lex.uz quick-fallback skipped (%s); local corpus only for the next %ss.",
+                    exc.__class__.__name__,
+                    LIVE_CIRCUIT_COOLDOWN_SEC,
+                )
                 live_fetched_ids = []
             if live_fetched_ids:
-                fused = await self._hybrid_search_once(query, top_k=top_k, filters=filters, hop=hop)
+                fused = await self._hybrid_search_once(
+                    query, top_k=top_k, filters=filters, hop=hop, expansions=expansions
+                )
 
-        reranked = self.reranker.rerank(query, fused, top_k=rerank_top_k)
-        for item in reranked:
+        rerank_query = " ".join([query, *expansions]) if expansions else query
+        reranked = self.reranker.rerank(rerank_query, fused, top_k=max(rerank_top_k * 2, rerank_top_k + 4))
+        ranked = self._prefer_language_and_dedupe(query, reranked)[:rerank_top_k]
+        for item in ranked:
             item.retrieval_hop = hop
-        return reranked, live_fetched_ids
+        return ranked, live_fetched_ids
+
+    @staticmethod
+    def _article_key(item: RetrievedChunk) -> tuple[str, str]:
+        art = item.chunk.article or ""
+        m = re.search(r"(\d+(?:[.-]\d+)?)", art)
+        return item.chunk.canonical_id, (m.group(1) if m else art or item.chunk.chunk_id)
+
+    def _prefer_language_and_dedupe(self, query: str, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        """Prefer norms in the asker's language and keep one chunk per (act, article) across editions."""
+        if not items:
+            return items
+        q_lang = detect_language(query)
+        for item in items:
+            c_lang = item.chunk.language
+            if q_lang == Language.RU:
+                factor = 1.0 if c_lang == Language.RU else 0.82
+            elif q_lang in (Language.UZ_LATN, Language.UZ_CYRL):
+                factor = 1.0 if c_lang in (Language.UZ_LATN, Language.UZ_CYRL) else 0.8
+            else:
+                factor = 1.0
+            item.final_score *= factor
+        items.sort(key=lambda r: r.final_score, reverse=True)
+        seen: set[tuple[str, str]] = set()
+        out: list[RetrievedChunk] = []
+        for item in items:
+            key = self._article_key(item)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(item)
+        return out
 
     async def retrieve_exact_reference(
         self,
@@ -150,31 +201,45 @@ class HybridLegalRetriever:
         top_k: int,
         filters: RetrievalFilter | None,
         hop: int,
+        expansions: list[str] | None = None,
     ) -> list[RetrievedChunk]:
-        # 1. Instant SQLite FTS5 BM25 search (<5ms even on 100k chunks!)
-        bm25_hits = self.bm25_store.search(query, top_k=top_k, filters=filters)
+        # 1. Instant SQLite FTS5 BM25 search for the question and its statutory re-phrasings
+        lexical_lists = [self.bm25_store.search(query, top_k=top_k, filters=filters)]
+        for exp in expansions or []:
+            lexical_lists.append(self.bm25_store.search(exp, top_k=top_k, filters=filters))
+        bm25_hits = self._fuse_lexical(lexical_lists) if len(lexical_lists) > 1 else lexical_lists[0]
 
-        # 2. Dense vector search: skip slow local-mode brute-force scan when using hash embeddings
-        # and FTS5 already found strong exact matches; always run dense when real neural embeddings are active!
-        use_hash = self.vector_store.embedder.is_hash_fallback
-        skip_slow_hash_scan = (
-            use_hash
-            and self.settings.qdrant_mode == "local"
-            and len(bm25_hits) >= min(top_k, 6)
-        )
-        if skip_slow_hash_scan:
-            dense_hits: list[RetrievedChunk] = []
-        else:
+        # 2. Dense vector search only when real neural embeddings are configured (hash vectors are noise)
+        if self.vector_store.enabled:
             dense_hits = await self.vector_store.search(query, top_k=top_k, filters=filters)
+        else:
+            dense_hits = []
 
         return self._reciprocal_rank_fusion(
             dense_hits,
             bm25_hits,
             k=60,
             hop=hop,
-            dense_weight=0.35 if use_hash else 1.0,
+            dense_weight=1.0,
             bm25_weight=1.4,
         )
+
+    @staticmethod
+    def _fuse_lexical(lists: list[list[RetrievedChunk]], k: int = 30) -> list[RetrievedChunk]:
+        """Reciprocal-rank fuse several BM25 result lists (original question + expansions)."""
+        merged: dict[str, tuple[float, RetrievedChunk]] = {}
+        for weight, hits in zip([1.0] + [1.15] * (len(lists) - 1), lists):
+            for rank, item in enumerate(hits, start=1):
+                score = weight / (k + rank)
+                cid = item.chunk.chunk_id
+                if cid in merged:
+                    prev_score, prev = merged[cid]
+                    prev.bm25_score = max(prev.bm25_score, item.bm25_score)
+                    merged[cid] = (prev_score + score, prev)
+                else:
+                    merged[cid] = (score, item)
+        ordered = sorted(merged.values(), key=lambda x: x[0], reverse=True)
+        return [item for _, item in ordered]
 
     @staticmethod
     def _reciprocal_rank_fusion(

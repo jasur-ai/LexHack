@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { api } from "./lib/api";
+import { authenticate } from "./lib/api";
 import { useAppStore } from "./lib/store";
-import { getTelegramInitData, initTelegramRuntime } from "./tma/sdk";
+import { initTelegramRuntime } from "./tma/sdk";
+import { Button } from "./ui/Button";
 import { AppShell } from "./features/layout/AppShell";
 import { HimoyaView } from "./features/himoya/HimoyaView";
 import { TilxatView } from "./features/tilxat/TilxatView";
@@ -18,15 +19,15 @@ import { ToastStack } from "./ui/Toast";
 const queryClient = new QueryClient();
 
 function HaqliMainApp() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const token = useAppStore((s) => s.token);
   const themePref = useAppStore((s) => s.themePref);
-  const setSession = useAppStore((s) => s.setSession);
   const setResolvedTheme = useAppStore((s) => s.setResolvedTheme);
   const activeTab = useAppStore((s) => s.activeTab);
   const activeMode = useAppStore((s) => s.activeMode);
 
   const [bootError, setBootError] = useState<string | null>(null);
+  const [bootAttempt, setBootAttempt] = useState(0);
 
   useEffect(() => {
     const tgScheme = initTelegramRuntime();
@@ -44,22 +45,10 @@ function HaqliMainApp() {
 
   useEffect(() => {
     let cancelled = false;
-    api
-      .authTelegram(getTelegramInitData())
+    setBootError(null);
+    authenticate()
       .then((res) => {
-        if (cancelled) return;
-        setSession({
-          token: res.accessToken,
-          user: res.user,
-          demoMode: res.demoMode,
-          constants: {
-            bhm: Number(res.constants.bhm) || 375000,
-            bhmStatus: res.constants.bhmStatus,
-            version: res.constants.version,
-            talabnomaPriceUzs: Number(res.constants.talabnomaPriceUzs) || 29000,
-          },
-        });
-        i18n.changeLanguage(res.user.language || "uz_lat");
+        if (!cancelled) i18n.changeLanguage(res.user.language || "uz_lat");
       })
       .catch((err) => {
         if (!cancelled) setBootError(err instanceof Error ? err.message : "Backend connection error");
@@ -67,7 +56,7 @@ function HaqliMainApp() {
     return () => {
       cancelled = true;
     };
-  }, [i18n, setSession]);
+  }, [i18n, bootAttempt]);
 
   if (!token) {
     return (
@@ -76,8 +65,13 @@ function HaqliMainApp() {
           haqli
         </div>
         {bootError ? (
-          <div className="haqli-card p-4 text-sm text-center" style={{ color: "var(--danger)" }}>
-            {bootError}
+          <div className="haqli-card p-4 space-y-3 text-center">
+            <p className="text-sm" style={{ color: "var(--danger)" }}>
+              {bootError}
+            </p>
+            <Button variant="secondary" onClick={() => setBootAttempt((n) => n + 1)}>
+              {t("common.retry")}
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">

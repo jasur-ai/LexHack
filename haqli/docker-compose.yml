@@ -7,9 +7,12 @@ services:
       - .env
     environment:
       APP_PORT: "8002"
-      DATABASE_URL: "sqlite+aiosqlite:///./storage/haqli.db"
+      # DB, uploads and PDFs all live on the mounted volume (see Settings.storage_dir).
       STORAGE_DIR: "/app/storage"
+      AGENT_BASE_URL: "${AGENT_BASE_URL:-http://host.docker.internal:8000}"
       DEMO_MODE: "true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8002:8002"
     volumes:

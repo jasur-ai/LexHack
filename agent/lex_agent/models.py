@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -325,6 +325,45 @@ class AgentQueryRequest(BaseModel):
     max_hops: int | None = None
     enable_live_lex: bool = True
     compare_translations: bool = False
+    answer_style: Literal["concise", "detailed"] | None = Field(
+        default=None, description="concise = short scannable answer cards (default); detailed = long legal memo"
+    )
+    context: str | None = Field(
+        default=None,
+        max_length=600,
+        description="Previous question of the conversation; lets short follow-ups ('What are the deadlines?') "
+        "be searched and answered in the right topic.",
+    )
+
+
+class AnswerSections(BaseModel):
+    """Parsed concise answer: direct answer, rules with [n] citations, steps, caution, follow-up prompts."""
+
+    structured: bool = False
+    answer: str = ""
+    key_points: list[str] = Field(default_factory=list)
+    steps: list[str] = Field(default_factory=list)
+    caution: str = ""
+    follow_ups: list[str] = Field(default_factory=list)
+
+
+class SourceItem(BaseModel):
+    """A numbered evidence source shown next to the answer (n matches the [n] markers)."""
+
+    n: int
+    doc_id: str
+    title: str
+    full_title: str
+    article: str | None = None
+    article_title: str | None = None
+    excerpt: str = ""
+    lead: str | None = None
+    url: str
+    language: str
+    status: str
+    source: str = "lex.uz"
+    snapshot: str | None = None
+    doc_type: str = "other"
 
 
 class AgentResponse(BaseModel):
@@ -339,6 +378,11 @@ class AgentResponse(BaseModel):
     hop_traces: list[HopTrace] = Field(default_factory=list)
     evidence_count: int = 0
     as_of_date: date | None = None
+    answer_style: str = "concise"
+    sections: AnswerSections | None = None
+    sources: list[SourceItem] = Field(default_factory=list)
+    mode: str = Field(default="llm", description="llm | extractive | cache")
+    elapsed_ms: int = 0
 
 
 class ClauseFinding(BaseModel):

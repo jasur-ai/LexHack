@@ -39,6 +39,39 @@ _EN_LEGAL_MARKERS = {
     "administrative", "under", "pursuant", "accordance", "what", "does", "provide",
 }
 
+# Everyday words people actually type in Uzbek (Latin) questions. Citizens rarely use legal vocabulary, and they
+# often type a plain apostrophe or none at all ("tatil", "boshatishdi"), so legal markers alone misclassify
+# questions such as "Yillik ta'til necha kun?" as English.
+_UZ_LATN_COMMON = {
+    "va", "ham", "yoki", "lekin", "agar", "bo'lsa", "emas", "yo'q", "ha", "kabi", "haqida", "uchun", "bilan",
+    "men", "menga", "meni", "mening", "biz", "bizga", "siz", "sizga", "u", "unga", "ular", "o'zim", "o'z",
+    "nima", "nimaga", "nega", "qanday", "qanaqa", "qancha", "necha", "nechta", "nechanchi", "qachon", "qayerga",
+    "qayerda", "qaysi", "kim", "kimga", "kerak", "kerakmi", "mumkin", "mumkinmi", "shart", "shartmi", "bormi",
+    "bo'ladi", "bo'ladimi", "beriladi", "beriladimi", "beradi", "olish", "olsam", "qilish", "qilishim", "qilaman",
+    "qilsam", "qilishadi", "to'lash", "to'laydi", "to'lanadi", "ish", "ishdan", "ishga", "ishxona", "haqi",
+    "maosh", "oylik", "kun", "kunlik", "kunga", "soat", "oy", "yil", "yillik", "muddat", "muddati", "ta'til",
+    "ta'tili", "tatil", "jarima", "jarimasi", "sud", "sudga", "ariza", "shikoyat", "qarz", "qarzni", "pul",
+    "pulni", "uy", "uyni", "ijara", "ijaraga", "ijarachi", "aliment", "ajrashish", "nikoh", "bola", "bolalar",
+    "ota-ona", "meros", "vasiyat", "notarius", "ishonchnoma", "pensiya", "nafaqa", "kafolat", "tovar",
+    "sotuvchi", "xaridor", "qaytarish", "qaytarib", "bo'shatish", "bo'shatishdi", "boshatishdi", "haydadi",
+    "haydash", "ishlayman", "ishlash", "davlat", "boj", "xizmat", "haydovchi", "mashina", "yhxx", "bhm",
+}
+
+_EN_COMMON = {
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "am", "do", "does", "did", "can", "could",
+    "should", "would", "will", "shall", "may", "must", "have", "has", "had", "i", "my", "me", "we", "our", "you",
+    "your", "he", "she", "it", "they", "their", "this", "that", "these", "those", "what", "how", "why", "when",
+    "where", "which", "who", "whom", "of", "to", "in", "on", "for", "with", "from", "by", "about", "and", "or",
+    "not", "if", "many", "much", "there", "get", "leave", "annual", "salary", "employer", "employee", "days",
+    "fine", "rent", "landlord", "tenant", "divorce", "alimony", "court", "appeal", "deadline", "penalty",
+}
+
+_UZ_SUFFIX_RE = re.compile(
+    r"(?:ning|dagi|lari|larni|larga|lardan|moqda|yapti|ganda|gani|sangiz|ishim|ishdi|ilsa|ladimi|adimi|"
+    r"mizni|ingiz|imiz|sizmi|asizmi|dimi|kerakmi|mumkinmi)$"
+)
+_EN_CONTRACTION_RE = re.compile(r"[a-z]'(?:t|s|m|re|ve|ll|d)\b")
+
 _APOSTROPHE_VARIANTS = re.compile(r"[ʻʼ‘’`´ʹʽˈ]")
 
 _CYR_TO_LAT_MAP: dict[str, str] = {
@@ -229,17 +262,18 @@ def detect_language(text: str) -> Language:
             return Language.UZ_CYRL
         return Language.RU
 
-    # Latin script: distinguish Uzbek Latin vs English
-    has_uz_apostrophe_digraph = bool(re.search(r"(?:o'|g'|sh|ch)", normalized.lower()))
-    uz_hits = len(words & _UZ_LATN_LEGAL_MARKERS)
-    en_hits = len(words & _EN_LEGAL_MARKERS)
-
-    if uz_hits > en_hits:
-        return Language.UZ_LATN
-    if en_hits > uz_hits:
-        return Language.EN
-    if re.search(r"\b(?:o'|g')", normalized.lower()) or re.search(r"qonun|modda|qaror|farmon", normalized.lower()):
-        return Language.UZ_LATN
-    if has_uz_apostrophe_digraph and any(w.endswith(("lar", "ning", "dagi", "ga", "dan")) for w in words):
-        return Language.UZ_LATN
-    return Language.EN
+    # Latin script: Uzbek Latin vs English. This is an Uzbek-law assistant, so ties resolve to Uzbek.
+    lower = normalized.lower()
+    uz_score = len(words & _UZ_LATN_LEGAL_MARKERS) + len(words & _UZ_LATN_COMMON)
+    uz_score += sum(1 for w in words if len(w) > 4 and _UZ_SUFFIX_RE.search(w))
+    if re.search(r"(?:o'|g')[a-z]", lower):
+        uz_score += 2
+    # A letter-apostrophe-letter inside a word ("ta'til", "san'at") is the Uzbek tutuq belgisi, unless it is an
+    # English contraction ("don't", "it's").
+    if re.search(r"[a-z]'[a-z]", lower) and not _EN_CONTRACTION_RE.search(lower):
+        uz_score += 1
+    uz_score += min(2, len(re.findall(r"q(?!u)|x(?![aeiouy]?\b)", lower)))
+    en_score = len(words & _EN_COMMON) + len(words & _EN_LEGAL_MARKERS)
+    if _EN_CONTRACTION_RE.search(lower):
+        en_score += 1
+    return Language.EN if en_score > uz_score else Language.UZ_LATN

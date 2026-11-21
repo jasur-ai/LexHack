@@ -35,6 +35,7 @@ UZ_CYR_LEGAL_WORDS: tuple[str, ...] = (
 )
 
 _APOS_VARIANTS = {"'", "ʻ", "ʼ", "’", "‘", "`", "´"}
+_NUMERIC_LOOKALIKE_TOKEN = re.compile(r"^[0-9OoОоlI]+$")
 _NUMERIC_O_TO_0 = str.maketrans({"O": "0", "o": "0", "О": "0", "о": "0", "l": "1", "I": "1"})
 
 
@@ -172,7 +173,8 @@ def normalize_ocr_text(
     # Token-level repairs preserving exact length so offset_map remains 1-to-1
     joined = "".join(chars)
     repaired_chars = list(joined)
-    for m in re.finditer(r"[^\s\n]+", joined):
+    tokens = list(re.finditer(r"[^\s\n]+", joined))
+    for t_idx, m in enumerate(tokens):
         tok = m.group(0)
         s, e = m.span()
         # 1. Numeric-context 0<->O, 1<->l/I repair (token contains >= 50% digits)
@@ -181,6 +183,18 @@ def normalize_ocr_text(
             fixed = tok.translate(_NUMERIC_O_TO_0)
             repaired_chars[s:e] = list(fixed)
             continue
+        # 1b. Thousands group inside a space-grouped amount: "4 5OO 000" -> "4 500 000"
+        if digits and len(tok) <= 3 and _NUMERIC_LOOKALIKE_TOKEN.match(tok):
+            prev_tok = tokens[t_idx - 1] if t_idx > 0 else None
+            next_tok = tokens[t_idx + 1] if t_idx + 1 < len(tokens) else None
+            near_number = (
+                prev_tok is not None and prev_tok.end() == s - 1 and joined[s - 1] == " " and prev_tok.group(0).isdigit()
+            ) or (
+                next_tok is not None and next_tok.start() == e + 1 and joined[e] == " " and next_tok.group(0).isdigit()
+            )
+            if near_number:
+                repaired_chars[s:e] = list(tok.translate(_NUMERIC_O_TO_0))
+                continue
         # 2. Uzbek Cyrillic lookalike repair (length-preserving)
         fixed_cyr = _repair_cyrillic_token(tok)
         if len(fixed_cyr) == len(tok):

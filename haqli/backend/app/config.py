@@ -6,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,10 +22,13 @@ class Settings(BaseSettings):
     public_base_url: str = "http://localhost:8002"
     cors_origins: str = "http://localhost:5173,http://localhost:8002,http://127.0.0.1:5173"
 
+    # One persistent directory (e.g. a Render disk) for the SQLite DB, uploads and PDFs. Explicit
+    # DATABASE_URL / UPLOAD_DIR / PDF_DIR values still win when they are set.
+    storage_dir: Path | None = None
     database_url: str = "sqlite+aiosqlite:///./data/haqli.db"
 
     jwt_secret: str = "haqli-dev-jwt-secret-change-in-production-32chars"
-    jwt_ttl_minutes: int = 15
+    jwt_ttl_minutes: int = 60
     fernet_key: str = ""
     fernet_key_id: str = "k1"
     ed25519_private_key_b64: str = ""
@@ -34,11 +37,18 @@ class Settings(BaseSettings):
     telegram_bot_username: str = "haqli_bot"
     advocate_invite_codes: str = "HAQLI-ADV-2026,DEMO-ADV"
 
+    allow_web_guests: bool = True  # browsers outside Telegram get a private per-device guest account
+
+    # Lex.uz legal AI agent (`agent/`) used by the "AI yurist" chat
+    agent_base_url: str = "http://127.0.0.1:8000"
+    agent_timeout_sec: float = 75.0
+    agent_user_questions_per_hour: int = 40
+
     llm_provider: Literal["null", "openai", "gemini", "anthropic", "local"] = "null"
     llm_api_key: str = ""
     llm_model: str = "gemini-3.8-flash"
     llm_base_url: str = ""
-    llm_timeout_sec: float = 5.0
+    llm_timeout_sec: float = 20.0
 
     # Storage & Retention
     upload_dir: Path = Field(default=Path("./data/uploads"))
@@ -95,11 +105,32 @@ class Settings(BaseSettings):
     def advocate_codes_set(self) -> set[str]:
         return {c.strip().upper() for c in self.advocate_invite_codes.split(",") if c.strip()}
 
+    @model_validator(mode="after")
+    def _apply_storage_dir(self) -> "Settings":
+        if self.storage_dir is not None:
+            root = Path(self.storage_dir)
+            explicit = self.model_fields_set
+            if "database_url" not in explicit:
+                self.database_url = f"sqlite+aiosqlite:///{(root / 'haqli.db').as_posix()}"
+            if "upload_dir" not in explicit:
+                self.upload_dir = root / "uploads"
+            if "pdf_dir" not in explicit:
+                self.pdf_dir = root / "pdfs"
+        return self
+
+    @property
+    def sqlite_path(self) -> Path | None:
+        if not self.database_url.startswith("sqlite"):
+            return None
+        raw = self.database_url.split(":///", 1)[1] if ":///" in self.database_url else ""
+        return Path(raw) if raw and raw != ":memory:" else None
+
     def ensure_dirs(self) -> None:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.pdf_dir.mkdir(parents=True, exist_ok=True)
-        if self.database_url.startswith("sqlite"):
-            Path("./data").mkdir(parents=True, exist_ok=True)
+        db_file = self.sqlite_path
+        if db_file is not None:
+            db_file.parent.mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache(maxsize=1)

@@ -164,15 +164,15 @@ def extract_entities_deterministic(text: str, *, today: date | None = None) -> d
         "docType": doc_type,
         "amountUzs": str(amount) if amount is not None else None,
         "dueDate": dt.isoformat() if dt is not None else None,
-        "partyBName": party,
-        "passportNumber": passport,
+        "counterpartyName": party,
+        "passport": passport,
         "termsSummary": text.strip()[:300],
     }
     confidences = {
         "amountUzs": amt_c,
         "dueDate": dt_c,
-        "partyBName": party_c,
-        "passportNumber": pass_c,
+        "counterpartyName": party_c,
+        "passport": pass_c,
     }
     overall = round(
         sum(v for v in confidences.values() if v > 0) / max(1, sum(1 for v in confidences.values() if v > 0)),
@@ -187,7 +187,7 @@ def extract_entities_deterministic(text: str, *, today: date | None = None) -> d
 
 
 class _LLMIntakeSchema(BaseModel):
-    partyBName: str | None = None
+    counterpartyName: str | None = None
     termsSummary: str | None = None
 
 
@@ -197,14 +197,15 @@ async def parse_intake_text(text: str, *, today: date | None = None) -> dict[str
     gateway = get_llm_gateway()
     try:
         prompt = (
-            "Extract counterparty full name (partyBName) and concise 1-sentence summary (termsSummary) "
+            "Extract counterparty full name (counterpartyName) and concise 1-sentence summary (termsSummary) "
             "from the untrusted user utterance below. Do NOT invent numbers.\n"
             + quote_untrusted_user_text("utterance", text)
         )
-        llm_res = await gateway.generate_structured(_LLMIntakeSchema, prompt)
-        if not base["fields"]["partyBName"] and llm_res.partyBName:
-            base["fields"]["partyBName"] = llm_res.partyBName
-            base["confidences"]["partyBName"] = 0.72
+        # Form helper: the user is waiting, so cap the enrichment tightly (deterministic fields are already filled).
+        llm_res = await gateway.generate_structured(_LLMIntakeSchema, prompt, timeout=8.0)
+        if not base["fields"]["counterpartyName"] and llm_res.counterpartyName:
+            base["fields"]["counterpartyName"] = llm_res.counterpartyName
+            base["confidences"]["counterpartyName"] = 0.72
         if llm_res.termsSummary:
             base["fields"]["termsSummary"] = llm_res.termsSummary
         base["engine"] = gateway.name
