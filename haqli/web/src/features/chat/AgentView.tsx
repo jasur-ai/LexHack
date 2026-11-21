@@ -36,14 +36,6 @@ interface Message {
   isStreaming?: boolean;
 }
 
-const SUGGESTED_QUESTIONS = [
-  { text: "YHXX jarimasini 0 so'm boj bilan qanday bekor qilaman?", tab: "jarima" as NavTab },
-  { text: "Qarz berganda tilxat tuzish majburiymi? (10 BHM)", tab: "tilxat" as NavTab },
-  { text: "Gaz va svetdan asossiz qarzdorlik yozishsa nima qilish kerak?", tab: "himoya" as NavTab },
-  { text: "Ish haqi kechiksa qancha penya va kompensatsiya to'lanadi?", tab: "himoya" as NavTab },
-  { text: "Ijara yoki yangi uy shartnomasidagi xavfli tuzoqlar", tab: "scanner" as NavTab },
-];
-
 function getAutonomousLegalResponse(query: string): {
   text: string;
   sections: AnswerSections;
@@ -424,16 +416,6 @@ export function AgentView({
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
-            {onClose && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-600 cursor-pointer transition-colors"
-                title="Yopish"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
           </div>
         </div>
       ) : (
@@ -467,26 +449,6 @@ export function AgentView({
 
       {/* Main chat body scrollable in side panel */}
       <div className={isSidePanel ? "flex-1 overflow-y-auto p-3 space-y-3" : "space-y-4"}>
-        {/* Suggested Chips Carousel */}
-        <div className="space-y-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Tezkor savollar:
-          </span>
-          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {SUGGESTED_QUESTIONS.map((sq, i) => (
-              <button
-                key={i}
-                type="button"
-                disabled={busy}
-                onClick={() => handleSend(sq.text)}
-                className="shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 transition-colors hover:border-[#0074ff] hover:text-[#0074ff] cursor-pointer"
-              >
-                {sq.text}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Messages Stream */}
         <div className="space-y-3 pt-1">
         {messages.map((msg) => (
