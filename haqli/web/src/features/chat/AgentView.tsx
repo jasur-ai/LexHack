@@ -2,19 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Bot,
+  Brain,
   Car,
   CheckCircle2,
+  Clock,
   FileCheck2,
   FileText,
   HelpCircle,
+  History,
   Lightbulb,
+  MessageSquare,
   Mic,
+  Plus,
   RotateCcw,
   Scale,
   Send,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Trash2,
   User,
   X,
 } from "lucide-react";
@@ -35,6 +41,123 @@ interface Message {
   sources?: AgentSource[];
   isStreaming?: boolean;
 }
+
+interface ChatSession {
+  id: string;
+  title: string;
+  date: string;
+  messages: Message[];
+}
+
+const DEFAULT_SESSIONS: ChatSession[] = [
+  {
+    id: "sess-1",
+    title: "YHXX radar xatosi bo'yicha shikoyat",
+    date: "Bugun, 14:30",
+    messages: [
+      {
+        id: "m-1",
+        role: "user",
+        text: "Radar tezlikni noto'g'ri o'lchagan bo'lsa qanday bekor qildiraman?",
+      },
+      {
+        id: "m-2",
+        role: "assistant",
+        text: "MJtK 315-moddasiga binoan, ma'muriy jazo ustidan shikoyat berishda davlat boji undirilmaydi (0 so'm). Metrologiya sertifikati muddati o'tgan bo'lsa, jarima to'liq bekor qilinadi. 'Jarima' modulimiz orqali 3 daqiqada tayyor shikoyat arizasini oling.",
+      },
+    ],
+  },
+  {
+    id: "sess-2",
+    title: "Ish haqi kechikishi va 1% penya",
+    date: "Kecha, 18:15",
+    messages: [
+      {
+        id: "m-3",
+        role: "user",
+        text: "Korxona 2 oydan beri oylik maoshimni bermayapti.",
+      },
+      {
+        id: "m-4",
+        role: "assistant",
+        text: "Mehnat kodeksining 333-moddasiga asosan, ish beruvchi ish haqi to'lovini kechiktirgan har bir kun uchun Markaziy bank qayta moliyalash stavkasidan kam bo'lmagan miqdorda foiz (penya) to'lashi shart. 'Himoya' modulida ish beruvchiga rasmiy Talabnoma tuzing.",
+      },
+    ],
+  },
+  {
+    id: "sess-3",
+    title: "Qarz tilxati va 10 BHM qoidasi",
+    date: "16-noyabr",
+    messages: [
+      {
+        id: "m-5",
+        role: "user",
+        text: "Do'stimga 15 million so'm qarz bermoqchiman, tilxat shartmi?",
+      },
+      {
+        id: "m-6",
+        role: "assistant",
+        text: "Fuqarolik kodeksining 108-moddasiga ko'ra, fuqarolar o'rtasidagi bitim summasi 10 BHM (3 750 000 so'm) dan oshsa, yozma shaklda tuzilishi shart. Ovozli va QR-kodli tilxat modulimiz orqali qonuniy kuchga ega tilxat rasmiylashtiring.",
+      },
+    ],
+  },
+  {
+    id: "sess-4",
+    title: "Kvartira ijara shartnomasi auditi",
+    date: "12-noyabr",
+    messages: [
+      {
+        id: "m-7",
+        role: "user",
+        text: "Uy egasi shartnomaga 'istalgan vaqtda chiqarib yuborish' bandini qo'shibdi.",
+      },
+      {
+        id: "m-8",
+        role: "assistant",
+        text: "Bu band qonunga zid! FK 600 va 615-moddalariga binoan ijaraga beruvchi ijarachini kamida 3 oy oldin yozma ogohlantirishi lozim. Shartnoma skaneri orqali xavfli bandni xavfsiz qonuniy muqobiliga almashtiring.",
+      },
+    ],
+  },
+];
+
+const createWelcomeMessage = (): Message => ({
+  id: "m-welcome",
+  role: "assistant",
+  text: "Assalomu alaykum! Men Haqly AI — O'zbekiston Respublikasi qonunlariga asoslangan Yuridik Sun'iy Intellektman. YHXX jarimalari, og'zaki va yozma qarzlar (tilxat), kommunal ortiqcha to'lovlar, ish haqi kechikishi yoki shartnoma tuzoqlari bo'yicha istalgan savolingizni bering.",
+  sections: {
+    structured: true,
+    answer:
+      "O'zbekiston Respublikasining MJtK, FK, MK va Iste'molchilar huquqlarini himoya qilish qonunlari bo'yicha aniq moddalar bilan javob beraman va kerak bo'lsa rasmiy ariza yaratishga yo'naltiraman.",
+    key_points: [
+      "100% Avtonom qonuniy maslahat (lex.uz bazasi).",
+      "Sudgacha rasmiy Talabnoma va Shikoyatlar yaratish imkoniyati.",
+      "Xotira tizimi: barcha maslahatlaringiz xavfsiz saqlanadi.",
+    ],
+    steps: [
+      "Savolingizni pastdagi maydonga yozing.",
+      "Ovozli savol berish uchun mikrofon tugmasidan foydalaning.",
+    ],
+    caution:
+      "Tizim ma'lumot beruvchi huquqiy yordamchidir; murakkab sud ishlarida rasmiy yurist xulosasini oling.",
+    follow_ups: [
+      "Jarima bo'yicha shikoyat muddati qancha?",
+      "10 BHM qancha so'm bo'ladi?",
+      "Kommunal to'lovda kunlik penya bormi?",
+    ],
+  },
+  sources: [
+    {
+      n: 1,
+      doc_id: "lex-base",
+      title: "O'zR Qonunchilik Portali",
+      full_title: "O'zbekiston Respublikasi Qonun hujjatlari ma'lumotlari milliy bazasi",
+      excerpt: "Lex.uz — O'zbekiston qonunlari",
+      url: "https://lex.uz",
+      language: "uz",
+      status: "active",
+    },
+  ],
+});
 
 function getAutonomousLegalResponse(query: string): {
   text: string;
@@ -230,50 +353,51 @@ export function AgentView({
   const setNavHidden = useAppStore((s) => s.setNavHidden);
 
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "m-welcome",
-      role: "assistant",
-      text: "Assalomu alaykum! Men HAQLI — O'zbekiston Respublikasi qonunlariga asoslangan AI Yuridik Maslahatchiman. YHXX jarimalari, og'zaki va yozma qarzlar (tilxat), kommunal ortiqcha to'lovlar, ish haqi kechikishi yoki shartnoma tuzoqlari bo'yicha istalgan savolingizni bering.",
-      sections: {
-        structured: true,
-        answer: "O'zbekiston Respublikasining MJtK, FK, MK va Iste'molchilar huquqlarini himoya qilish qonunlari bo'yicha aniq moddalar bilan javob beraman va kerak bo'lsa rasmiy ariza yaratishga yo'naltiraman.",
-        key_points: [
-          "100% Avtonom qonuniy maslahat (lex.uz bazasi).",
-          "Sudgacha rasmiy Talabnoma va Shikoyatlar yaratish imkoniyati.",
-          "50 BHM dan ortiq nizolarda litsenziyaga ega hamkor advokatlarga yo'naltirish.",
-        ],
-        steps: [
-          "Quyidagi tayyor savollardan birini tanlang yoki o'z vaziyatingizni yozing.",
-          "Ovozli savol berish uchun mikrofon tugmasidan foydalaning.",
-        ],
-        caution: "Tizim ma'lumot beruvchi huquqiy yordamchidir; murakkab sud ishlarida Advokat MSO portaliga murojaat qiling.",
-        follow_ups: [
-          "Jarima bo'yicha shikoyat muddati qancha?",
-          "10 BHM qancha so'm bo'ladi?",
-          "Kommunal to'lovda kunlik penya bormi?",
-        ],
-      },
-      sources: [
-        {
-          n: 1,
-          doc_id: "lex-base",
-          title: "O'zR Qonunchilik Portali",
-          full_title: "O'zbekiston Respublikasi Qonun hujjatlari ma'lumotlari milliy bazasi",
-          excerpt: "Lex.uz — O'zbekiston qonunlari",
-          url: "https://lex.uz",
-          language: "uz",
-          status: "active",
-        },
-      ],
-    },
-  ]);
+  const [sessions, setSessions] = useState<ChatSession[]>(DEFAULT_SESSIONS);
+  const [activeSessionId, setActiveSessionId] = useState<string>("live");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([createWelcomeMessage()]);
   const [busy, setBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, busy]);
+
+  const handleStartNewChat = () => {
+    const userMsgs = messages.filter((m) => m.role === "user");
+    if (activeSessionId === "live" && userMsgs.length > 0) {
+      const firstMsg = userMsgs[0]?.text || "Yuridik maslahat";
+      const snippet = firstMsg.length > 36 ? firstMsg.slice(0, 36) + "..." : firstMsg;
+      const newSess: ChatSession = {
+        id: `sess-${Date.now()}`,
+        title: snippet,
+        date: "Hozir",
+        messages: [...messages],
+      };
+      setSessions((prev) => [newSess, ...prev]);
+    }
+    setActiveSessionId("live");
+    setMessages([createWelcomeMessage()]);
+    setHistoryOpen(false);
+    haptics.impact("light");
+  };
+
+  const handleSelectSession = (sess: ChatSession) => {
+    setActiveSessionId(sess.id);
+    setMessages(sess.messages);
+    setHistoryOpen(false);
+    haptics.impact("light");
+  };
+
+  const handleDeleteSession = (id: string) => {
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    if (activeSessionId === id) {
+      setActiveSessionId("live");
+      setMessages([createWelcomeMessage()]);
+    }
+    haptics.impact("light");
+  };
 
   const handleSend = async (queryText?: string) => {
     const q = (queryText || input).trim();
@@ -393,29 +517,67 @@ export function AgentView({
     >
       {/* Header */}
       {isSidePanel ? (
-        <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/80 shrink-0">
+        <div className="relative p-2.5 sm:p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/90 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-xs">
               <Bot className="h-4 w-4" />
             </div>
             <div className="flex flex-col min-w-0 text-left">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-slate-800 truncate">AI Yuridik Agent</span>
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-slate-900 tracking-tight">Haqly AI</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <span className="text-[10px] text-slate-500 truncate">24/7 Avtonom Maslahat</span>
+              <span className="text-[10px] text-slate-500 truncate">Yuridik Sun'iy Intellekt</span>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
+            {/* Memory / History Toggle Button */}
             <button
               type="button"
-              onClick={() => setMessages(messages.slice(0, 1))}
+              onClick={() => {
+                haptics.impact("light");
+                setHistoryOpen(!historyOpen);
+              }}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                historyOpen
+                  ? "bg-[#0074ff] text-white border-[#0074ff]"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+              }`}
+              title="Suhbatlar xotirasi va tarixi"
+            >
+              <History className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-semibold">Xotira</span>
+              <span
+                className={`text-[10px] px-1 py-0.2 rounded-full font-bold ${
+                  historyOpen ? "bg-white/20 text-white" : "bg-blue-50 text-[#0074ff]"
+                }`}
+              >
+                {sessions.length}
+              </span>
+            </button>
+
+            {/* New Chat Button */}
+            <button
+              type="button"
+              onClick={handleStartNewChat}
+              className="h-7 w-7 flex items-center justify-center rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer transition-colors"
+              title="Yangi suhbat"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Clear Current Chat */}
+            <button
+              type="button"
+              onClick={() => setMessages([createWelcomeMessage()])}
               className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-500 cursor-pointer transition-colors"
               title="Tozalash"
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
+
+            {/* Close Panel Button */}
             {onClose && (
               <button
                 type="button"
@@ -429,31 +591,124 @@ export function AgentView({
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-3 dark:border-slate-800">
+        <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-3 border-slate-200">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/60 dark:text-blue-400">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff]">
                 <Bot className="h-3.5 w-3.5" />
-                AI YURIST
+                HAQLY AI
               </span>
               <Chip tone="success">100% Avtonom</Chip>
             </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight">AI Yuridik Maslahatchi</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              O'zR kodekslari bo'yicha tezkor, aniq va rasmiy huquqiy javoblar
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Haqly AI</h1>
+            <p className="text-xs text-slate-500">
+              O'zbekiston Respublikasi qonunlari va kodekslari bo'yicha tezkor, aniq va rasmiy huquqiy yordamchi
             </p>
           </div>
 
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              setMessages(messages.slice(0, 1));
-            }}
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>Tozalash</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant={historyOpen ? "primary" : "secondary"}
+              onClick={() => {
+                haptics.impact("light");
+                setHistoryOpen(!historyOpen);
+              }}
+            >
+              <History className="h-3.5 w-3.5" />
+              <span>Xotira ({sessions.length})</span>
+            </Button>
+            <Button size="sm" variant="secondary" onClick={handleStartNewChat}>
+              <Plus className="h-3.5 w-3.5" />
+              <span>Yangi suhbat</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setMessages([createWelcomeMessage()]);
+              }}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Tozalash</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Memory & History Drawer (Slide down) */}
+      {historyOpen && (
+        <div className="border-b border-slate-200 bg-slate-50/95 p-3 space-y-2.5 animate-in slide-in-from-top-2 duration-150 shadow-xs shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+              <Brain className="h-4 w-4 text-[#0074ff]" />
+              <span>Suhbatlar xotirasi</span>
+              <span className="text-[10px] font-normal text-slate-500">
+                ({sessions.length} ta mavzu saqlangan)
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleStartNewChat}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#0074ff] text-white text-[11px] font-semibold hover:bg-blue-600 transition-colors cursor-pointer"
+            >
+              <Plus className="h-3 w-3" />
+              <span>Yangi suhbat</span>
+            </button>
+          </div>
+
+          {/* Context sync info badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50/70 border border-blue-100 rounded-lg text-[10.5px] text-blue-800 font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="truncate">Kontekst xotirasi faol — Lex.uz qonunchilik bazasi bilan ulangan</span>
+          </div>
+
+          {/* List of sessions */}
+          <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+            {sessions.map((sess) => {
+              const isActive = activeSessionId === sess.id;
+              return (
+                <div
+                  key={sess.id}
+                  onClick={() => handleSelectSession(sess)}
+                  className={`group flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                    isActive
+                      ? "bg-white border-[#0074ff] shadow-xs text-blue-900 ring-1 ring-[#0074ff]/20"
+                      : "bg-white/80 border-slate-200 hover:bg-white hover:border-slate-300 text-slate-700"
+                  }`}
+                >
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    <MessageSquare
+                      className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${
+                        isActive ? "text-[#0074ff]" : "text-slate-400 group-hover:text-slate-600"
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold truncate text-[11.5px] leading-snug">{sess.title}</p>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        <span>{sess.date}</span>
+                        <span>•</span>
+                        <span>{sess.messages.length} ta xabar</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteSession(sess.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 text-slate-400 rounded-md transition-all cursor-pointer ml-1"
+                    title="O'chirish"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

@@ -707,7 +707,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   : activeTab === "services"
                   ? "Xizmatlar Katalogi"
                   : activeTab === "agent"
-                  ? "AI Yuridik Maslahatchi"
+                  ? "Haqly AI"
                   : desktopModules.find((m) => m.id === activeTab)?.label || "Boshqaruv Paneli"}
               </span>
               <span className="text-xs text-slate-300">/</span>
@@ -967,7 +967,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               setAiPanelOpen(true);
             }}
             className="group flex items-center gap-2.5 sm:gap-3 rounded-full text-white pl-3.5 sm:pl-4 pr-4 sm:pr-5 py-2.5 sm:py-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 bg-[#0074ff] hover:bg-[#0063db] border-white/40 shadow-blue-500/25"
-            aria-label="AI Yuridik Agent"
+            aria-label="Haqly AI"
           >
             <div className="relative flex items-center justify-center">
               <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -978,7 +978,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex flex-col text-left">
               <span className="text-xs sm:text-sm font-bold leading-tight flex items-center gap-1.5">
-                <span>AI Yuridik Agent</span>
+                <span>Haqly AI</span>
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
               </span>
               <span className="text-[10px] sm:text-[11px] text-blue-100 font-medium leading-tight">
