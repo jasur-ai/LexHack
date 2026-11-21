@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { readString, STORAGE_KEYS, writeString } from "./storage";
 
 export type LangCode = "uz_lat" | "uz_cyr" | "ru";
 export type UserRole = "citizen" | "advocate";
@@ -17,6 +18,7 @@ export interface UserProfile {
   profileTags: string[];
   pushEnabled: boolean;
   consentVersion: string | null;
+  isGuest?: boolean;
 }
 
 export interface ConstantsMeta {
@@ -54,6 +56,9 @@ interface AppState {
   recognitionInitialMode: "document" | "receipt" | "id_mrz" | "voice" | "verify";
   prefill: RecognitionPrefill | null;
   toasts: ToastItem[];
+  /** Hidden while the chat composer has focus, so the on-screen keyboard leaves room for the conversation. */
+  navHidden: boolean;
+  setNavHidden: (hidden: boolean) => void;
   setSession: (payload: { token: string; user: UserProfile; demoMode: boolean; constants: ConstantsMeta }) => void;
   setUser: (user: UserProfile, token?: string) => void;
   setLang: (lang: LangCode) => void;
@@ -68,18 +73,26 @@ interface AppState {
   dismissToast: (id: string) => void;
 }
 
+/** Fallbacks until the server sends the verified values (BHM per PF-115 from 2026-09-01). */
+export const DEFAULT_CONSTANTS: ConstantsMeta = {
+  bhm: 440000,
+  bhmStatus: "verified",
+  version: "2026.11",
+  talabnomaPriceUzs: 19000,
+};
+
+function initialThemePref(): ThemePref {
+  const stored = readString(STORAGE_KEYS.theme);
+  return stored === "light" || stored === "dark" || stored === "auto" ? stored : "auto";
+}
+
 export const useAppStore = create<AppState>((set) => ({
   token: null,
   user: null,
   demoMode: true,
-  constants: {
-    bhm: 375000,
-    bhmStatus: "needs_review",
-    version: "2026-04-01",
-    talabnomaPriceUzs: 29000,
-  },
+  constants: DEFAULT_CONSTANTS,
   lang: "uz_lat",
-  themePref: "auto",
+  themePref: initialThemePref(),
   resolvedTheme: "light",
   activeTab: "himoya",
   activeMode: "citizen",
@@ -87,25 +100,38 @@ export const useAppStore = create<AppState>((set) => ({
   recognitionInitialMode: "document",
   prefill: null,
   toasts: [],
+  navHidden: false,
+  setNavHidden: (navHidden) => set({ navHidden }),
   setSession: ({ token, user, demoMode, constants }) =>
-    set({
-      token,
-      user,
-      demoMode,
-      constants,
-      lang: user.language || "uz_lat",
-      themePref: user.themePref || "auto",
-      activeMode: user.role === "advocate" ? "advocate" : "citizen",
+    set((s) => {
+      const themePref = user.themePref || "auto";
+      writeString(STORAGE_KEYS.theme, themePref);
+      return {
+        token,
+        user,
+        demoMode,
+        constants,
+        lang: user.language || "uz_lat",
+        themePref,
+        // A silent re-login (expired token) must not throw the user out of the screen they are on.
+        activeMode: s.token ? s.activeMode : user.role === "advocate" ? "advocate" : "citizen",
+      };
     }),
   setUser: (user, token) =>
-    set((s) => ({
-      user,
-      token: token ?? s.token,
-      lang: user.language,
-      themePref: user.themePref,
-    })),
+    set((s) => {
+      writeString(STORAGE_KEYS.theme, user.themePref || "auto");
+      return {
+        user,
+        token: token ?? s.token,
+        lang: user.language,
+        themePref: user.themePref,
+      };
+    }),
   setLang: (lang) => set({ lang }),
-  setThemePref: (themePref) => set({ themePref }),
+  setThemePref: (themePref) => {
+    writeString(STORAGE_KEYS.theme, themePref);
+    set({ themePref });
+  },
   setResolvedTheme: (resolvedTheme) => set({ resolvedTheme }),
   setActiveTab: (activeTab) => set({ activeTab }),
   setActiveMode: (activeMode) => set({ activeMode }),

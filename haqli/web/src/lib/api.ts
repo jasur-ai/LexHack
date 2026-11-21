@@ -1,7 +1,17 @@
 /**
  * Typed HTTP + WebSocket client for Haqli FastAPI backend (§10).
  */
-import { useAppStore, type LangCode, type ThemePref, type UserProfile, type UserRole } from "./store";
+import { getTelegramInitData } from "../tma/sdk";
+import { getDeviceId } from "./device";
+import {
+  DEFAULT_CONSTANTS,
+  useAppStore,
+  type ConstantsMeta,
+  type LangCode,
+  type ThemePref,
+  type UserProfile,
+  type UserRole,
+} from "./store";
 
 export interface CitationItem {
   id: string;
@@ -199,48 +209,138 @@ export interface VerifyDocumentResponse {
   detail?: string;
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
     super(message);
+    this.name = "ApiError";
     this.status = status;
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export interface AuthResponse {
+  accessToken: string;
+  user: UserProfile;
+  demoMode: boolean;
+  constants: { bhm: string; bhmStatus: string; version: string; talabnomaPriceUzs: string };
+}
+
+export interface AgentStatusDTO {
+  available: boolean;
+  answerMode?: "llm" | "extractive" | string;
+  indexedChunks?: number;
+  version?: string | null;
+  latencyMs?: number;
+  reason?: string;
+}
+
+export interface AgentSourceInfoDTO {
+  id: string;
+  name: string;
+  kind?: string;
+  description?: string;
+  url?: string;
+  license?: string;
+  snapshot?: string | null;
+  languages?: string[];
+  documents?: number;
+  chunks?: number;
+  available?: boolean;
+}
+
+const AUTH_PATH = "/api/auth/telegram";
+
+async function readErrorDetail(resp: Response): Promise<string> {
+  let detail = `HTTP ${resp.status}`;
+  try {
+    const body = (await resp.json()) as { detail?: unknown; title?: string };
+    if (typeof body.detail === "string") detail = body.detail;
+    else if (Array.isArray(body.detail) && body.detail.length > 0) {
+      const first = body.detail[0] as { msg?: string };
+      detail = first?.msg || detail;
+    } else if (body.title) detail = body.title;
+  } catch {
+    // Non-JSON error body.
+  }
+  return detail;
+}
+
+function toConstants(raw: AuthResponse["constants"] | undefined): ConstantsMeta {
+  return {
+    bhm: Number(raw?.bhm) || DEFAULT_CONSTANTS.bhm,
+    bhmStatus: raw?.bhmStatus || DEFAULT_CONSTANTS.bhmStatus,
+    version: raw?.version || DEFAULT_CONSTANTS.version,
+    talabnomaPriceUzs: Number(raw?.talabnomaPriceUzs) || DEFAULT_CONSTANTS.talabnomaPriceUzs,
+  };
+}
+
+let authInFlight: Promise<AuthResponse> | null = null;
+
+/**
+ * Sign in with Telegram initData inside the Mini App, or as a private per-device guest on the web.
+ * Concurrent callers share one request; the session is written to the store before the promise resolves.
+ */
+export function authenticate(): Promise<AuthResponse> {
+  if (!authInFlight) {
+    authInFlight = (async () => {
+      const resp = await fetch(AUTH_PATH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: getTelegramInitData(), deviceId: getDeviceId() }),
+      });
+      if (!resp.ok) throw new ApiError(resp.status, await readErrorDetail(resp));
+      const data = (await resp.json()) as AuthResponse;
+      useAppStore.getState().setSession({
+        token: data.accessToken,
+        user: data.user,
+        demoMode: data.demoMode,
+        constants: toConstants(data.constants),
+      });
+      return data;
+    })().finally(() => {
+      authInFlight = null;
+    });
+  }
+  return authInFlight;
+}
+
+function withAuth(init: RequestInit): RequestInit {
   const token = useAppStore.getState().token;
   const headers = new Headers(init.headers);
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-  if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (init.body !== undefined && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const resp = await fetch(path, { ...init, headers });
-  if (!resp.ok) {
-    let detail = `HTTP ${resp.status}`;
-    try {
-      const errBody = (await resp.json()) as { detail?: string; title?: string };
-      detail = errBody.detail || errBody.title || detail;
-    } catch {
-      // Ignore parse error
-    }
-    throw new ApiError(resp.status, detail);
+  return { ...init, headers };
+}
+
+/**
+ * fetch() with the session token. Sessions are short-lived JWTs, so a 401 triggers one silent
+ * re-login and a single retry; the user never sees an "expired session" error.
+ */
+export async function authorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const resp = await fetch(path, withAuth(init));
+  if (resp.status !== 401 || path === AUTH_PATH || init.body instanceof ReadableStream) return resp;
+  try {
+    await authenticate();
+  } catch {
+    return resp;
   }
+  return fetch(path, withAuth(init));
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const resp = await authorizedFetch(path, init);
+  if (!resp.ok) throw new ApiError(resp.status, await readErrorDetail(resp));
   return (await resp.json()) as T;
 }
 
 export const api = {
-  authTelegram(initData: string, demoName?: string) {
-    return request<{
-      accessToken: string;
-      user: UserProfile;
-      demoMode: boolean;
-      constants: { bhm: string; bhmStatus: string; version: string; talabnomaPriceUzs: string };
-    }>("/api/auth/telegram", {
-      method: "POST",
-      body: JSON.stringify({ initData, demoName }),
-    });
+  agentStatus() {
+    return request<AgentStatusDTO>("/api/agent/status");
+  },
+  agentSources() {
+    return request<{ sources: AgentSourceInfoDTO[]; totalChunks: number }>("/api/agent/sources");
   },
 
   patchPreferences(payload: {
@@ -416,11 +516,8 @@ export const api = {
 };
 
 export async function downloadProtectedPdf(url: string, filename: string): Promise<void> {
-  const token = useAppStore.getState().token;
-  const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const resp = await fetch(url, { headers });
-  if (!resp.ok) throw new Error(`PDF download failed (${resp.status})`);
+  const resp = await authorizedFetch(url);
+  if (!resp.ok) throw new ApiError(resp.status, await readErrorDetail(resp));
   const blob = await resp.blob();
   const objUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");

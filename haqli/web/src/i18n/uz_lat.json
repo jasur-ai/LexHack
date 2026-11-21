@@ -36,7 +36,8 @@
     "deleteData": "Ma'lumotlarimni o'chirish",
     "deleteConfirm": "Barcha ishlar, tilxatlar va yuklangan fayllar darhol o'chiriladi. Davom etasizmi?",
     "dataDeleted": "Shaxsiy ma'lumotlaringiz o'chirildi.",
-    "verifyDoc": "PDF haqiqiyligini tekshirish"
+    "verifyDoc": "PDF haqiqiyligini tekshirish",
+    "retry": "Qayta urinish"
   },
   "consent": {
     "title": "Ma'lumotlarni qayta ishlashga rozilik",

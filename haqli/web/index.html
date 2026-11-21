@@ -3,19 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0F766E" />
-    <meta name="description" content="Haqli — Haqqingiz hujjat bilan. O'zbekiston fuqarolari uchun tezkor huquqiy hujjatlar." />
+    <meta name="theme-color" content="#0F766E" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0B1120" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Haqli — huquqiy savolingizga O'zbekiston qonunlari asosida qisqa javob, talabnoma, tilxat va shartnoma tekshiruvi." />
+    <meta property="og:title" content="haqli — Haqqingiz hujjat bilan" />
+    <meta property="og:description" content="AI-yurist, talabnoma, tilxat va shartnoma skaneri — O'zbekiston qonunlari asosida." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <title>haqli — Haqqingiz hujjat bilan</title>
+    <script>
+      // Apply the stored theme before first paint so the app never flashes the wrong colours.
+      (function () {
+        try {
+          var pref = localStorage.getItem("haqli:theme") || "auto";
+          var dark = pref === "dark" || (pref === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Haqli ishlashi uchun brauzeringizda JavaScript yoqilgan bo'lishi kerak.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
