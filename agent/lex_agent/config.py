@@ -57,9 +57,13 @@ class Settings(BaseSettings):
     qdrant_api_key: str = Field(default="")
     qdrant_collection: str = Field(default="lex_uz_legislation")
 
-    # Cross-encoder reranker
+    # Second-stage reranker
     reranker_enabled: bool = Field(default=True)
-    reranker_model: str = Field(default="BAAI/bge-reranker-v2-m3")
+    reranker_backend: Literal["auto", "trained", "heuristic", "cross_encoder"] = Field(
+        default="auto",
+        description="auto = bundled trained model when present, else the heuristic; cross_encoder needs the [ml] extra",
+    )
+    reranker_model: str = Field(default="BAAI/bge-reranker-v2-m3", description="Cross-encoder (only for cross_encoder)")
 
     # Live Lex.uz fetching
     lex_uz_base_url: str = Field(default="https://lex.uz")

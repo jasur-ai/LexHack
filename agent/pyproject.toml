@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lex-uz-agent"
-version = "1.0.0"
+version = "1.1.0"
 description = "Production-grade multilingual Legal AI Agent for all legislation of the Republic of Uzbekistan (Lex.uz - UZ/RU/EN)"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -13,32 +13,41 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
+    "python-multipart>=0.0.12",
+    "python-dotenv>=1.0.1",
     "httpx>=0.27.2",
     "beautifulsoup4>=4.12.3",
     "lxml>=5.3.0",
-    "qdrant-client>=1.12.0",
-    "rank-bm25>=0.2.2",
-    "openai>=1.55.0",
     "tenacity>=9.0.0",
+    "snowballstemmer>=2.2.0",
+    "rapidfuzz>=3.9.0",
+    "numpy>=1.26.4",
+    "openai>=1.55.0",
+    "pypdf>=5.0.0",
+    "python-docx>=1.1.2",
     "rich>=13.9.0",
     "typer>=0.13.0",
-    "python-multipart>=0.0.12",
 ]
 
 [project.optional-dependencies]
-ml = [
-    "sentence-transformers>=3.2.0",
-    "torch>=2.4.0",
+vector = [
+    "qdrant-client>=1.12.0",
+]
+hf = [
     "datasets>=3.0.0",
     "huggingface-hub>=0.26.0",
     "pyarrow>=17.0.0",
 ]
+train = [
+    "lightgbm>=4.3.0",
+]
+ml = [
+    "sentence-transformers>=3.2.0",
+    "torch>=2.4.0",
+    "qdrant-client>=1.12.0",
+]
 browser = [
     "playwright>=1.48.0",
-]
-docs = [
-    "pypdf>=5.0.0",
-    "python-docx>=1.1.2",
 ]
 dev = [
     "pytest>=8.3.0",
@@ -52,6 +61,13 @@ lex-agent = "lex_agent.cli:app"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["lex_agent*"]
+
+[tool.setuptools.package-data]
+lex_agent = ["api/static/*", "data/*.json", "data/*.json.gz"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
