@@ -4,7 +4,7 @@ import { readString, STORAGE_KEYS, writeString } from "./storage";
 export type LangCode = "uz_lat" | "uz_cyr" | "ru";
 export type UserRole = "citizen" | "advocate";
 export type ThemePref = "auto" | "light" | "dark";
-export type NavTab = "home" | "services" | "agent" | "jarima" | "himoya" | "tilxat" | "scanner" | "radar";
+export type NavTab = "home" | "services" | "agent" | "jarima" | "himoya" | "tilxat" | "scanner" | "radar" | "laws";
 
 export interface UserProfile {
   id: string;

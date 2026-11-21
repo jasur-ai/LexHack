@@ -14,6 +14,7 @@ import { JarimaView } from "./features/jarima/JarimaView";
 import { TilxatView } from "./features/tilxat/TilxatView";
 import { ScannerView } from "./features/scanner/ScannerView";
 import { RadarView } from "./features/radar/RadarView";
+import { LawsView } from "./features/laws/LawsView";
 import { AdvocateView } from "./features/advocate/AdvocateView";
 import { RecognitionSheet } from "./features/recognition/RecognitionSheet";
 import { PublicSignTilxatPage, PublicVerifyPage } from "./features/verify/PublicPages";
@@ -88,6 +89,7 @@ function HaqliMainApp() {
       {activeTab === "tilxat" && <TilxatView />}
       {activeTab === "scanner" && <ScannerView />}
       {activeTab === "radar" && <RadarView />}
+      {activeTab === "laws" && <LawsView />}
       <RecognitionSheet />
       <ToastStack />
     </AppShell>

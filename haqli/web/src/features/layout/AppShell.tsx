@@ -133,8 +133,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [paymentInfoOpen, setPaymentInfoOpen] = useState(false);
   const [mobileAppOpen, setMobileAppOpen] = useState(false);
-  const [lawsModalOpen, setLawsModalOpen] = useState(false);
-  const [lawSearchQuery, setLawSearchQuery] = useState("");
 
   const userInitials = (name?: string) => {
     if (!name) return "F";
@@ -457,18 +455,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
             </button>
 
-            {/* 9. Yangilangan hujjatlar va qonunlar */}
+            {/* 9. Yangilangan hujjatlar va qonunlar (Dedicated Page) */}
             <button
               type="button"
               onClick={() => {
                 haptics.selection();
-                setLawsModalOpen(true);
+                if (activeMode !== "citizen") setActiveMode("citizen");
+                setActiveTab("laws");
                 onItemClick?.();
               }}
-              className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left text-slate-700 hover:bg-slate-50/90 font-medium transition-all cursor-pointer"
+              className={`w-full flex items-center justify-between gap-3 px-3.5 py-3 text-left transition-all cursor-pointer ${
+                activeTab === "laws"
+                  ? "bg-blue-50/80 text-[#0074ff] font-bold"
+                  : "text-slate-700 hover:bg-slate-50/90 font-medium"
+              }`}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <div
+                  className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    activeTab === "laws"
+                      ? "bg-[#0074ff] text-white shadow-xs"
+                      : "bg-amber-50 text-amber-600"
+                  }`}
+                >
                   <FileText className="h-4.5 w-4.5" />
                 </div>
                 <span className="text-sm truncate">Yangilangan hujjatlar va qonunlar</span>
@@ -548,11 +557,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   ? "Xizmatlar Katalogi"
                   : activeTab === "agent"
                   ? "Haqly AI"
+                  : activeTab === "laws"
+                  ? "Yangilangan Qonunlar"
                   : desktopModules.find((m) => m.id === activeTab)?.label || "Boshqaruv Paneli"}
               </span>
               <span className="text-xs text-slate-300">/</span>
               <span className="text-xs text-slate-500 font-medium">
-                {desktopModules.find((m) => m.id === activeTab)?.num
+                {activeTab === "laws"
+                  ? "Qonunchilik Bazasi"
+                  : desktopModules.find((m) => m.id === activeTab)?.num
                   ? `${desktopModules.find((m) => m.id === activeTab)?.num}-Modul`
                   : "Fuqarolar Himoyasi"}
               </span>
@@ -932,196 +945,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </Sheet>
 
-      {/* Yangilangan va O'zgartirilgan Qonunlar Sheet (Profilga ulanmagan mustaqil qonunchilik bazasi) */}
-      <Sheet
-        open={lawsModalOpen}
-        onClose={() => setLawsModalOpen(false)}
-        title="Yangilangan va O'zgartirilgan Qonunlar"
-      >
-        <div className="space-y-3.5">
-          {/* Top Banner info */}
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 flex items-start gap-3">
-            <div className="h-9 w-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
-              <BookOpen className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                <span>Lex.uz Rasmiy Qonunchilik Bazasi (2026)</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              </div>
-              <p className="text-[11.5px] text-amber-900/80 mt-0.5 leading-relaxed">
-                O'zbekiston Respublikasining fuqarolar huquqlarini himoya qilishga oid eng so'nggi yangilangan va o'zgartirilgan me'yoriy-huquqiy hujjatlari.
-              </p>
-            </div>
-          </div>
-
-          {/* Search filter */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              value={lawSearchQuery}
-              onChange={(e) => setLawSearchQuery(e.target.value)}
-              placeholder="Qonun yoki moddani qidirish (masalan: 333, jarima, tilxat)..."
-              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0074ff] focus:ring-1 focus:ring-blue-100 bg-white"
-            />
-          </div>
-
-          {/* Laws list */}
-          <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-0.5">
-            {[
-              {
-                code: "MK 333-modda",
-                lawTitle: "Mehnat Kodeksi (Yangi tahrir) — Ish haqi kechiktirilganda 1% penya",
-                docNo: "O'RQ-798",
-                date: "Amaldagi norma",
-                badge: "1% Penya Majburiy",
-                badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
-                change:
-                  "Ish beruvchi ish haqini to'lash muddatini kechiktirgan har bir kun uchun Markaziy bank qayta moliyalash stavkasi asosida (kamida 1%) pulli kompensatsiya to'lashi shart. Xodim roziligisiz ushlab qolish taqiqlanadi.",
-                moduleId: "himoya" as NavTab,
-                moduleLabel: "Talabnoma tuzish",
-                lexUrl: "https://lex.uz/docs/6257288",
-              },
-              {
-                code: "MJtK 315-modda",
-                lawTitle: "Ma'muriy Javobgarlik Kodeksi — YHXX Radar jarimalari ustidan bepul shikoyat",
-                docNo: "MJtK 315, 317",
-                date: "2026 yangilangan",
-                badge: "0 so'm Davlat boji",
-                badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
-                change:
-                  "Yo'l harakati xavfsizligi fotoradarlari va kameralar qarorlari ustidan shikoyat berishda davlat boji undirilmaydi (0 so'm). Metrologik sertifikati muddati o'tgan fotoradar ko'rsatkichlari bo'yicha qarorlar to'liq bekor qilinadi.",
-                moduleId: "jarima" as NavTab,
-                moduleLabel: "Shikoyat tuzish",
-                lexUrl: "https://lex.uz/docs/97664",
-              },
-              {
-                code: "FK 732–735 moddalar",
-                lawTitle: "Fuqarolik Kodeksi — 10 BHM dan ortiq qarz va tilxat qoidalari",
-                docNo: "FK 733-modda",
-                date: "Qat'iy talab",
-                badge: "10 BHM Yozma Shakl",
-                badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
-                change:
-                  "Fuqarolar o'rtasida 10 BHM (3 750 000 so'm) dan ortiq qarz bitimlari yozma shaklda (tilxat yoki shartnoma) tuzilishi shart. QR-kodli elektron va audio tasdiqlangan tilxatlar sudlarda yuridik dalil sifatida o'tadi.",
-                moduleId: "tilxat" as NavTab,
-                moduleLabel: "Tilxat tayyorlash",
-                lexUrl: "https://lex.uz/docs/111189",
-              },
-              {
-                code: "PF-115 Farmon",
-                lawTitle: "Prezident Farmoni — 2026-yilgi Bazaviy hisoblash miqdori (BHM)",
-                docNo: "PF-115-son",
-                date: "2026-yil yangi stavka",
-                badge: "1 BHM = 375 000 so'm",
-                badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
-                change:
-                  "Respublika bo'yicha 1 BHM stavkasi 375 000 so'm etib belgilandi. Barcha soliqlar, davlat bojlari, ma'muriy jarimalar va kompensatsiyalar yangi stavka bo'yicha hisoblanadi.",
-                lexUrl: "https://lex.uz",
-              },
-              {
-                code: "O'zR Qonuni 221-I",
-                lawTitle: "Iste'molchilar huquqlarini himoya qilish — Kommunal tarmoqdan noqonuniy uzish taqiqi",
-                docNo: "221-I-son",
-                date: "Kafolatlangan huquq",
-                badge: "Uzish Taqiqlangan",
-                badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
-                change:
-                  "Asossiz yoki noaniq hisoblangan qarzdorlik ustidan fuqaro e'tiroz bildirgan vaqtda gaz, elektr va suv ta'minotidan uzib qo'yish taqiqlanadi. Tekshirish davrida fuqaroga xizmat ko'rsatish davom ettiriladi.",
-                lexUrl: "https://lex.uz/docs/440",
-              },
-              {
-                code: "FK 535–550 moddalar",
-                lawTitle: "Fuqarolik Kodeksi — Shartnomalardagi 7 ta yashirin tuzoqlarni bekor qilish",
-                docNo: "FK 540-modda",
-                date: "Yuridik kuchsiz bandlar",
-                badge: "Tuzoqlar Bekor",
-                badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
-                change:
-                  "Ijara yoki xizmat shartnomalariga kiritilgan bir tomonlama asossiz jarimalar, to'lovni noqonuniy oshirish va fuqaroni ogohlantirishsiz chiqarib yuborish bandlari qonun bo'yicha o'z-o'zidan haqiqiy emas hisoblanadi.",
-                moduleId: "scanner" as NavTab,
-                moduleLabel: "Shartnomani tekshirish",
-                lexUrl: "https://lex.uz/docs/111189",
-              },
-            ]
-              .filter(
-                (item) =>
-                  !lawSearchQuery ||
-                  item.code.toLowerCase().includes(lawSearchQuery.toLowerCase()) ||
-                  item.lawTitle.toLowerCase().includes(lawSearchQuery.toLowerCase()) ||
-                  item.change.toLowerCase().includes(lawSearchQuery.toLowerCase())
-              )
-              .map((item, idx) => (
-                <div
-                  key={idx}
-                  className="p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-blue-200 hover:shadow-xs transition-all space-y-2.5"
-                >
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-[#0074ff] bg-blue-50 px-2.5 py-0.5 rounded-md font-mono">
-                        {item.code}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        {item.docNo}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${item.badgeColor}`}
-                    >
-                      {item.badge}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                      {item.lawTitle}
-                    </h4>
-                    <p className="text-[11.5px] text-slate-600 mt-1 leading-relaxed">
-                      {item.change}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-                    <a
-                      href={item.lexUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-[#0074ff] transition-colors"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      <span>Lex.uz rasmiy matni</span>
-                    </a>
-
-                    {item.moduleId && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          haptics.selection();
-                          if (activeMode !== "citizen") setActiveMode("citizen");
-                          setActiveTab(item.moduleId!);
-                          setLawsModalOpen(false);
-                        }}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0074ff] hover:text-blue-700 hover:underline cursor-pointer"
-                      >
-                        <span>{item.moduleLabel}</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-          </div>
-
-          <Button
-            variant="secondary"
-            fullWidth
-            onClick={() => setLawsModalOpen(false)}
-          >
-            Yopish
-          </Button>
-        </div>
-      </Sheet>
       {/* Xizmatlar uchun to'lov Sheet */}
       <Sheet
         open={paymentInfoOpen}
