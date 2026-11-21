@@ -336,3 +336,16 @@ def test_index_builder_prefers_synced_text(tmp_path: Path) -> None:
     before = bundle_fingerprint(cfg.corpus_dir, cfg.cache_dir)
     (cfg.corpus_dir / STATE_FILE).write_text('{"acts": {}, "runs": [1]}', encoding="utf-8")
     assert bundle_fingerprint(cfg.corpus_dir, cfg.cache_dir) == before
+
+
+def test_nightly_check_time_zone_falls_back_to_uzbekistan_offset() -> None:
+    from lex_agent.ingestion.lex_sync import local_zone, next_check_at
+
+    july = datetime(2026, 7, 1, 12, 0)
+    assert local_zone("Asia/Tashkent").utcoffset(july) == timedelta(hours=5)
+    assert local_zone("No/Such_Zone").utcoffset(july) == timedelta(hours=5)  # missing tzdata never kills the loop
+
+    tz = timezone(timedelta(hours=5))
+    assert next_check_at(datetime(2026, 11, 21, 1, 0, tzinfo=tz), 3) == datetime(2026, 11, 21, 3, 7, tzinfo=tz)
+    assert next_check_at(datetime(2026, 11, 21, 3, 7, tzinfo=tz), 3) == datetime(2026, 11, 22, 3, 7, tzinfo=tz)
+    assert next_check_at(datetime(2026, 12, 31, 23, 0, tzinfo=tz), 3) == datetime(2027, 1, 1, 3, 7, tzinfo=tz)

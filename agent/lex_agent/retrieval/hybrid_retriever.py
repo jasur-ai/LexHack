@@ -196,7 +196,9 @@ class HybridLegalRetriever:
         use_live = self.settings.lex_uz_enable_live_fallback and (
             True if enable_live_fallback is None else enable_live_fallback
         )
-        qa = analysis or self.analyze(query)
+        # CPU-bound steps run in worker threads so the event loop keeps streaming other answers meanwhile
+        # (SQLite connections are per thread; FTS5 queries release the GIL)
+        qa = analysis or await asyncio.to_thread(self.analyze, query)
         fused, list_ranks = await self._search_once(qa, top_k=top_k, filters=filters, hop=hop)
         live_fetched_ids: list[str] = []
 
@@ -227,7 +229,9 @@ class HybridLegalRetriever:
                 fused, list_ranks = await self._search_once(qa, top_k=top_k, filters=filters, hop=hop)
 
         qinfo = self.query_info(qa, list_ranks)
-        reranked = self.reranker.rerank(qinfo, fused, top_k=max(rerank_top_k * 3, rerank_top_k + 6))
+        reranked = await asyncio.to_thread(
+            self.reranker.rerank, qinfo, fused, top_k=max(rerank_top_k * 3, rerank_top_k + 6)
+        )
         ranked = self._demote_figures(qa, self._prefer_language_and_dedupe(qa.language, reranked))[:rerank_top_k]
         for item in ranked:
             item.retrieval_hop = hop
@@ -270,6 +274,14 @@ class HybridLegalRetriever:
     async def _search_once(
         self, qa: QueryAnalysis, *, top_k: int, filters: RetrievalFilter | None, hop: int
     ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]]]:
+        exact, concept_hits, bm25_hits, list_ranks = await asyncio.to_thread(self._lexical_round, qa, top_k, filters)
+        return await self._fuse_round(qa, exact, concept_hits, bm25_hits, list_ranks, top_k=top_k, filters=filters,
+                                      hop=hop)
+
+    def _lexical_round(
+        self, qa: QueryAnalysis, top_k: int, filters: RetrievalFilter | None
+    ) -> tuple[list[RetrievedChunk], list[RetrievedChunk], list[RetrievedChunk], dict[str, dict[str, int]]]:
+        """Exact references, situation targets and the BM25 lists of one search round (synchronous, thread-safe)."""
         exact = self._exact_articles(qa, filters)
         concept_hits = self._concept_articles(qa, filters)
 
@@ -301,7 +313,20 @@ class HybridLegalRetriever:
                 1.3,
             )
         bm25_hits = self._fuse_lexical(lexical_lists, weights) if lexical_lists else []
+        return exact, concept_hits, bm25_hits, list_ranks
 
+    async def _fuse_round(
+        self,
+        qa: QueryAnalysis,
+        exact: list[RetrievedChunk],
+        concept_hits: list[RetrievedChunk],
+        bm25_hits: list[RetrievedChunk],
+        list_ranks: dict[str, dict[str, int]],
+        *,
+        top_k: int,
+        filters: RetrievalFilter | None,
+        hop: int,
+    ) -> tuple[list[RetrievedChunk], dict[str, dict[str, int]]]:
         dense_hits: list[RetrievedChunk] = []
         if self.vector_store.enabled:
             dense_hits = await self.vector_store.search(qa.query, top_k=top_k, filters=filters)

@@ -90,6 +90,13 @@ class Settings(BaseSettings):
     answer_cache_ttl_sec: int = Field(default=6 * 3600, ge=0)
     answer_cache_size: int = Field(default=512, ge=0)
     warmup_on_start: bool = Field(default=True, description="Load lazy resources and pre-answer suggested questions")
+    agent_threads: int = Field(
+        default=4, ge=1, le=32, description="Worker threads for CPU-bound search steps (keeps the event loop streaming)"
+    )
+    sqlite_reader_mmap_mb: int = Field(
+        default=256, ge=0, le=4096,
+        description="Memory-mapped reads of the search index per reader (0 = off: lower RSS, ~10 ms slower answers)",
+    )
     warmup_llm_answers: bool = Field(
         default=False, description="Also pre-generate LLM answers for the suggested questions at startup (uses quota)"
     )

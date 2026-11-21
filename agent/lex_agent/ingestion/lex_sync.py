@@ -37,7 +37,7 @@ import re
 import time
 from collections.abc import Awaitable, Callable, Iterable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
 from html import unescape
 from pathlib import Path
 from typing import Any
@@ -931,25 +931,42 @@ def sync_status(corpus_dir: Path, *, catalog: list[CatalogEntry] | None = None, 
     }
 
 
+_UZ_FIXED_ZONE = timezone(timedelta(hours=5), "UTC+05:00")  # Uzbekistan: UTC+5 all year, no DST since 1992
+
+
+def local_zone(tz_name: str = "Asia/Tashkent") -> tzinfo:
+    """IANA time zone, falling back to UTC+05:00 when the system has no zone data (slim containers)."""
+    try:
+        from zoneinfo import ZoneInfo
+
+        return ZoneInfo(tz_name)
+    except Exception:  # ZoneInfoNotFoundError, missing tzdata, invalid key
+        logger.warning("Time zone %r is unavailable (install tzdata); using UTC+05:00", tz_name)
+        return _UZ_FIXED_ZONE
+
+
+def next_check_at(now: datetime, hour: int, minute: int = 7) -> datetime:
+    """Next local ``hour:minute`` strictly after ``now`` (an aware datetime)."""
+    nxt = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    return nxt if nxt > now else nxt + timedelta(days=1)
+
+
 async def nightly_check_loop(corpus_dir: Path, *, hour: int, rps: float, budget: int,
                              tz_name: str = "Asia/Tashkent") -> None:  # pragma: no cover - long-running
     """In-process nightly *check* (no text is changed on a live server): records which acts changed on lex.uz so
     ``/api/health`` shows how fresh the corpus is. Updates are applied by ``lex-agent sync`` + a redeploy."""
-    from zoneinfo import ZoneInfo
-
-    tz = ZoneInfo(tz_name)
+    tz = local_zone(tz_name)
     while True:
         now = datetime.now(tz)
-        nxt = now.replace(hour=hour, minute=7, second=0, microsecond=0)
-        if nxt <= now:
-            nxt += timedelta(days=1)
-        await asyncio.sleep((nxt - now).total_seconds())
-        sync = LexSync(corpus_dir, rps=rps, max_requests=budget)
+        await asyncio.sleep((next_check_at(now, hour) - now).total_seconds())
+        sync = None
         try:
+            sync = LexSync(corpus_dir, rps=rps, max_requests=budget)
             report = await sync.run(check_only=True)
             logger.info("Nightly lex.uz check: %s checked, %s changed, %s failed", report.checked,
                         report.updated + report.added, report.failed)
         except Exception as exc:
             logger.warning("Nightly lex.uz check failed: %s", exc)
         finally:
-            await sync.close()
+            if sync is not None:
+                await sync.close()

@@ -238,3 +238,38 @@ async def test_follow_up_question_uses_previous_question_as_context(tmp_path: Pa
                                context="Yillik ta'til necha kun?")
     assert orch._follow_up_context(long_q) is None
     await rt.close()
+
+
+def test_internal_errors_get_a_friendly_message_in_the_question_language(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from lex_agent.retrieval.hybrid_retriever import HybridLegalRetriever
+
+    _write_corpus(tmp_path)
+    monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("CORPUS_DIR", str(tmp_path / "corpus"))
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("LLM_API_KEY", "")
+    monkeypatch.setenv("LEX_UZ_ENABLE_LIVE_FALLBACK", "false")
+    get_settings.cache_clear()
+    from lex_agent.api.app import create_app
+
+    async def broken_retrieve(self: Any, *_: Any, **__: Any) -> Any:
+        raise IndexError("string index out of range")
+
+    try:
+        with TestClient(create_app()) as client:
+            monkeypatch.setattr(HybridLegalRetriever, "retrieve", broken_retrieve)
+            resp = client.post("/api/ask", json={"query": "Ijara shartnomasini muddatidan oldin bekor qilish mumkinmi?"})
+            assert resp.status_code == 500
+            body = resp.json()
+            assert body["code"] == "internal_error" and body["detail"].startswith("Kechirasiz")
+            assert "index" not in body["detail"]
+
+            with client.stream("POST", "/api/ask/stream", json={"query": "Можно ли досрочно расторгнуть договор аренды?"}) as r:
+                assert r.status_code == 200
+                events = [json.loads(line[5:]) for line in r.iter_lines() if line.startswith("data:")]
+            assert events[-1]["type"] == "error" and events[-1]["code"] == "internal_error"
+            assert events[-1]["detail"].startswith("Извините") and "index" not in events[-1]["detail"]
+    finally:
+        get_settings.cache_clear()

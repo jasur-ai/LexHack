@@ -63,6 +63,8 @@ def max_edits(word: str) -> int:
     return 1 if n <= 6 else 2
 
 
+_MISSING = object()
+
 class SpellingCorrector:
     """Nearest-corpus-word lookup, bucketed by (first letter, length) for speed."""
 
@@ -122,8 +124,9 @@ class SpellingCorrector:
         self._ensure()
         if word in self._known:
             return None
-        if word in self._cache:
-            return self._cache[word]
+        cached = self._cache.get(word, _MISSING)  # one lookup: another thread may clear the cache in between
+        if cached is not _MISSING:
+            return cached
         edits = max_edits(word)
         best: tuple[int, int, int, str] | None = None
         if edits and self._buckets:

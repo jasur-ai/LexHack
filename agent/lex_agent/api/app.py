@@ -45,9 +45,23 @@ from lex_agent.models import (
     TranslationCompareRequest,
     TranslationCompareResponse,
 )
+from lex_agent.language.transliterator import detect_language
 from lex_agent.runtime import AgentRuntime
 
 logger = logging.getLogger(__name__)
+
+# Unexpected failures never leak internal exception text to the user; the details go to the server log.
+_INTERNAL_ERROR = {
+    Language.UZ_LATN: "Kechirasiz, javobni tayyorlashda ichki xatolik yuz berdi. Iltimos, savolni qayta yuboring.",
+    Language.UZ_CYRL: "Кечирасиз, жавобни тайёрлашда ички хатолик юз берди. Илтимос, саволни қайта юборинг.",
+    Language.RU: "Извините, при подготовке ответа произошла внутренняя ошибка. Пожалуйста, отправьте вопрос ещё раз.",
+    Language.EN: "Sorry, something went wrong while preparing the answer. Please send the question again.",
+}
+
+
+def _internal_error_text(req: AgentQueryRequest) -> str:
+    lang = req.response_language or detect_language(req.query)
+    return _INTERNAL_ERROR.get(lang, _INTERNAL_ERROR[Language.UZ_LATN])
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
@@ -88,6 +102,12 @@ def create_app() -> FastAPI:
     async def lifespan(_app: FastAPI):
         rt = AgentRuntime.build()
         runtime_holder["rt"] = rt
+        # A bounded pool for the CPU-bound search steps (asyncio.to_thread): fairness under load, bounded memory
+        from concurrent.futures import ThreadPoolExecutor
+
+        asyncio.get_running_loop().set_default_executor(
+            ThreadPoolExecutor(max_workers=rt.settings.agent_threads, thread_name_prefix="lex-search")
+        )
         logging.basicConfig(level=getattr(logging, rt.settings.log_level.upper(), logging.INFO))
         # Offline knowledge base: index the bundled open corpora once (seconds; skipped when unchanged)
         if rt.settings.auto_build_index:
@@ -267,9 +287,15 @@ def create_app() -> FastAPI:
         return {"sources": items, "total_chunks": rt.bm25_store.count(), "languages": rt.bm25_store.language_counts()}
 
     @app.post("/api/ask", response_model=AgentResponse)
-    async def ask_legal_question(req: AgentQueryRequest) -> AgentResponse:
+    async def ask_legal_question(req: AgentQueryRequest) -> AgentResponse | JSONResponse:
         rt = get_rt()
-        return await rt.orchestrator.answer(req)
+        try:
+            return await rt.orchestrator.answer(req)
+        except (AuthenticationError, PermissionError, HTTPException):
+            raise
+        except Exception:
+            logger.exception("Error during legal Q&A")
+            return JSONResponse(status_code=500, content={"detail": _internal_error_text(req), "code": "internal_error"})
 
     @app.post("/api/ask/stream")
     async def ask_legal_question_stream(req: AgentQueryRequest) -> StreamingResponse:
@@ -290,10 +316,10 @@ def create_app() -> FastAPI:
                     yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
             except (AuthenticationError, PermissionError) as exc:
                 yield f"data: {json.dumps({'type': 'error', 'detail': str(exc)}, ensure_ascii=False)}\n\n"
-            except Exception as exc:
+            except Exception:
                 logger.exception("Error during streaming legal Q&A")
-                msg = str(exc).strip() or f"{type(exc).__name__}: AI xizmati bilan ulanishda kechikish yuz berdi, iltimos qayta urinib ko'ring."
-                yield f"data: {json.dumps({'type': 'error', 'detail': msg}, ensure_ascii=False)}\n\n"
+                payload = {"type": "error", "detail": _internal_error_text(req), "code": "internal_error"}
+                yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
         return StreamingResponse(
             event_gen(),

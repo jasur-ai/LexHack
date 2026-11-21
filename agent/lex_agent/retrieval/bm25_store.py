@@ -171,8 +171,9 @@ class BM25Store:
     # doc filter token
     _WEIGHTS = (1.2, 4.0, 2.0, 4.0, 1.5, 1.0, 0.0)
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path, *, reader_mmap_mb: int = 256) -> None:
         self.db_path = db_path
+        self.reader_mmap_mb = max(0, int(reader_mmap_mb))
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._fts_ready = False
         self._df_cache: dict[str, int] = {}
@@ -182,20 +183,23 @@ class BM25Store:
         self._init_schema()
 
     # ------------------------------------------------------------------ schema & connections
-    def _connect(self) -> sqlite3.Connection:
+    def _connect(self, *, cache_kib: int = 32000, mmap_mb: int = 256) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
-        conn.execute("PRAGMA cache_size=-32000")
-        conn.execute("PRAGMA mmap_size=268435456")
+        conn.execute(f"PRAGMA cache_size=-{int(cache_kib)}")
+        # Memory-mapped reads come straight from the OS page cache (shared by all connections, counted once by
+        # cgroup memory limits; the RSS figure counts each mapping separately). SQLITE_READER_MMAP_MB=0 turns it off.
+        conn.execute(f"PRAGMA mmap_size={int(mmap_mb) * 1024 * 1024}")
         return conn
 
     def _reader(self) -> sqlite3.Connection:
         """Per-thread connection for read-only queries (avoids reconnecting on every lookup)."""
         conn = getattr(self._local, "conn", None)
         if conn is None:
-            conn = self._connect()
+            # One small private page cache per worker thread (the OS page cache is shared underneath)
+            conn = self._connect(cache_kib=8000, mmap_mb=self.reader_mmap_mb)
             self._local.conn = conn
         return conn
 
@@ -443,7 +447,15 @@ class BM25Store:
     def doc_freqs(self, terms: Iterable[str]) -> dict[str, int]:
         """Number of chunks containing each term (cached)."""
         wanted = [t for t in dict.fromkeys(terms) if t]
-        missing = [t for t in wanted if t not in self._df_cache]
+        cache = self._df_cache
+        out: dict[str, int] = {}
+        missing: list[str] = []
+        for t in wanted:
+            df = cache.get(t)  # a single lookup stays consistent when another thread resets the cache
+            if df is None:
+                missing.append(t)
+            else:
+                out[t] = df
         if missing:
             with _nullctx(self._reader()) as conn:
                 found: dict[str, int] = {}
@@ -452,11 +464,11 @@ class BM25Store:
                     q = f"SELECT term, doc FROM chunks_vocab WHERE term IN ({','.join('?' * len(part))})"
                     found.update({r["term"]: int(r["doc"]) for r in conn.execute(q, part)})
             with self._df_lock:
-                for t in missing:
-                    self._df_cache[t] = found.get(t, 0)
                 if len(self._df_cache) > 200_000:
                     self._df_cache.clear()
-        return {t: self._df_cache.get(t, 0) for t in wanted}
+                for t in missing:
+                    out[t] = self._df_cache[t] = found.get(t, 0)
+        return {t: out[t] for t in wanted}
 
     def idf(self, terms: Iterable[str]) -> dict[str, float]:
         n = self.total_docs()

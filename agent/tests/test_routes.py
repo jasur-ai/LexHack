@@ -127,3 +127,14 @@ async def test_reply_follows_the_question_language(rt: AgentRuntime) -> None:
     assert ru.route == "greeting" and ru.response_language.value == "ru"
     en, _ = await _ask(rt, "Hello")
     assert en.route == "greeting" and en.response_language.value == "en"
+
+
+async def test_cached_answers_replay_the_same_event_sequence(rt: AgentRuntime) -> None:
+    await _ask(rt, "rahmat")
+    again, events = await _ask(rt, "rahmat")
+    assert again.mode == "cache" and _steps(events) == [1, 5]  # a direct route stays direct when cached
+    await _ask(rt, "Yillik mehnat ta'tili necha kun?")
+    legal, events = await _ask(rt, "Yillik mehnat ta'tili necha kun?")
+    types = [e["type"] for e in events]
+    assert legal.mode == "cache" and _steps(events) == [1, 2, 3, 4, 5]
+    assert types.index("sources") < types.index("token") < types.index("done")

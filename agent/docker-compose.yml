@@ -1,32 +1,37 @@
+# Local / self-hosted run of the legal agent (agent/ only).
+#
+#   cp .env.example .env    # put GEMINI_API_KEY there (optional: without a key answers are extractive)
+#   docker compose up --build
+#
+# Open http://localhost:8000 (UI) or http://localhost:8000/docs (API).
 services:
-  qdrant:
-    image: qdrant/qdrant:v1.12.4
-    container_name: lex-agent-qdrant
-    restart: unless-stopped
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - qdrant_storage:/qdrant/storage
-
-  lex-agent-api:
+  lex-agent:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: lex-agent-api
+    image: lex-agent:latest
+    container_name: lex-agent
     restart: unless-stopped
-    depends_on:
-      - qdrant
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
-      - QDRANT_MODE=remote
-      - QDRANT_URL=http://qdrant:6333
-      - DATA_DIR=/app/data
+      PORT: "8000"
+      WEB_CONCURRENCY: "1"
+      # Nightly in-process freshness check against lex.uz (reports in /api/health; changes no text)
+      LEX_SYNC_CHECK_ENABLED: "${LEX_SYNC_CHECK_ENABLED:-false}"
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      # documents ingested at runtime (admin ingest / live lex.uz lookups) survive restarts
+      - lex-agent-index:/app/data/.cache
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
 
 volumes:
-  qdrant_storage:
+  lex-agent-index:

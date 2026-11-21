@@ -233,3 +233,32 @@ def test_figures_cards_never_outrank_the_law_for_non_figure_questions() -> None:
     assert [i.chunk.canonical_id for i in HybridLegalRetriever._demote_figures(plain, list(items))] == ["3517337", FACTS_DOC_ID]
     figures = QueryAnalysis(query="What is the minimum wage?", language="en", terms=["minimum", "wage"])
     assert HybridLegalRetriever._demote_figures(figures, list(items))[0].chunk.canonical_id == FACTS_DOC_ID
+
+
+def _stem_in_threads(words_ru: list[str], words_en: list[str], workers: int = 8, rounds: int = 16):
+    import sys
+    from concurrent.futures import ThreadPoolExecutor
+
+    from lex_agent.language.textproc import stem_en, stem_ru
+
+    def run(_):  # bypass the lru caches so every call really reaches a stemmer object
+        return [stem_ru.__wrapped__(w) for w in words_ru], [stem_en.__wrapped__(w) for w in words_en]
+
+    old = sys.getswitchinterval()
+    sys.setswitchinterval(1e-6)  # force frequent thread switches inside stemWord
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            return list(pool.map(run, range(rounds)))
+    finally:
+        sys.setswitchinterval(old)
+
+
+def test_stemmers_are_safe_to_use_from_search_worker_threads():
+    from lex_agent.language.textproc import stem_en, stem_ru
+
+    ru = ["увольнение", "уволили", "работодатель", "заработной", "отпускные", "алименты", "наследство",
+          "превышение", "скорости", "штрафа", "жилищного", "потребителя", "договора", "расторжении"] * 40
+    en = ["dismissed", "employer", "wages", "inheritance", "speeding", "consumer", "contracts", "termination"] * 40
+    expected = ([stem_ru.__wrapped__(w) for w in ru], [stem_en.__wrapped__(w) for w in en])
+    for got in _stem_in_threads(ru, en):
+        assert got == expected

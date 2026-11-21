@@ -18,6 +18,7 @@ word families collapse to the same key.
 from __future__ import annotations
 
 import re
+import threading
 import unicodedata
 from functools import lru_cache
 
@@ -25,12 +26,20 @@ from lex_agent.language.transliterator import cyrillic_to_latin
 
 try:  # pragma: no cover - import guard exercised implicitly
     import snowballstemmer
-
-    _RU_STEMMER = snowballstemmer.stemmer("russian")
-    _EN_STEMMER = snowballstemmer.stemmer("english")
 except Exception:  # pragma: no cover - the dependency is declared, this is only a safety net
-    _RU_STEMMER = None
-    _EN_STEMMER = None
+    snowballstemmer = None
+
+# Snowball stemmer objects keep the word being stemmed in instance state, so one shared instance used from the
+# search worker threads corrupts stems (or raises IndexError). Every thread gets its own instances.
+_STEMMERS = threading.local()
+
+
+def _stemmer(language: str):
+    stemmer = getattr(_STEMMERS, language, None)
+    if stemmer is None and snowballstemmer is not None:
+        stemmer = snowballstemmer.stemmer(language)
+        setattr(_STEMMERS, language, stemmer)
+    return stemmer
 
 _APOS_RE = re.compile(r"[ʻʼ‘’`´ʹʽˈ'ʿ]")
 _CYR_RE = re.compile(r"[\u0400-\u04ff]")
@@ -222,9 +231,10 @@ _RU_VOWELS = set("аеёиоуыэюя")
 @lru_cache(maxsize=200_000)
 def stem_ru(token: str) -> str:
     """Snowball stem plus light derivational folding (увольнение / уволили / увольняют -> увол)."""
-    if _RU_STEMMER is None or len(token) <= 3 or not token.isalpha():
+    stemmer = _stemmer("russian") if len(token) > 3 and token.isalpha() else None
+    if stemmer is None:
         return token
-    stem = _RU_STEMMER.stemWord(token).replace("ь", "").replace("ъ", "")
+    stem = stemmer.stemWord(token).replace("ь", "").replace("ъ", "")
     for _ in range(2):
         for suf in _RU_DERIV:
             if stem.endswith(suf) and len(stem) - len(suf) >= 4:
@@ -241,9 +251,10 @@ def stem_ru(token: str) -> str:
 
 @lru_cache(maxsize=50_000)
 def stem_en(token: str) -> str:
-    if _EN_STEMMER is None or len(token) <= 3 or not token.isalpha():
+    stemmer = _stemmer("english") if len(token) > 3 and token.isalpha() else None
+    if stemmer is None:
         return token
-    return _EN_STEMMER.stemWord(token)
+    return stemmer.stemWord(token)
 
 
 def uz_latin_fold(text: str) -> str:

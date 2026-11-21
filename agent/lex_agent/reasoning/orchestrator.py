@@ -209,21 +209,13 @@ class LegalAgentOrchestrator:
         cache_key = self._cache_key(request, style)
         cached: AgentResponse | None = self.cache.get(cache_key)
         if cached is not None:
-            for step_no, label in enumerate(
-                ["Savol tahlil qilindi", "Mos normalar topildi", "Havolalar tekshirildi", "Normalar saralandi"],
-                start=1,
-            ):
-                yield {"type": "step", "step": step_no, "total": 5, "status": "done", "label": label, "elapsed_ms": _elapsed_ms()}
-            yield {"type": "sources", "sources": [src.model_dump() for src in cached.sources]}
-            yield {"type": "token", "text": cached.answer}
-            yield {"type": "step", "step": 5, "total": 5, "status": "done", "label": "Tayyor (keshdan)", "elapsed_ms": _elapsed_ms()}
-            response = cached.model_copy(update={"mode": "cache", "elapsed_ms": _elapsed_ms()})
-            yield {"type": "done", "response": response, "elapsed_ms": _elapsed_ms()}
+            for ev in self._replay_cached(cached, "Tayyor (keshdan)", _elapsed_ms):
+                yield ev
             return
 
         # ROUTING: decide what kind of turn this is before spending time on retrieval
         follow_up_context = self._follow_up_context(request)
-        qa = self.retriever.analyze(request.query)
+        qa = await asyncio.to_thread(self.retriever.analyze, request.query)
         response_lang = request.response_language or self._lang(qa.language, request.query)
         route = classify(request.query, language=qa.language, concepts=qa.concepts)
         if "injection" in route.flags:
@@ -231,7 +223,7 @@ class LegalAgentOrchestrator:
             cleaned = strip_injection(request.query, qa.language)
             if cleaned and cleaned != request.query:
                 request = request.model_copy(update={"query": cleaned})
-                qa = self.retriever.analyze(cleaned)
+                qa = await asyncio.to_thread(self.retriever.analyze, cleaned)
                 route = classify(cleaned, language=qa.language, concepts=qa.concepts)
                 route.flags.add("injection")
             elif not cleaned:
@@ -240,7 +232,7 @@ class LegalAgentOrchestrator:
         if follow_up_context and route.kind == "legal":
             # A short follow-up ("2 ta bola bo'lsa-chi?") inherits the topic of the previous question
             combined = f"{follow_up_context} {request.query}"
-            qa_topic = self.retriever.analyze(combined)
+            qa_topic = await asyncio.to_thread(self.retriever.analyze, combined)
             route_combined = classify(combined, language=qa_topic.language, concepts=qa_topic.concepts)
             if route_combined.kind == "calculation":
                 route = route_combined
@@ -248,12 +240,8 @@ class LegalAgentOrchestrator:
         if sim_key:
             similar = self.cache.get(sim_key)
             if similar is not None:
-                yield {"type": "step", "step": 5, "total": 5, "status": "done", "label": "Tayyor (oʻxshash savol keshidan)",
-                       "elapsed_ms": _elapsed_ms()}
-                yield {"type": "sources", "sources": [src.model_dump() for src in similar.sources]}
-                yield {"type": "token", "text": similar.answer}
-                response = similar.model_copy(update={"mode": "cache", "elapsed_ms": _elapsed_ms()})
-                yield {"type": "done", "response": response, "elapsed_ms": _elapsed_ms()}
+                for ev in self._replay_cached(similar, "Tayyor (oʻxshash savol keshidan)", _elapsed_ms):
+                    yield ev
                 return
 
         if route.kind in ("greeting", "thanks", "farewell", "about", "off_topic"):
@@ -1156,6 +1144,26 @@ class LegalAgentOrchestrator:
         payload = {"kind": result.kind, "ok": result.ok, "missing": result.missing, "values": result.values,
                    "basis": [f"{d}:{a}" for d, a in result.basis if d], "facts": result.facts}
         return sections, evidence, payload
+
+    # Routes answered without retrieval steps 2-4 (their stream has steps 1 and 5 only)
+    _DIRECT_ROUTES = frozenset({"greeting", "thanks", "farewell", "about", "off_topic", "figures", "template",
+                                "calculation", "clarify"})
+
+    def _replay_cached(self, cached: AgentResponse, label: str, elapsed: Any) -> list[dict[str, Any]]:
+        """A cached answer replayed with the same event sequence as a fresh one (steps -> sources -> token -> done)."""
+        direct = (cached.route or "legal") in self._DIRECT_ROUTES
+        labels = ["Savol tahlil qilindi"] if direct else [
+            "Savol tahlil qilindi", "Mos normalar topildi", "Havolalar tekshirildi", "Normalar saralandi"]
+        events: list[dict[str, Any]] = [
+            {"type": "step", "step": n, "total": 5, "status": "done", "label": lab, "elapsed_ms": elapsed()}
+            for n, lab in enumerate(labels, start=1)
+        ]
+        events.append({"type": "sources", "sources": [src.model_dump() for src in cached.sources]})
+        events.append({"type": "token", "text": cached.answer})
+        events.append({"type": "step", "step": 5, "total": 5, "status": "done", "label": label, "elapsed_ms": elapsed()})
+        response = cached.model_copy(update={"mode": "cache", "elapsed_ms": elapsed()})
+        events.append({"type": "done", "response": response, "elapsed_ms": elapsed()})
+        return events
 
     async def _finish_direct(
         self,

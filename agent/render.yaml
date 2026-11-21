@@ -1,0 +1,38 @@
+# Render Blueprint for the legal agent only (agent/). In Render: New -> Blueprint -> this repository,
+# Blueprint path: agent/render.yaml. Then set GEMINI_API_KEY (optional: without it answers are extractive).
+services:
+  - type: web
+    name: lex-agent
+    runtime: docker
+    rootDir: agent
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter          # 0.5 CPU / 512 MB; the free plan works too but sleeps after 15 minutes idle
+    region: frankfurt
+    healthCheckPath: /api/health
+    autoDeploy: true       # merging the nightly lex.uz sync PR redeploys with fresh texts
+    envVars:
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gemini-3.8-flash
+      - key: LLM_FALLBACK_MODEL
+        value: gemini-2.5-flash
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: LEX_UZ_ENABLE_LIVE_FALLBACK
+        value: "true"
+      - key: LEX_SYNC_CHECK_ENABLED
+        value: "false"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: AGENT_THREADS
+        value: "4"
+      - key: SQLITE_READER_MMAP_MB   # 0 keeps the process RSS ~230 MB on a 512 MB instance
+        value: "0"
+      - key: LOG_LEVEL
+        value: INFO
