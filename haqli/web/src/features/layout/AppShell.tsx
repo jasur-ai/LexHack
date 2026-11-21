@@ -42,6 +42,7 @@ import { haptics } from "../../tma/sdk";
 import { Button } from "../../ui/Button";
 import { Sheet } from "../../ui/Sheet";
 import { Banner } from "../../ui/Banner";
+import { AgentView } from "../chat/AgentView";
 
 export function HaqliLogo({ className = "h-7 w-auto" }: { className?: string }) {
   return (
@@ -112,6 +113,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const setUser = useAppStore((s) => s.setUser);
   const pushToast = useAppStore((s) => s.pushToast);
   const navHidden = useAppStore((s) => s.navHidden);
+  const servicesCategory = useAppStore((s) => s.servicesCategory);
+  const setServicesCategory = useAppStore((s) => s.setServicesCategory);
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -128,6 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [paymentInfoOpen, setPaymentInfoOpen] = useState(false);
   const [mobileAppOpen, setMobileAppOpen] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const userInitials = (name?: string) => {
     if (!name) return "F";
@@ -419,9 +423,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setServicesSectionOpen((v) => !v)}
-              className="w-full flex items-center justify-between px-2.5 py-1 text-left text-xs font-bold text-slate-700 hover:text-slate-900 cursor-pointer group"
+              className="w-full flex items-center justify-between px-2.5 py-1.5 text-left text-xs font-bold text-slate-800 hover:text-slate-900 cursor-pointer group"
             >
-              <span className="flex items-center gap-1.5 uppercase text-[11px] tracking-wider text-slate-500 group-hover:text-slate-800">
+              <span className="flex items-center gap-1.5 uppercase text-[11px] tracking-wider text-slate-600 group-hover:text-slate-900 font-bold">
                 Xizmatlar
               </span>
               <ChevronDown
@@ -432,44 +436,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             {servicesSectionOpen && (
-              <div className="mt-1 space-y-0.5">
+              <div className="mt-1 divide-y divide-slate-100/90 rounded-xl border border-slate-100 bg-white overflow-hidden shadow-2xs">
                 {/* 1. Ommabop xizmatlar */}
                 <button
                   type="button"
                   onClick={() => {
                     haptics.selection();
                     setActiveTab("services");
+                    setServicesCategory("ommabop");
                     onItemClick?.();
                   }}
-                  className={`w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
-                    activeTab === "services"
-                      ? "bg-blue-50 text-[#0074ff] font-semibold border border-blue-100"
-                      : "text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "ommabop"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <Award className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Award className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Ommabop xizmatlar</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-emerald-100 text-emerald-800">
-                    Top
-                  </span>
                 </button>
 
                 {/* 2. Sohalar (5 ta Himoya Moduli) */}
-                <div className="pt-1">
+                <div>
                   <button
                     type="button"
-                    onClick={() => setSohalarOpen((v) => !v)}
-                    className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-1.5 text-left text-slate-700 hover:bg-slate-50 font-medium cursor-pointer"
+                    onClick={() => {
+                      haptics.selection();
+                      setSohalarOpen((v) => !v);
+                      setActiveTab("services");
+                      setServicesCategory("sohalar");
+                    }}
+                    className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                      activeTab === "services" && servicesCategory === "sohalar"
+                        ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                    }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#0074ff]">
-                        <LayoutGrid className="h-4 w-4" />
-                      </div>
-                      <span className="text-xs font-semibold">Sohalar (5 Modul)</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <LayoutGrid className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
+                      <span className="text-xs truncate">Sohalar</span>
                     </div>
                     <ChevronDown
                       className={`h-3.5 w-3.5 text-slate-400 transition-transform ${
@@ -479,7 +486,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </button>
 
                   {sohalarOpen && (
-                    <div className="pl-3.5 pr-1 py-0.5 ml-3 border-l-2 border-slate-100 space-y-0.5 mt-0.5">
+                    <div className="pl-4 pr-2 py-1 bg-slate-50/50 border-t border-slate-100 space-y-0.5">
                       {desktopModules.map(({ id, num, label, badge, Icon }) => {
                         const active = activeMode === "citizen" && activeTab === id;
                         return (
@@ -495,7 +502,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                             className={`w-full flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors cursor-pointer ${
                               active
                                 ? "bg-blue-50 text-[#0074ff] font-semibold"
-                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                : "text-slate-600 hover:bg-white hover:text-slate-900"
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
@@ -517,20 +524,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
+                    setActiveTab("services");
+                    setServicesCategory("tolov");
                     setPaymentInfoOpen(true);
                     onItemClick?.();
                   }}
-                  className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "tolov"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <CreditCard className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CreditCard className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Xizmatlar uchun to'lov</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-emerald-100 text-emerald-800">
-                    0 so'm boj
-                  </span>
                 </button>
 
                 {/* 4. Arizani tekshirish */}
@@ -538,20 +546,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
+                    setActiveTab("services");
+                    setServicesCategory("tekshirish");
                     openRecognition("verify");
                     onItemClick?.();
                   }}
-                  className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "tekshirish"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <ListChecks className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ListChecks className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Arizani tekshirish</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-slate-100 text-slate-500">
-                    QR Muhr
-                  </span>
                 </button>
 
                 {/* 5. Joylar xaritasi */}
@@ -559,20 +568,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
+                    setActiveTab("services");
+                    setServicesCategory("xarita");
                     setMapOpen(true);
                     onItemClick?.();
                   }}
-                  className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "xarita"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <MapPin className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <MapPin className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Joylar xaritasi</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-slate-100 text-slate-500">
-                    Idoralar
-                  </span>
                 </button>
 
                 {/* 6. Yagona reyestr */}
@@ -580,21 +590,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
+                    setActiveTab("services");
+                    setServicesCategory("reyestr");
                     setProfileTab("history");
                     setProfileOpen(true);
                     onItemClick?.();
                   }}
-                  className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "reyestr"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <FileText className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Yagona reyestr</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-slate-100 text-slate-500">
-                    5 ta
-                  </span>
                 </button>
 
                 {/* 7. Proaktiv va kompozit xizmatlar */}
@@ -602,24 +613,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
-                    setActiveTab("radar");
+                    setActiveTab("services");
+                    setServicesCategory("kompozit");
                     onItemClick?.();
                   }}
-                  className={`w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
-                    activeTab === "radar"
-                      ? "bg-blue-50 text-[#0074ff] font-semibold border border-blue-100"
-                      : "text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "kompozit"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <FileCheck className="h-4 w-4" />
-                    </div>
-                    <span className="text-xs truncate">Proaktiv va kompozit</span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileCheck className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
+                    <span className="text-xs truncate">Proaktiv va kompozit xizmatlar</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-blue-100 text-blue-800">
-                    Avto
-                  </span>
                 </button>
 
                 {/* 8. Mobil ilovalar */}
@@ -627,20 +634,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => {
                     haptics.selection();
+                    setActiveTab("services");
+                    setServicesCategory("mobil");
                     setMobileAppOpen(true);
                     onItemClick?.();
                   }}
-                  className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer text-slate-700 hover:bg-slate-50 font-medium"
+                  className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    activeTab === "services" && servicesCategory === "mobil"
+                      ? "bg-emerald-50/70 text-slate-900 font-semibold"
+                      : "text-slate-700 hover:bg-slate-50/80 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                      <Smartphone className="h-4 w-4" />
-                    </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Smartphone className="h-4.5 w-4.5 shrink-0 text-emerald-500 stroke-[2]" />
                     <span className="text-xs truncate">Mobil ilovalar</span>
                   </div>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-slate-100 text-slate-500">
-                    Bot
-                  </span>
                 </button>
               </div>
             )}
@@ -835,6 +843,32 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
+      {/* VS Code Copilot Style AI Agent Right Side Panel (Desktop) */}
+      {aiPanelOpen && (
+        <aside
+          style={{
+            backgroundColor: "var(--surface)",
+            borderColor: "var(--border)",
+          }}
+          className="hidden lg:flex flex-col w-[390px] xl:w-[440px] shrink-0 border-l min-h-screen sticky top-0 h-screen z-30 shadow-xl overflow-hidden animate-in slide-in-from-right duration-200"
+        >
+          <AgentView onClose={() => setAiPanelOpen(false)} isSidePanel />
+        </aside>
+      )}
+
+      {/* Mobile Right Slide-Over Drawer for AI Agent */}
+      {aiPanelOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setAiPanelOpen(false)}
+          />
+          <aside className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-right duration-200">
+            <AgentView onClose={() => setAiPanelOpen(false)} isSidePanel />
+          </aside>
+        </div>
+      )}
+
       {/* Modern Floating Bottom Navigation Dock (Mobile / Telegram Mini App) */}
       {activeMode === "citizen" && !navHidden && (
         <nav
@@ -948,36 +982,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Sheet>
 
       {/* Floating Quick AI Yuridik Agent Button (Pastki o'ng burchak) */}
-      {activeTab !== "agent" && (
-        <div className="fixed bottom-24 lg:bottom-6 right-4 sm:right-6 z-40">
-          <button
-            type="button"
-            onClick={() => {
-              haptics.impact("medium");
-              setActiveTab("agent");
-            }}
-            className="group flex items-center gap-2.5 sm:gap-3 rounded-full bg-[#0074ff] hover:bg-[#0063db] text-white pl-3.5 sm:pl-4 pr-4 sm:pr-5 py-2.5 sm:py-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 border-white/40"
-            aria-label="AI Yuridik Agent"
-          >
-            <div className="relative flex items-center justify-center">
-              <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-              </span>
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs sm:text-sm font-bold leading-tight flex items-center gap-1.5">
-                AI Yuridik Agent
-                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-blue-100 font-medium leading-tight">
-                24/7 Bepul Huquqiy Yordam
-              </span>
-            </div>
-          </button>
-        </div>
-      )}
+      <div className="fixed bottom-24 lg:bottom-6 right-4 sm:right-6 z-40">
+        <button
+          type="button"
+          onClick={() => {
+            haptics.impact("medium");
+            setAiPanelOpen((v) => !v);
+          }}
+          className={`group flex items-center gap-2.5 sm:gap-3 rounded-full text-white pl-3.5 sm:pl-4 pr-4 sm:pr-5 py-2.5 sm:py-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 ${
+            aiPanelOpen
+              ? "bg-slate-800 hover:bg-slate-700 border-slate-600 shadow-slate-900/30"
+              : "bg-[#0074ff] hover:bg-[#0063db] border-white/40 shadow-blue-500/25"
+          }`}
+          aria-label="AI Yuridik Agent"
+        >
+          <div className="relative flex items-center justify-center">
+            <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
+            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            </span>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-xs sm:text-sm font-bold leading-tight flex items-center gap-1.5">
+              {aiPanelOpen ? "Chatni yopish" : "AI Yuridik Agent"}
+              {!aiPanelOpen && <Sparkles className="h-3.5 w-3.5 text-amber-300" />}
+            </span>
+            <span className="text-[10px] sm:text-[11px] text-blue-100 font-medium leading-tight">
+              {aiPanelOpen ? "O'ng panelda faol" : "24/7 Bepul Huquqiy Yordam"}
+            </span>
+          </div>
+        </button>
+      </div>
 
       {/* User Profile / Login Sheet */}
       <Sheet

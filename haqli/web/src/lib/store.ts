@@ -51,6 +51,7 @@ interface AppState {
   themePref: ThemePref;
   resolvedTheme: "light" | "dark";
   activeTab: NavTab;
+  servicesCategory: string;
   activeMode: UserRole;
   recognitionOpen: boolean;
   recognitionInitialMode: "document" | "receipt" | "id_mrz" | "voice" | "verify";
@@ -65,6 +66,7 @@ interface AppState {
   setThemePref: (pref: ThemePref) => void;
   setResolvedTheme: (theme: "light" | "dark") => void;
   setActiveTab: (tab: NavTab) => void;
+  setServicesCategory: (category: string) => void;
   setActiveMode: (mode: UserRole) => void;
   openRecognition: (mode?: "document" | "receipt" | "id_mrz" | "voice" | "verify") => void;
   closeRecognition: () => void;
@@ -95,6 +97,7 @@ export const useAppStore = create<AppState>((set) => ({
   themePref: initialThemePref(),
   resolvedTheme: "light",
   activeTab: "home",
+  servicesCategory: "ommabop",
   activeMode: "citizen",
   recognitionOpen: false,
   recognitionInitialMode: "document",
@@ -134,6 +137,7 @@ export const useAppStore = create<AppState>((set) => ({
   },
   setResolvedTheme: (resolvedTheme) => set({ resolvedTheme }),
   setActiveTab: (activeTab) => set({ activeTab }),
+  setServicesCategory: (servicesCategory) => set({ servicesCategory }),
   setActiveMode: (activeMode) => set({ activeMode }),
   openRecognition: (mode = "document") => set({ recognitionOpen: true, recognitionInitialMode: mode }),
   closeRecognition: () => set({ recognitionOpen: false }),

@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   User,
+  X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { streamAgentAnswer, type AgentEvent } from "./agentStream";
@@ -222,7 +223,13 @@ function getAutonomousLegalResponse(query: string): {
   };
 }
 
-export function AgentView() {
+export function AgentView({
+  onClose,
+  isSidePanel = false,
+}: {
+  onClose?: () => void;
+  isSidePanel?: boolean;
+} = {}) {
   const { t } = useTranslation();
   const lang = useAppStore((s) => s.lang);
   const user = useAppStore((s) => s.user);
@@ -385,57 +392,103 @@ export function AgentView() {
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div
+      className={
+        isSidePanel
+          ? "h-full flex flex-col justify-between bg-white overflow-hidden text-slate-800"
+          : "space-y-4 animate-in fade-in duration-200"
+      }
+    >
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-3 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/60 dark:text-blue-400">
-              <Bot className="h-3.5 w-3.5" />
-              AI YURIST
-            </span>
-            <Chip tone="success">100% Avtonom</Chip>
+      {isSidePanel ? (
+        <div className="p-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/80 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-xs">
+              <Bot className="h-4 w-4" />
+            </div>
+            <div className="flex flex-col min-w-0 text-left">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-800 truncate">AI Yuridik Agent</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <span className="text-[10px] text-slate-500 truncate">24/7 Avtonom Maslahat</span>
+            </div>
           </div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">AI Yuridik Maslahatchi</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            O'zR kodekslari bo'yicha tezkor, aniq va rasmiy huquqiy javoblar
-          </p>
-        </div>
 
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            setMessages(messages.slice(0, 1));
-          }}
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          <span>Tozalash</span>
-        </Button>
-      </div>
-
-      {/* Suggested Chips Carousel */}
-      <div className="space-y-1.5">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          Tezkor savollar:
-        </span>
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-          {SUGGESTED_QUESTIONS.map((sq, i) => (
+          <div className="flex items-center gap-1">
             <button
-              key={i}
               type="button"
-              disabled={busy}
-              onClick={() => handleSend(sq.text)}
-              className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-[#0074ff] hover:text-[#0074ff] cursor-pointer"
+              onClick={() => setMessages(messages.slice(0, 1))}
+              className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-500 cursor-pointer transition-colors"
+              title="Tozalash"
             >
-              {sq.text}
+              <RotateCcw className="h-3.5 w-3.5" />
             </button>
-          ))}
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-600 cursor-pointer transition-colors"
+                title="Yopish"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-wrap items-start justify-between gap-2 border-b pb-3 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-xs font-bold text-[#0074ff] dark:bg-blue-950/60 dark:text-blue-400">
+                <Bot className="h-3.5 w-3.5" />
+                AI YURIST
+              </span>
+              <Chip tone="success">100% Avtonom</Chip>
+            </div>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">AI Yuridik Maslahatchi</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              O'zR kodekslari bo'yicha tezkor, aniq va rasmiy huquqiy javoblar
+            </p>
+          </div>
 
-      {/* Messages Stream */}
-      <div className="space-y-4 pt-1">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setMessages(messages.slice(0, 1));
+            }}
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Tozalash</span>
+          </Button>
+        </div>
+      )}
+
+      {/* Main chat body scrollable in side panel */}
+      <div className={isSidePanel ? "flex-1 overflow-y-auto p-3 space-y-3" : "space-y-4"}>
+        {/* Suggested Chips Carousel */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Tezkor savollar:
+          </span>
+          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {SUGGESTED_QUESTIONS.map((sq, i) => (
+              <button
+                key={i}
+                type="button"
+                disabled={busy}
+                onClick={() => handleSend(sq.text)}
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 transition-colors hover:border-[#0074ff] hover:text-[#0074ff] cursor-pointer"
+              >
+                {sq.text}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Messages Stream */}
+        <div className="space-y-3 pt-1">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -573,20 +626,29 @@ export function AgentView() {
             )}
           </div>
         ))}
+        </div>
         <div ref={bottomRef} />
       </div>
 
-      {/* Floating Bottom Composer */}
-      <div className="sticky bottom-[calc(var(--safe-bottom)+4.25rem)] lg:bottom-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-3 pb-2 z-20">
+      {/* Floating / Bottom Composer */}
+      <div
+        className={
+          isSidePanel
+            ? "p-2.5 border-t border-slate-200 bg-white shrink-0"
+            : "sticky bottom-[calc(var(--safe-bottom)+4.25rem)] lg:bottom-0 bg-gradient-to-t from-white via-white/95 to-transparent pt-3 pb-2 z-20"
+        }
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg"
+          className={`flex items-center gap-2 rounded-2xl border border-slate-200 bg-white ${
+            isSidePanel ? "p-1.5 shadow-xs" : "p-2 shadow-lg"
+          }`}
         >
           <input
-            className="flex-1 bg-transparent px-3 py-1.5 text-sm outline-none placeholder:text-slate-400 text-[#383838]"
+            className="flex-1 bg-transparent px-2.5 py-1 text-xs sm:text-sm outline-none placeholder:text-slate-400 text-[#383838]"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setNavHidden(true)}
@@ -597,18 +659,18 @@ export function AgentView() {
           <button
             type="button"
             onClick={() => openRecognition("voice")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer"
             aria-label="Voice input"
           >
-            <Mic className="h-4 w-4" />
+            <Mic className="h-3.5 w-3.5" />
           </button>
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-md disabled:opacity-40 cursor-pointer hover:bg-blue-600 transition-colors"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#0074ff] text-white shadow-xs disabled:opacity-40 cursor-pointer hover:bg-blue-600 transition-colors"
             aria-label="Send"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5" />
           </button>
         </form>
       </div>
