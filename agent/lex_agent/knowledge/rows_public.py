@@ -353,7 +353,7 @@ ROWS = [
       "умышленное причинение легкого, средней тяжести и тяжкого телесного повреждения",
       f"{JK}:109,105,104"),
     c("criminal.threat",
-      r"oldirish bilan korkit|oldiraman deb|tahdid kil|korkit(?:di|yap)",
+      r"oldirish bilan korkit|oldiraman de|oldirib kuyaman|tahdid kil|korkit(?:di|yap)|dag.?dag.?a kil",
       r"угроз\w* (?:убийств|насили)|угрожа",
       r"\bthreat(?:en)?\w*\b",
       "o'ldirish yoki zo'rlik ishlatish bilan qo'rqitish",
@@ -495,8 +495,8 @@ ROWS = [
       "нарушение права на труд принуждение к труду",
       f"{JK}:148,148.2;{MJTK}:51;6257288:5"),
     c("criminal.arrest_rights",
-      r"ushlab turish|ushlab (?:olib ketdi|turishdi|kamash)|hibsga ol|kamokka ol|militsiya(?:ga)? olib ket|"
-      r"politsiya(?:ga)? olib ket|zaderj|gumon kilinuvchi",
+      r"ushlab turish|ushlab (?:olib ketdi|turishdi|kamash|oldi|ketdi|olishdi|ketishdi)|ushlash(?:di|ganda)|"
+      r"hibsga ol|kamokka ol|(?:militsiya|politsiya|iib)\w*~(?:olib ket|ushla)|zaderj|gumon kilinuvchi",
       r"задержани|задержал|арест\w* (?:подозреваем|обвиняем)|подозреваем\w*.*прав",
       r"\barrest(?:ed)?\b|\bdetain(?:ed)?\b|\bin custody\b",
       "ushlab turish asoslari va muddati gumon qilinuvchining huquqlari",

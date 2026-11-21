@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -93,6 +95,10 @@ def create_app() -> FastAPI:
             logger.info("Bundled legal corpora index: %s", "up to date" if stats.get("skipped") else stats)
         rt.bm25_store._ensure_fts_synced()
         await rt.llm.warmup()
+        warm_task = None
+        if rt.settings.warmup_on_start:
+            # Speller vocabulary, lexicon, facts and the suggested questions: first real requests are fast
+            warm_task = asyncio.create_task(rt.orchestrator.warm_up())
         logger.info(
             "Lex.uz Legal AI Agent v%s initialized (chunks=%d, qdrant_mode=%s, llm=%s)",
             __version__,
@@ -103,6 +109,8 @@ def create_app() -> FastAPI:
         try:
             yield
         finally:
+            if warm_task is not None and not warm_task.done():
+                warm_task.cancel()
             await rt.close()
 
     app = FastAPI(

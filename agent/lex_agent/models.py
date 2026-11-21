@@ -303,6 +303,10 @@ class VerificationReport(BaseModel):
     repealed_or_amended_warnings: list[str] = Field(default_factory=list)
     translation_discrepancy_warnings: list[str] = Field(default_factory=list)
     confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    checks: dict[str, bool] = Field(
+        default_factory=dict, description="Automatic answer checks: citations, articles, language, length"
+    )
+    warnings: list[str] = Field(default_factory=list, description="Human-readable notes from the answer checks")
 
 
 class HopTrace(BaseModel):
@@ -313,6 +317,13 @@ class HopTrace(BaseModel):
     cross_refs_followed: list[str] = Field(default_factory=list)
     live_lex_fetched: list[str] = Field(default_factory=list)
     chunks_added: int = 0
+
+
+class ChatTurn(BaseModel):
+    """One previous conversation turn."""
+
+    role: Literal["user", "assistant"]
+    content: str = Field(..., max_length=2000)
 
 
 class AgentQueryRequest(BaseModel):
@@ -333,6 +344,12 @@ class AgentQueryRequest(BaseModel):
         max_length=600,
         description="Previous question of the conversation; lets short follow-ups ('What are the deadlines?') "
         "be searched and answered in the right topic.",
+    )
+    history: list[ChatTurn] | None = Field(
+        default=None,
+        max_length=12,
+        description="Optional recent turns (oldest first) for conversation memory; the last user turn is used like "
+        "`context` when `context` is not given.",
     )
 
 
@@ -383,6 +400,12 @@ class AgentResponse(BaseModel):
     sources: list[SourceItem] = Field(default_factory=list)
     mode: str = Field(default="llm", description="llm | extractive | cache")
     elapsed_ms: int = 0
+    route: str = Field(
+        default="legal",
+        description="Turn type: legal | calculation | template | figures | emergency | illegal | greeting | thanks | "
+        "farewell | about | off_topic | clarify | not_found",
+    )
+    calculation: dict[str, Any] | None = Field(default=None, description="Structured calculator result, when used")
 
 
 class ClauseFinding(BaseModel):

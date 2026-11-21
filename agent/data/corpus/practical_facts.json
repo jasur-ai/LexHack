@@ -211,5 +211,19 @@
      "uz": "Qarz shartnomasini notarial tasdiqlash — BHMning 25 foizi.",
      "ru": "Удостоверение договора займа — 25% БРВ.",
      "en": "Notarising a loan agreement: 25% of BHM."}
-  ]
+  ],
+  "holidays": {
+    "fixed": ["01-01", "03-08", "03-21", "05-09", "09-01", "10-01", "12-08"],
+    "fixed_source": "Mehnat kodeksi, 208-modda (lex.uz/docs/6257288)",
+    "movable": [
+      {"date": "2026-03-20", "status": "official", "uz": "Ramazon hayiti", "ru": "Рамазан хайит", "en": "Eid al-Fitr",
+       "source": "Prezident qarori, 18.03.2026"},
+      {"date": "2026-05-27", "status": "official", "uz": "Qurbon hayiti", "ru": "Курбан хайит", "en": "Eid al-Adha",
+       "source": "2026 yil ishlab chiqarish taqvimi"},
+      {"date": "2027-03-10", "status": "tentative", "uz": "Ramazon hayiti (taxminiy)", "ru": "Рамазан хайит (предварительно)",
+       "en": "Eid al-Fitr (tentative)", "source": "Astronomik prognoz; aniq sana Prezident qarori bilan belgilanadi"},
+      {"date": "2027-05-16", "status": "tentative", "uz": "Qurbon hayiti (taxminiy)", "ru": "Курбан хайит (предварительно)",
+       "en": "Eid al-Adha (tentative)", "source": "Astronomik prognoz; aniq sana Prezident qarori bilan belgilanadi"}
+    ]
+  }
 }

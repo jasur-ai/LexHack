@@ -26,7 +26,8 @@ ROWS = [
                  "В какой срок можно обратиться в суд?")),
     c("labour.dismissal.own_will",
       r"oz (?:hohish|xohish|ihtiyor)|ozim(?: hohlab)? (?:ketmokchi|boshamokchi|ariza)|boshamokchi|boshab ket|"
-      r"ishdan ket(?:mokchi|dim|aman|sam)|ariza yozib ket|uvolnyats|po sobstvennom|uvolitsya|ishni tashla",
+      r"ishdan~(?:ket(?:mokchi|dim|aman|sam|ish)|chik(?:mokchi|ish|aman|sam))|ariza yozib ket|uvolnyats|po sobstvennom|"
+      r"uvolitsya|ishni tashla|ishdan (?:kanday kilib )?ketish|ishdan boshash",
       r"по собственному желани|сам\w* уйти|уволиться|увольняюсь|заявлени\w* об увольнени",
       r"\b(?:quit|resign\w*|leave my job)\b",
       "mehnat shartnomasini xodimning tashabbusiga ko'ra bekor qilish ogohlantirish",

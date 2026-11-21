@@ -32,10 +32,11 @@ class SeriesValue:
     url: str
     as_of: date | None = None
 
-    def label(self, unit: str) -> str:
+    def label(self, unit: str, lang: str = "uz") -> str:
         if unit == "%":
             return f"{self.value:g}%"
-        return f"{int(self.value):,}".replace(",", " ") + " so'm"
+        cur = {"ru": "сум", "uz_cyrl": "сўм"}.get(lang, "soʻm")
+        return f"{int(self.value):,}".replace(",", "\u00a0") + f"\u00a0{cur}"
 
 
 def _d(value: str | None) -> date | None:
@@ -50,6 +51,20 @@ class FactsPack:
         self.rules = {r["id"]: r for r in data.get("rules", [])}
         self.deadlines = {d["id"]: d for d in data.get("deadlines", [])}
         self.state_duty = {s["id"]: s for s in data.get("state_duty", [])}
+        hol = data.get("holidays") or {}
+        self.fixed_holidays: set[tuple[int, int]] = {
+            (int(x[:2]), int(x[3:5])) for x in hol.get("fixed", []) if len(x) == 5
+        }
+        self.movable_holidays: dict[date, dict[str, Any]] = {
+            date.fromisoformat(h["date"]): h for h in hol.get("movable", []) if h.get("date")
+        }
+
+    def is_holiday(self, d: date) -> bool:
+        return (d.month, d.day) in self.fixed_holidays or d in self.movable_holidays
+
+    def tentative_holiday(self, d: date) -> dict[str, Any] | None:
+        h = self.movable_holidays.get(d)
+        return h if h and h.get("status") == "tentative" else None
 
     @classmethod
     def empty(cls) -> FactsPack:
@@ -112,7 +127,7 @@ class FactsPack:
         parts: list[str] = []
         for v in spec.get("values", []):
             sv = self._sv(series, v)
-            amount = sv.label(unit)
+            amount = sv.label(unit, key)
             if sv.start and sv.end:
                 period = {"uz": f"{sv.start:%d.%m.%Y}–{sv.end:%d.%m.%Y}", "ru": f"с {sv.start:%d.%m.%Y} по {sv.end:%d.%m.%Y}",
                           "en": f"{sv.start:%d.%m.%Y}–{sv.end:%d.%m.%Y}"}[key]

@@ -209,10 +209,10 @@ ROWS = [
       "перемена фамилии, имени и отчества",
       f"{OK}:226,227,70"),
     c("family.domestic_violence",
-      r"oilaviy zoravon|oilada zoravon|eri(?:m)? ur|hotini(?:ni)? ur|kaltakla|zoravonlik.*(?:oila|er|hotin)|"
-      r"himoya order|tazyik",
-      r"домашн\w* насили|бь[её]т (?:муж|жена)|избива|охранн\w* ордер|защитн\w* ордер",
-      r"\bdomestic violence\b|\bprotection order\b|\bhusband (?:beats|hits)\b",
+      r"oilaviy zoravon|oilada zoravon|\beri(?:m)?~ur(?:di|adi|yap|ish|ayot)|hotini(?:ni)?~ur(?:di|adi|yap)|kaltakla|"
+      r"zoravonlik.*(?:oila|er|hotin)|himoya order|tazyik|meni~(?:uryapti|uradi|urdi|dopposla)",
+      r"домашн\w* насили|бь[её]т (?:муж|жена)|муж бь[её]т|избива|охранн\w* ордер|защитн\w* ордер",
+      r"\bdomestic violence\b|\bprotection order\b|\bhusband (?:beats|hits)\b|\bbeats me\b",
       "oilaviy zo'ravonlik himoya orderini berish",
       "семейное (бытовое) насилие защитный ордер",
       "4494709:23,25,26,4;97664:59.2;111453:126.1"),

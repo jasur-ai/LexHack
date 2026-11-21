@@ -156,7 +156,7 @@ ROWS = [
       "порядок обжалования решений налоговых органов",
       f"{SK}:230,231,233,236"),
     c("tax.evasion",
-      r"solik(?:dan)? (?:koch|yashir|bosh tort|tolamay)|soliklarni tolashdan bosh",
+      r"solik(?:dan)?~(?:koch|yashir|bosh tort|tolamay)|soliklarni tolashdan bosh|solik tolamaslik",
       r"уклонени\w* от уплат\w* налог|неуплат\w* налог",
       r"\btax evasion\b",
       "soliqlar yoki yig'imlarni to'lashdan bo'yin tovlash",
