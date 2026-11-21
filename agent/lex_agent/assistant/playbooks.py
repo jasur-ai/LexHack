@@ -763,6 +763,60 @@ LEADS: dict[str, Lead] = {
         "лет.",
         "Old-age pension: men at 60 with at least 25 years of service, women at 55 with at least 20 years.",
         "112314:7"),
+    # ---------------------------------------------------------------- liability (answers to requests for wrongdoing)
+    "tax.evasion": _l(
+        "Daromadni yashirish yoki soliq toʻlashdan qasddan boʻyin tovlash uchun fuqaroga 15–25 BHM jarima solinadi; "
+        "maʼmuriy jazodan keyin yana sodir etilsa yoki koʻp miqdorda boʻlsa — jinoiy javobgarlik, eng ogʻir holda 7 "
+        "yilgacha ozodlikdan mahrum qilish. Yashirilgan daromad boʻyicha soliq toʻliq toʻlansa, ozodlikni cheklash va "
+        "ozodlikdan mahrum qilish qoʻllanilmaydi.",
+        "За умышленное сокрытие дохода или уклонение от уплаты налогов гражданину грозит штраф 15–25 БРВ; если это "
+        "повторилось после административного взыскания или совершено в крупном размере — уголовная ответственность, в "
+        "самых тяжёлых случаях до 7 лет лишения свободы. При полной уплате налогов на сокрытый доход ограничение и "
+        "лишение свободы не применяются.",
+        "Deliberately hiding income or evading tax costs an individual a fine of 15–25 BHM; if repeated after an "
+        "administrative penalty or done on a large scale it is a crime punishable, in the gravest cases, by up to 7 "
+        "years in prison. If the tax on the hidden income is paid in full, restriction or deprivation of liberty is not "
+        "applied.",
+        "97664:174;111453:184"),
+    "criminal.forgery": _l(
+        "Huquq beradigan yoki majburiyatdan ozod qiladigan rasmiy hujjatni (diplom, maʼlumotnoma, guvohnoma) "
+        "soxtalashtirish yoki sotish — jinoyat: 50–100 BHM jarima yoki axloq tuzatish ishlari, takroran yoki guruh "
+        "boʻlib — 5 yilgacha ozodlikdan mahrum qilish. Soxta hujjatdan bila turib foydalanish ham jazolanadi: 25–50 BHM "
+        "jarimadan 2 yilgacha ozodlikdan mahrum qilishgacha.",
+        "Изготовление, подделка или сбыт официального документа, дающего право или освобождающего от обязанности "
+        "(диплом, справка, удостоверение), — преступление: штраф 50–100 БРВ или исправительные работы, повторно или "
+        "группой — до 5 лет лишения свободы. Использование заведомо подложного документа тоже наказуемо: от штрафа "
+        "25–50 БРВ до 2 лет лишения свободы.",
+        "Making, forging or selling an official document that grants a right or releases from a duty (a diploma, "
+        "certificate or licence) is a crime: a fine of 50–100 BHM or correctional labour, and up to 5 years in prison "
+        "if repeated or done by a group. Knowingly using a forged document is punished too: from a fine of 25–50 BHM "
+        "up to 2 years in prison.",
+        "111453:228", "no"),
+    "public.military_evasion": _l(
+        "Muddatli harbiy yoki muqobil xizmatga chaqiruvdan uzrli sababsiz boʻyin tovlash maʼmuriy jazodan keyin "
+        "takrorlansa — jinoyat: 50 BHMgacha jarima, majburiy jamoat ishlari yoki axloq tuzatish ishlari; oʻzini "
+        "jarohatlash yoki hujjatni soxtalashtirish yoʻli bilan — 3 yilgacha ozodlikdan mahrum qilish. Qonuniy yoʻl — "
+        "oilaviy sharoit, salomatlik yoki oʻqish sababli chaqiruvni kechiktirish yoki salomatligi boʻyicha ozod etish.",
+        "Уклонение без уважительной причины от призыва на срочную военную или альтернативную службу после "
+        "административного взыскания — преступление: штраф до 50 БРВ, обязательные общественные или исправительные "
+        "работы; путём членовредительства или подлога документов — до 3 лет лишения свободы. Законный путь — отсрочка "
+        "по семейным обстоятельствам, здоровью или для учёбы либо освобождение по состоянию здоровья.",
+        "Evading conscription to compulsory military or alternative service without a valid reason, after an "
+        "administrative penalty, is a crime: a fine of up to 50 BHM or community or correctional work; by self-injury "
+        "or forged documents, up to 3 years in prison. The lawful route is a deferral for family circumstances, health "
+        "or studies, or an exemption on health grounds.",
+        "111453:225;78717:21;78717:22"),
+    "procedure.enforcement_evasion": _l(
+        "Sud hujjati yuklagan majburiyatni bajarishdan maʼmuriy jazodan keyin ham boʻyin tovlash — jinoyat: 100 "
+        "BHMgacha jarima, majburiy jamoat ishlari, axloq tuzatish ishlari yoki 1 yilgacha ozodlikdan mahrum qilish. "
+        "Davlat ijrochisi qarzdorni va uning mol-mulkini qidirishni eʼlon qilishi mumkin.",
+        "Уклонение от исполнения судебного акта, продолжаемое после административного взыскания, — преступление: "
+        "штраф до 100 БРВ, обязательные или исправительные работы либо до 1 года лишения свободы. Государственный "
+        "исполнитель может объявить розыск должника и его имущества.",
+        "Evading what a court decision requires, after an administrative penalty, is a crime: a fine of up to 100 BHM, "
+        "community or correctional work, or up to 1 year in prison. The state enforcement officer can order a search "
+        "for the debtor and the debtor's property.",
+        "111453:232;26477:42", "no"),
 }
 
 _LEAD_ALIASES: dict[str, str] = {

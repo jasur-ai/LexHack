@@ -156,9 +156,11 @@ ROWS = [
       "порядок обжалования решений налоговых органов",
       f"{SK}:230,231,233,236"),
     c("tax.evasion",
-      r"solik(?:dan)?~(?:koch|yashir|bosh tort|tolamay)|soliklarni tolashdan bosh|solik tolamaslik",
-      r"уклонени\w* от уплат\w* налог|неуплат\w* налог",
-      r"\btax evasion\b",
+      r"solik(?:dan)?~(?:koch|yashir|bosh tort|tolamay)|soliklarni tolashdan bosh|solik tolamaslik|"
+      r"daromad\w*~(?:yashir|kamaytirib korsat)|solik\w*dan~kutul",
+      r"уклонени\w* от уплат\w* налог|неуплат\w* налог|не платить~налог|(?:скрыть|спрятать|утаить)~доход|"
+      r"(?:уйти|уклониться) от (?:уплаты )?налог",
+      r"\btax evasion\b|\b(?:dodge|dodging|evade|evading|cheat on) (?:my |the )?tax\w*\b|\bhide (?:my )?income\b",
       "soliqlar yoki yig'imlarni to'lashdan bo'yin tovlash",
       "уклонение от уплаты налогов или сборов",
       "111453:184;97664:174"),
@@ -184,6 +186,15 @@ ROWS = [
       "налоговое обязательство права и обязанности налогоплательщиков",
       f"{SK}:86,72,75;{KONST}:63", generic=True),
     # ---------------------------------------------------------------- business
+    c("business.liquidation",
+      r"(?:biznes|firma|kompaniya|korhona|mchj|yatt|yakka tartibdagi tadbirkor|tadbirkorlik faoliyat)\w*~(?:yop|tugat)\w*|"
+      r"yuridik shahs\w*~tugat",
+      r"(?:закрыть|ликвидировать|ликвидаци\w*)~(?:бизнес|фирм|ооо|компани|ип|предпри|юридическ)|прекра\w*~предпринимательск",
+      r"\bclose (?:a |my |the )?(?:business|company|firm)\b|\bliquidat\w+ (?:a |my |the )?(?:company|business|firm)\b|"
+      r"\bwind(?:ing)? up (?:a |my |the )?company\b",
+      "tadbirkorlik sub'yektini tugatish yuridik shaxsni tugatish tartibi",
+      "ликвидация субъекта предпринимательства порядок ликвидации юридического лица",
+      "2006789:49;111189:53,55"),
     c("business.registration",
       r"biznes och|firma och|kompaniya och|korhona och|yuridik shahs(?:ni)? royhat|tadbirkorlik(?:ni)? boshla|"
       r"davlat royhatidan otkaz\w*.*(?:firma|tadbirkor)",
@@ -405,8 +416,8 @@ ROWS = [
     c("rights.information_access",
       r"ahborot ol(?:ish)? huku|davlat organi\w*.*malumot bermay|ochiklik|ahborot erkinlig|"
       r"(?:malumot|ahborot)\w*~(?:bermay|berishdan bosh tort|rad et)",
-      r"доступ\w* к информаци|открытост\w* государствен",
-      r"\baccess to information\b|\bfreedom of information\b",
+      r"доступ\w* к информаци|открытост\w* государствен|прав\w* на (?:получение )?информаци",
+      r"\baccess to information\b|\bfreedom of information\b|\bright to (?:receive |obtain )?information\b",
       "axborot olish kafolatlari va erkinligi davlat organlari faoliyatining ochiqligi",
       "гарантии и свобода доступа к информации открытость деятельности органов",
       "1319:1;2381133:1;6445145:33"),
@@ -487,6 +498,15 @@ ROWS = [
       "saylov huquqi va saylovlarni o'tkazish",
       "избирательное право и проведение выборов",
       f"4386848:1;{KONST}:36;81253:1"),
+    c("rights.official_complaint",
+      r"(?:davlat (?:fukarolik )?hizmatchi|mansabdor|amaldor|chinovnik)\w*~(?:harakat|karor|ustidan)\w*~shikoyat|"
+      r"(?:davlat (?:fukarolik )?hizmatchi|amaldor|chinovnik)\w*~shikoyat",
+      r"жалоб\w*~(?:чиновник|должностн|госслужащ)|жаловаться~(?:чиновник|должностн|госслужащ)|"
+      r"обжал\w*~действи\w*~(?:чиновник|госслужащ)",
+      r"\bcomplain(?:t)? (?:about|against) (?:an? |the )?(?:official|civil servant|public servant)|\bofficial's actions\b",
+      "davlat fuqarolik xizmatchisining g'ayriqonuniy harakatlari ustidan shikoyat qilish va javobgarligi",
+      "обжалование незаконных действий государственного гражданского служащего и его ответственность",
+      f"6145972:14;3336169:21;{KONST}:55"),
     c("rights.state_officials",
       r"mansabdor\w*.*(?:karor|harakat)\w*.*shikoyat|hokim\w*.*shikoyat|davlat organi\w*.*(?:sudga|ustidan)",
       r"обжаловани\w* (?:действий|решений) (?:государствен|должностн)",
@@ -597,9 +617,11 @@ ROWS = [
       "отсрочка и освобождение от призыва альтернативная служба",
       "78717:21,22,37,38"),
     c("public.military_evasion",
-      r"armiyadan kochish|chakiruvdan bosh tort|dezertir|harbiy hizmatdan boyin tovla",
-      r"уклонени\w* от (?:призыв|военн)|дезертир",
-      r"\bdraft evasion\b|\bdesertion\b",
+      r"armiyadan kochish|chakiruvdan bosh tort|dezertir|harbiy hizmatdan boyin tovla|"
+      r"(?:armiya|harbiy hizmat|askarlik|chakiruv)\w*dan~(?:koch|kutul|yashir)\w*",
+      r"уклонени\w* от (?:призыв|военн)|дезертир|откосить|(?:уйти|избежать|отмазаться) от (?:армии|службы|призыва)",
+      r"\bdraft evasion\b|\bdesertion\b|\b(?:dodge|dodging|evade|evading|escape|get out of) (?:the )?"
+      r"(?:draft|military service|conscription|army)\b",
       "harbiy yoki muqobil xizmatdan bo'yin tovlash",
       "уклонение от военной или альтернативной службы",
       "111453:225"),

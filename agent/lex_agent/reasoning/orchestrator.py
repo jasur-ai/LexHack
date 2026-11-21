@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import logging
 import re
 import time
@@ -10,7 +11,7 @@ from collections.abc import AsyncIterator
 from datetime import date
 from typing import Any
 
-from lex_agent.assistant import calculators, replies
+from lex_agent.assistant import calculators, followups, replies
 from lex_agent.assistant import templates as doc_templates
 from lex_agent.assistant.checks import run_checks
 from lex_agent.assistant.entities import extract as extract_entities
@@ -49,6 +50,9 @@ from lex_agent.reasoning.norm_resolver import NormConflictResolver
 from lex_agent.retrieval.hybrid_retriever import HybridLegalRetriever
 
 logger = logging.getLogger(__name__)
+
+# Criminal Code and Code of Administrative Responsibility: where the liability for wrongdoing is set
+_LIABILITY_ACTS = frozenset({"111453", "97664"})
 
 _LANGUAGE_NAMES: dict[Language, str] = {
     Language.UZ_LATN: "Uzbek (Latin script / O'zbek lotin yozuvi)",
@@ -236,6 +240,9 @@ class LegalAgentOrchestrator:
             route_combined = classify(combined, language=qa_topic.language, concepts=qa_topic.concepts)
             if route_combined.kind == "calculation":
                 route = route_combined
+        if route.kind == "illegal":
+            # A request for help with wrongdoing is answered with the liability for it first, then lawful options
+            qa, qa_topic = self._liability_first(qa), self._liability_first(qa_topic)
         sim_key = self._similar_key(request, style, qa, route)
         if sim_key:
             similar = self.cache.get(sim_key)
@@ -248,6 +255,12 @@ class LegalAgentOrchestrator:
             async for ev in self._finish_direct(
                 request, replies.simple_reply(route.kind, response_lang), [], response_lang, route.kind, style,
                 cache_key, t0,
+            ):
+                yield ev
+            return
+        if route.kind == "clarify":  # a bare "help me": ask for the situation instead of guessing a topic
+            async for ev in self._finish_direct(
+                request, replies.simple_reply("help", response_lang), [], response_lang, "clarify", style, None, t0,
             ):
                 yield ev
             return
@@ -918,8 +931,20 @@ class LegalAgentOrchestrator:
                 return True
         return False
 
+    @staticmethod
+    def _liability_first(qa: Any) -> Any:
+        """The analysis with concepts that point to the Criminal or Administrative Code moved to the front."""
+        liable = [m for m in qa.concepts if any(doc in _LIABILITY_ACTS for doc, _ in m.concept.targets)]
+        if not liable or qa.concepts[0] in liable:
+            return qa
+        return dataclasses.replace(qa, concepts=liable + [m for m in qa.concepts if m not in liable])
+
     def _follow_ups_for(self, qa: Any, lang: Language) -> list[str]:
+        """Topic-specific suggestions: the situation's own list, else its legal domain's questions ([] = none)."""
         lk = replies.lang_key(lang)
+        ids = [m.concept.id for m in qa.concepts[:2]]
+        if any(cid in followups.CONCEPT_FOLLOW_UPS for cid in ids):
+            return followups.follow_ups(ids, None, lk)
         for m in qa.concepts[:2]:
             items = m.concept.follow_ru if lk == "ru" else m.concept.follow_uz
             if items and lk in ("uz", "ru"):
@@ -928,7 +953,7 @@ class LegalAgentOrchestrator:
                 from lex_agent.language.transliterator import latin_to_cyrillic
 
                 return [latin_to_cyrillic(x) for x in items]
-        return []
+        return followups.follow_ups(ids, qa.concepts[0].concept.domain if qa.concepts else None, lk)
 
     @staticmethod
     def _calc_hint(qa: Any, lang: Language) -> str | None:

@@ -206,8 +206,9 @@ ROWS = [
       f"{MJTK}:29,288"),
     c("admin.limitation",
       r"mamuriy jazo\w*.*muddat|jarima\w*.*muddati otgan|mamuriy javobgarlik\w*.*muddat",
-      r"срок\w* (?:наложени|давност)\w* административн",
-      None,
+      r"срок\w* (?:наложени|давност)\w* административн|срок\w*~привлечени\w*~административн|давност\w*~административн",
+      r"\btime limit\w* (?:for|on) (?:an )?administrative\b|\blimitation period\w* (?:for|on) (?:an )?administrative\b|"
+      r"\bstatute of limitations? (?:for|on) (?:an )?administrative\b",
       "ma'muriy jazo qo'llanish muddatlari",
       "сроки наложения административного взыскания",
       f"{MJTK}:36,37"),
@@ -311,9 +312,9 @@ ROWS = [
       "вымогательство",
       f"{JK}:165"),
     c("criminal.bribe_give",
-      r"\bpora (?:ber|tak)|pora bergan|pora bersa|vzyatka dal",
-      r"дач\w* взятк|дал\w* взятк|дать взятку",
-      r"\b(?:give|gave|giving|offer\w*) (?:a )?bribe\b",
+      r"\bpora (?:ber|tak)|pora bergan|pora bersa|vzyatka dal|\bpora(?: kanday| kimga| kancha)? (?:beriladi|berilsa|berish kerak|uzat\w*)",
+      r"дач\w* взятк|дал\w* взятк|дать взятку|(?:передать|предложить|занести) взятку",
+      r"\b(?:give|gave|giving|offer\w*|pay) (?:a )?bribe\b|\bbribe (?:a|the) (?:judge|official|officer|police\w*|inspector)\b",
       "pora berish",
       "дача взятки",
       f"{JK}:211,210,212"),
@@ -413,9 +414,14 @@ ROWS = [
       "торговля людьми",
       f"{JK}:135;4953314:1"),
     c("criminal.forgery",
-      r"soht?a hujjat|kalbaki (?:hujjat|pechat|muhr|diplom)|soht?a diplom|hujjat(?:ni)? kalbakilashtir",
-      r"поддельн\w* (?:документ|печат|диплом)|подделк\w* документ",
-      r"\bforg(?:ed|ery)\b|\bfake (?:document|diploma)\b",
+      r"soht?a hujjat|kalbaki (?:hujjat|pechat|muhr|diplom)|soht?a diplom|hujjat(?:ni)? kalbakilashtir|"
+      r"soht?a (?:spravka|malumotnoma|guvohnoma|prava|pasport|imzo|muhr|chek|attestat)|"
+      r"(?:diplom|spravka|malumotnoma|guvohnoma|prava|attestat|sertifikat|kasallik varak)\w*~(?:sotib ol|pulga ol|yasat)\w*",
+      r"поддельн\w* (?:документ|печат|диплом)|подделк\w* документ|подделать|"
+      r"купить~(?:диплом|справк|права|аттестат|больничн|сертификат)|(?:фальшив|липов)\w*~(?:справк|документ|диплом|больничн)",
+      r"\bforg(?:ed|ery)\b|\bfake (?:document|diploma)\b|\bforge (?:a |the )?\w+|"
+      r"\bbuy (?:a )?(?:fake )?(?:diploma|degree|certificate|driving licen[cs]e|sick note)\b|"
+      r"\bfake (?:a )?(?:certificate|sick note|signature|passport)\b",
       "hujjatlar shtamplar muhrlar blankalarni qalbakilashtirish",
       "подделка документов, штампов, печатей, бланков",
       f"{JK}:228,227"),
@@ -519,10 +525,19 @@ ROWS = [
       "himoyachi ishtirok etishi shart bo'lgan hollar himoyachining huquqlari",
       "обязательное участие защитника права защитника",
       f"{JPK}:49,50,51,53;6445145:29"),
+    c("criminal.report",
+      r"jinoyat\w*~(?:ariza|habar)\w*~(?:kayerga|kimga|kanday|beriladi|berish)|(?:kayerga|kimga)~jinoyat\w*~(?:ariza|habar)|"
+      r"jinoyat (?:haki?da|togrisida) ariza|militsiya\w*~ariza\w*~(?:kabul kilmay|olmay)",
+      r"заявлени\w* о преступлени|сообщ\w* о преступлени|куда~(?:подать|обратиться|сообщить)~преступлени",
+      r"\breport(?:ing)? (?:a )?crime\b|\bwhere (?:do|can|should) i report\b",
+      "jinoyat to'g'risidagi ariza va xabarlarni berish va ko'rib chiqish",
+      "заявления и сообщения о преступлении порядок их рассмотрения",
+      f"{JPK}:324,322,329"),
     c("criminal.victim",
       r"jabrlanuvchi|jinoyat(?:dan)? jabr|ariza (?:berdim|yozdim).*(?:militsiya|politsiya)|militsiya(?:ga)? ariza",
       r"потерпевш|заявлени\w* в полици|заявить в полици",
-      r"\bvictim of (?:a )?crime\b|\breport (?:a crime )?to (?:the )?police\b",
+      r"\bvictim of (?:a )?crime\b|\breport (?:a crime )?to (?:the )?police\b|\bvictim(?:'s|s')? rights\b|"
+      r"\brights (?:does|do) (?:a |the )?victims? have\b|\brights of (?:a |the )?victims?\b",
       "jabrlanuvchining huquq va majburiyatlari",
       "права и обязанности потерпевшего",
       f"{JPK}:55,27;4159913:1"),
@@ -596,6 +611,16 @@ ROWS = [
       "общие положения о судебном приказе и требования, по которым он выдается",
       f"{FPK}:170,171,177,181",
       unless_uz=r"evict|landlord|ijara|kochir"),
+    c("procedure.enforcement_evasion",
+      r"(?:mol-?mulk|mulk|pul|mashina|uy|daromad)\w*~(?:sud ijrochi|davlat ijrochi|ijrochi|majburiy ijro|mib)\w*dan~yashir|"
+      r"(?:ijrochi|mib)\w*dan~(?:mol-?mulk|mulk|pul|mashina|uy)\w*~yashir|"
+      r"sud karor\w*~(?:ijro etma|bajarma)slik~(?:yol|usul)",
+      r"(?:спрятать|скрыть|укрыть|переписать)~имуществ\w*~(?:от )?(?:пристав|исполнител|взыскан|арест)|"
+      r"уклон\w* от исполнени\w* (?:решени|судебн)",
+      r"\bhide (?:my )?(?:assets|property|money|car) from (?:the )?(?:bailiffs?|enforcement|creditors?|court)\b",
+      "sud hujjatini ijro etmaslik qarzdorning mol-mulkini qidirish",
+      "неисполнение судебного акта розыск имущества должника",
+      "111453:232;26477:42"),
     c("procedure.enforcement",
       r"majburiy ijro|\bmib\w*|ijro varak|sud karor\w*~(?:ijro|bajarilmay|bajarmay|bajarmadi)|ijro(?:chi)? byuro|"
       r"davlat ijrochi|ispolnitel",

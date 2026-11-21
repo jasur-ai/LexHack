@@ -48,9 +48,13 @@ ROWS = [
       f"{OK}:29,30,31,32"),
     c("family.common_property",
       r"er-? ?hotin\w* (?:umumiy )?mulk|birgalikda orttirilgan|umumiy mol-?mulk|nikoh davrida (?:olingan|sotib)|"
-      r"ajrash\w*.*(?:uy|mashina|mulk|kvartira)|(?:uy|mashina|kvartira|mulk)\w*.*ajrash",
-      r"совместн\w* (?:нажит|собственност\w* супруг)|имуществ\w* супруг|раздел\w* имуществ",
-      r"\bmarital property\b|\bdivision of property\b",
+      r"ajrash\w*.*(?:uy|mashina|mulk|kvartira)|(?:uy|mashina|kvartira|mulk)\w*.*ajrash|"
+      r"(?:uy|mashina|kvartira|mulk|mol-?mulk|pul)\w*~(?:hotin|er|turmush ortog)\w*dan~yashir|"
+      r"(?:hotin|er|turmush ortog)\w*dan~(?:uy|mashina|kvartira|mulk|mol-?mulk|pul)\w*~yashir",
+      r"совместн\w* (?:нажит|собственност\w* супруг)|имуществ\w* супруг|раздел\w* имуществ|"
+      r"(?:скрыть|спрятать|утаить)~(?:имуществ|деньг|квартир|машин|доход)\w*~от (?:жены|мужа|супруг)",
+      r"\bmarital property\b|\bdivision of property\b|"
+      r"\bhide (?:my )?(?:money|assets|property|income|savings) from (?:my )?(?:wife|husband|spouse)\b",
       "er va xotinning umumiy mulki va uni bo'lish ulushlar",
       "общая совместная собственность супругов и ее раздел",
       f"{OK}:23,27,28,25,24"),
@@ -131,9 +135,11 @@ ROWS = [
       f"{OK}:109,110,111;6445145:80"),
     c("family.alimony.debt",
       r"aliment(?:ni)? (?:tolamay|bermay|tolama|bermadi|kochib)|aliment kar[zs]|aliment.*bosh tort|"
-      r"aliment.*(?:javobgar|jarima|kamok)",
-      r"задолженност\w* по алимент|не плат\w* алимент|уклонени\w* от (?:уплаты )?алимент",
-      r"\b(?:unpaid|not paying) (?:alimony|child support)\b",
+      r"aliment.*(?:javobgar|jarima|kamok)|aliment\w*dan~(?:koch|kutul|yashir)\w*",
+      r"задолженност\w* по алимент|не плат\w* алимент|уклонени\w* от (?:уплаты )?алимент|"
+      r"(?:уйти|уклониться|избежать) от (?:уплаты )?алимент",
+      r"\b(?:unpaid|not paying) (?:alimony|child support)\b|"
+      r"\b(?:avoid|avoiding|stop|get out of|dodge) paying (?:alimony|child support)\b",
       "aliment qarzini undirish va aliment to'lashdan bosh tortganlik uchun javobgarlik",
       "взыскание задолженности по алиментам и ответственность за уклонение",
       f"{OK}:139,140,142,116;111453:122;97664:47.4", calc="alimony_debt"),
@@ -217,10 +223,12 @@ ROWS = [
       "перемена фамилии, имени и отчества",
       f"{OK}:226,227,70"),
     c("family.domestic_violence",
-      r"oilaviy zoravon|oilada zoravon|\beri(?:m)?~ur(?:di|adi|yap|ish|ayot)|hotini(?:ni)?~ur(?:di|adi|yap)|kaltakla|"
-      r"zoravonlik.*(?:oila|er|hotin)|himoya order|tazyik|meni~(?:uryapti|uradi|urdi|dopposla)",
-      r"домашн\w* насили|бь[её]т (?:муж|жена)|муж бь[её]т|избива|охранн\w* ордер|защитн\w* ордер",
-      r"\bdomestic violence\b|\bprotection order\b|\bhusband (?:beats|hits)\b|\bbeats me\b",
+      r"oilaviy zoravon|oilada zoravon|\b(?:eri|erim|turmush ortog\w*|kuyov\w*)~(?:ur(?:di|adi|a?yap|ish|ayot|vot|ib)|"
+      r"kaltak|doppos)|hotini(?:ni)?~ur(?:di|adi|a?yap|vot)|kaltakla|"
+      r"zoravonlik.*(?:oila|er|hotin)|himoya order|tazyik|meni~(?:ur(?:a?yap|vot|adi|di|ishyap)|dopposla)",
+      r"домашн\w* насили|бь[её]т (?:муж|жена)|муж\w*~(?:бь[её]т|избил|ударил)|избива|охранн\w* ордер|защитн\w* ордер",
+      r"\bdomestic (?:violence|abuse)\b|\bprotection order\b|\b(?:husband|wife|partner|boyfriend)\b~(?:beats|hits|is beating|hit)\b|"
+      r"\bbeats me\b|\bhits me\b",
       "oilaviy zo'ravonlik himoya orderini berish",
       "семейное (бытовое) насилие защитный ордер",
       "4494709:23,25,26,4;97664:59.2;111453:126.1"),
@@ -308,7 +316,7 @@ ROWS = [
     c("inheritance.mandatory_share",
       r"majburiy ulush|meros(?:dan)? ulush.*(?:bola|ota-?ona|nogiron)|vasiyatnoma.*(?:bola|ona)\w*.*kolmadi",
       r"обязательн\w* дол",
-      r"\bforced heirship\b|\bmandatory share\b",
+      r"\bforced heirship\b|\b(?:mandatory|compulsory|obligatory|forced) share\b",
       "merosdan majburiy ulush olish huquqi",
       "право на обязательную долю в наследстве",
       f"{FK2}:1142,1141"),

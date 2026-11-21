@@ -275,7 +275,8 @@ ROWS = [
       r"propiska|doimiy royhat|vaktincha royhat|yashash joyi\w*.*royhat|royhat(?:ga)? (?:kuy|koy|tush)|"
       r"registratsiya.*(?:uy|kvartira)|(?:uy|kvartira)\w*~royhat",
       r"прописк|регистраци\w* по месту (?:жительства|пребывания)|прописат",
-      r"\bresidence registration\b|\bpropiska\b",
+      r"\bresidence registration\b|\bpropiska\b|\bpermanent (?:residence )?registration\b|"
+      r"\bregister (?:my |a )?(?:permanent )?(?:residence|address|place of residence)\b",
       "yashash joyi va turgan joy bo'yicha ro'yxatdan o'tkazish",
       "регистрация по месту жительства и месту пребывания",
       "7623461:6,20,22,11;106136:51"),

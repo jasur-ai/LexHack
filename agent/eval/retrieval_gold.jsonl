@@ -416,7 +416,7 @@
 {"q": "Uy sotganda soliq to'lanadimi?", "lang": "uz_latn", "expect": [["4674902", ["375", "378"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
 {"q": "Soliq qarzim bor deb bank hisobimni bloklashdi", "lang": "uz_latn", "expect": [["4674902", ["112", "117", "121"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
 {"q": "Налоговый вычет за обучение ребенка", "lang": "ru", "expect": [["4674902", ["380", "378"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
-{"q": "Biznesimni tugatmoqchiman, nima qilish kerak?", "lang": "uz_latn", "expect": [["111189", ["53", "55"]], ["5957612", ["*"]]], "domain": "business", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Biznesimni tugatmoqchiman, nima qilish kerak?", "lang": "uz_latn", "expect": [["111189", ["53", "55"]], ["2006789", ["49"]], ["5957612", ["*"]]], "domain": "business", "typo": false, "split": "dev", "batch": "dev2"}
 {"q": "Davlat xaridlarida qatnashish tartibi", "lang": "uz_latn", "expect": [["5382974", ["*"]]], "domain": "business", "typo": false, "split": "dev", "batch": "dev2"}
 {"q": "Ayollar pensiyaga necha yoshda chiqadi?", "lang": "uz_latn", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev", "batch": "dev2"}
 {"q": "Chet elda ishlagan yillarim stajga qo'shiladimi?", "lang": "uz_latn", "expect": [["112314", ["40", "36", "37"]]], "domain": "social", "typo": false, "split": "dev", "batch": "dev2"}

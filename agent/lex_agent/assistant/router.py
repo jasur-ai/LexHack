@@ -1,9 +1,10 @@
 """Question routing: decide what kind of turn this is before spending time on retrieval.
 
 Kinds: ``greeting``, ``thanks``, ``farewell``, ``about`` (who are you / what can you do / requests for the system
-prompt), ``off_topic``, ``emergency`` (immediate danger: violence, suicide, abduction), ``illegal`` (asks how to
-break the law or evade liability), ``template`` (document samples), ``calculation``, ``figures`` (BHM, minimum
-wage, CB rate) and ``legal`` (everything else). Prompt-injection attempts are flagged (``injection``) and simply
+prompt), ``off_topic``, ``emergency`` (immediate danger: violence, suicide, abduction, fire), ``clarify`` (a bare
+"help me" with no facts), ``illegal`` (asks how to break the law or evade liability; questions about the liability
+itself stay legal), ``template`` (document samples), ``calculation``, ``figures`` (BHM, minimum wage, CB rate) and
+``legal`` (everything else). Prompt-injection attempts are flagged (``injection``) and simply
 treated as text. Matching is done on folded text, so Latin/Cyrillic Uzbek, Russian and English all work.
 """
 
@@ -45,6 +46,58 @@ _EMERGENCY = _rx(r"ozimni oldir|ozimga kasd|joniga kasd|yashagim kelmay|hayotim\
                  r"муж бь[её]т|похитил|изнасилова\w*|"
                  r"помогите\W*(?:срочно|скорее)|kill myself|suicid|want to die|being (?:beaten|attacked)|kidnapp|"
                  r"(?:husband|wife|partner|father) (?:beats|hits|is beating)|threaten\w* to kill|beats me|raped")
+# Violence: a perpetrator or victim word followed (within a few words) by a hitting verb in any tense, on folded Uzbek
+_UZ_PERSON = (r"(?:\b(?:eri|erim|erimni|uni|meni|bizni|seni)\b|\b(?:turmush ortog|ogay ota|ogay ona|kaynona|kaynota|kuyov|"
+              r"sherig|bolam|bolalarim|hotinim|singlim|kizim|oglim|akam|ukam|otam|otasi|onam|onasi|opam)\w*)")
+_UZ_HIT = (r"(?:ur(?:a?yap|vot|ayot|mokda|ishyap|ishvot)\w*|urib (?:tashla|yubor|ket)\w*|urdi\w*|uradi\w*|urishdi\w*|"
+           r"kaltakla\w*|doppos\w*|tep(?:yap|di|adi|ib)\w*)")
+_EMERGENCY_MORE = _rx(
+    _UZ_PERSON + "~" + _UZ_HIT + r"|\b(?:uryap|urayap|urvot|urayot|kaltaklayap|kaltaklayvot|dopposlayap)\w*|"
+    r"\b(?:kizim|oglim|bolam|bolalarim|kelin|singlim|ukam|meni|uni)\w*~ogirla(?:b ket|shdi|di|ndi|yap)\w*|"
+    r"oldiris\w* bilan kork\w*|\b(?:uy|kvartira|bino)\w*~yon(?:yap|ayap|vot|mokda)\w*|yongin chik\w*|gaz\w*~(?:hidi|siz)\w*|"
+    r"\b(?:муж|отец|отчим|сожител|парень|брат|свекр|свекров|сын)\w*~(?:бь[её]т|избива\w*|избил\w*|ударил\w*|душ(?:ит|ил)\w*)|"
+    r"избил\w*|меня~(?:бь[её]т|ударил\w*)|угрож\w*~(?:убийств|убить|расправ)|украл\w*~(?:реб[её]н|дочь|дочку|сына)|"
+    r"\bгорит\b|утечк\w* газа|"
+    r"\b(?:husband|wife|partner|boyfriend|girlfriend|father|stepfather|mother|brother|son|ex)(?:'s|s)?\b~"
+    r"(?:hits?|hitting|beat\w*|punch\w*|chok\w*|kick\w*|abus\w*)\b|"
+    r"\b(?:hit|hits|hitting|beat|beats|beating|punched|choked|kicked|attacked|abusing|abuses) me\b|"
+    r"house is on fire|gas leak|\b(?:muzh|muj)\w*~(?:bet|byot|izbil\w*|udaril\w*)\b"
+)
+# Asking for help with wrongdoing = a wrongful act + a "how / a way to" intent, unless it asks about the liability
+_ILLEGAL_ACT_WEAK = _rx(
+    r"\b(?:solik|daromad)\w*~(?:yashir|koch|kutul|kamaytirib korsat)\w*|aliment\w*dan~(?:koch|kutul|yashir|bosh tort)\w*|"
+    r"\b(?:harbiy hizmat|armiya|askar)\w*~(?:koch|kutul|yashir|bosh tort)\w*|\bpora\w*~(?:ber|uzat)\w*|"
+    r"\b(?:soht?a|kalbaki)\w*~(?:hujjat|diplom|spravka|malumotnoma|guvohnoma|pasport|imzo|muhr|chek|prava)\w*|"
+    r"\b(?:diplom|spravka|malumotnoma|guvohnoma|prava|sertifikat|attestat)\w*~(?:sotib ol|pulga ol)\w*|"
+    r"\b(?:mol-?mulk|mulk|uy|mashina|avtomobil|pul|kvartira)\w*~yashir\w*|"
+    r"(?:спрятать|скрыть|укрыть|переписать)\w*~(?:имуществ|деньг|доход|квартир|машин|актив)|откосить|"
+    r"(?:уклониться|избежать|уйти) от (?:армии|службы|призыва)|купить~(?:диплом|справк|права|аттестат)|"
+    r"(?:фальшив|поддельн)\w*~(?:справк|документ|диплом|паспорт|подпис|печат)|обмануть~(?:налогов|суд|полици|гаи|страхов)|"
+    r"dodge (?:the )?(?:tax|taxes|draft|military)|(?:avoid|get out of|stop) paying (?:child support|alimony|tax\w*)|"
+    r"hide (?:my )?(?:money|income|assets|property) from|buy (?:a )?(?:fake )?(?:diploma|degree|certificate|licen[cs]e)|"
+    r"fake (?:a )?(?:certificate|diploma|sick note|document)|(?:avoid|dodge|escape) (?:military service|the draft|conscription)|"
+    r"cheat (?:on )?(?:my )?tax\w*"
+)
+# "not paying" is lawful in some cases (exemptions), so it needs an explicit "how / which way"
+_ILLEGAL_ACT_STRONG = _rx(r"\b(?:solik|aliment|kredit|karz)\w*~tolamas\w*|не платить~(?:алимент|кредит)")
+_HOW_STRONG = _rx(r"\bkanday|\bkalay|\bkanaka|\busul|\byol(?:i|lari)?\b|\bкак\b|способ|\bhow\b|\bways? to\b")
+_HOW_WEAK = _rx(r"mumkin|bolad|bulad|kerak|можно|\bcan i\b|\bpossible\b")
+# Questions about the liability, or reports of someone else's wrongdoing (complaints, searches, recovery), stay legal
+# Asking for the lawful way ("qonuniy yo'l bilan", "legally") is a legitimate question about exemptions and options
+_LAWFUL = _rx(r"konuniy (?:yol|ravishda|asos)|konun doirasida|legal(?:ly)?\b|lawful(?:ly)?\b|законн\w*|легальн\w*")
+_LIABILITY = _rx(r"javobgar|jazo|jarima|nima bolad|ответствен|наказан|штраф|что будет|liabil|penalt|punish|what happens|"
+                 r"shikoyat|murojaat|habar ber|kidirt|undir|ariza|жалоб|сообщить|заявлени|розыск|взыска|report|complain|sue\b")
+# A bare request for help with no facts at all: ask for the situation instead of guessing a topic
+_VAGUE_HELP = _rx(
+    r"^\W*(?:iltimos\W+)?(?:menga\W+|bizga\W+|sizdan\W+)?(?:(?:yuridik|hukukiy)\W+)?(?:yordam|maslahat|konsultatsiya|komak)\w*"
+    r"(?:\W+(?:bering\w*|ber|bera olasizmi|berasizmi|bera olasanmi|kerak\w*|kere|sorayman|surayman|zarur))?"
+    r"(?:\W+iltimos)?\W*$|"
+    r"^\W*(?:bir\W+)?savol(?:im|imiz)?\W+(?:bor|bor edi|bermokchi\w*|bersam\w*)\W*$|"
+    r"^\W*(?:пожалуйста\W+)?(?:помогите|помоги|нужна помощь|нужна (?:юридическая )?консультация(?: юриста)?|"
+    r"нужен (?:совет|юрист)|подскажите|у меня (?:есть )?вопрос|есть вопрос|вопрос к юристу)(?:\W+пожалуйста)?\W*$|"
+    r"^\W*(?:please\W+)?(?:help(?: me)?(?: please)?|i need (?:some )?help|(?:can|could) you help(?: me)?|"
+    r"i have a (?:legal )?question|i need (?:legal )?advice|need (?:legal )?advice)(?:\W+please)?\W*$"
+)
 _ILLEGAL = _rx(r"(?:solik\w*dan|aliment\w*dan|jarima\w*dan|javobgarlik\w*dan|harbiy hizmat\w*dan)~"
                r"(?:kochish|kochib kutul|kutulish|kutulsa|bosh tort\w*|kochsa) (?:mumkin|yoli|usul|bolad)|"
                r"(?:kanday kilib|kanday|kalay kilib|kanaka kilib|usul\w*)~(?:solik\w*dan koch|soliki?ni? (?:tolama|yashir)|"
@@ -133,7 +186,7 @@ def classify(query: str, *, language: str, concepts: list[ConceptMatch] | None =
         flags.add("injection")
     if not q:
         return Route("greeting", flags=flags)
-    if v.search(_EMERGENCY):
+    if v.search(_EMERGENCY) or v.search(_EMERGENCY_MORE):
         return Route("emergency", flags=flags)
     if v.search(_GREETING):
         return Route("greeting", flags=flags)
@@ -143,7 +196,16 @@ def classify(query: str, *, language: str, concepts: list[ConceptMatch] | None =
         return Route("farewell", flags=flags)
     if v.search(_ABOUT) and not v.replace("bot", "").search(_LEGAL_HINT):
         return Route("about", flags=flags)
-    if v.search(_ILLEGAL):
+    if v.search(_VAGUE_HELP):
+        return Route("clarify", flags=flags)
+    if v.search(_ILLEGAL) or (
+        not v.search(_LIABILITY)
+        and not v.search(_LAWFUL)
+        and (
+            (v.search(_ILLEGAL_ACT_WEAK) and (v.search(_HOW_STRONG) or v.search(_HOW_WEAK)))
+            or (v.search(_ILLEGAL_ACT_STRONG) and v.search(_HOW_STRONG))
+        )
+    ):
         return Route("illegal", flags=flags)
     concepts = concepts or []
     if v.search(_CALC_TOPICS["fine"]):

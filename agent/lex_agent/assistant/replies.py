@@ -116,6 +116,16 @@ _TEXT: dict[str, dict[str, Any]] = {
         "en": ["Describe it in more detail: who, when, which document or amount", "Try the search on lex.uz",
                "Free legal aid: you may qualify for state-funded legal assistance"],
     },
+    "help": {
+        "uz": "Albatta, yordam beraman. Vaziyatingizni oddiy soʻzlar bilan yozing: nima boʻldi, kim bilan (ish beruvchi, "
+              "sotuvchi, turmush oʻrtogʻi, davlat organi), qachon va qanday summa yoki hujjat bor. Masalan:",
+        "uz_cyrl": "Албатта, ёрдам бераман. Вазиятингизни оддий сўзлар билан ёзинг: нима бўлди, ким билан (иш берувчи, "
+                   "сотувчи, турмуш ўртоғи, давлат органи), қачон ва қандай сумма ёки ҳужжат бор. Масалан:",
+        "ru": "Конечно, помогу. Опишите ситуацию простыми словами: что случилось, с кем (работодатель, продавец, супруг, "
+              "госорган), когда и какие есть суммы или документы. Например:",
+        "en": "Of course. Describe your situation in plain words: what happened, with whom (employer, seller, spouse, a "
+              "state body), when, and any amounts or documents. For example:",
+    },
     "clarify": {
         "uz": "Aniq javob berishim uchun biroz batafsilroq yozing:",
         "uz_cyrl": "Аниқ жавоб беришим учун бироз батафсилроқ ёзинг:",
@@ -147,11 +157,11 @@ def text(key: str, lang: Language | str) -> Any:
 
 
 def simple_reply(kind: str, lang: Language | str) -> dict[str, Any]:
-    """Sections for greeting / thanks / farewell / about / off-topic turns."""
+    """Sections for greeting / thanks / farewell / about / off-topic turns and bare requests for help."""
     lk = lang_key(lang)
     sections: dict[str, Any] = {"answer": text(kind, lang), "key_points": [], "steps": [], "caution": "", "follow_ups": []}
     if kind == "about":
         sections["key_points"] = list(text("about_points", lang))
-    if kind in ("greeting", "about", "off_topic", "thanks"):
+    if kind in ("greeting", "about", "off_topic", "thanks", "help"):
         sections["follow_ups"] = list(EXAMPLES.get(lk, EXAMPLES["uz"]))
     return sections

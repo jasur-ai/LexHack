@@ -138,3 +138,11 @@ async def test_cached_answers_replay_the_same_event_sequence(rt: AgentRuntime) -
     types = [e["type"] for e in events]
     assert legal.mode == "cache" and _steps(events) == [1, 2, 3, 4, 5]
     assert types.index("sources") < types.index("token") < types.index("done")
+
+
+async def test_bare_request_for_help_asks_for_the_situation(rt: AgentRuntime) -> None:
+    for query, start in (("menga yordam bering", "Albatta"), ("помогите", "Конечно"), ("help me", "Of course")):
+        resp, events = await _ask(rt, query)
+        assert resp.route == "clarify" and resp.sources == []
+        assert resp.sections.answer.startswith(start) and len(resp.sections.follow_ups) == 3
+        assert _steps(events) == [1, 5]
