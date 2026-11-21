@@ -623,21 +623,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-
-      {/* Sidebar Footer */}
-      <div className="p-3 border-t text-xs space-y-1.5 bg-white" style={{ borderColor: "var(--border)" }}>
-        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-          <span>1 BHM (2026):</span>
-          <span className="font-semibold text-slate-700 font-mono">375 000 so'm</span>
-        </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-          <span>Tizim holati:</span>
-          <span className="text-emerald-700 font-medium flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-            100% Avtonom
-          </span>
-        </div>
-      </div>
     </div>
   );
 
