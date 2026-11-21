@@ -48,19 +48,34 @@ def build_index(force: bool = typer.Option(False, help="Rebuild even if the bund
 def eval_retrieval(
     k: int = typer.Option(5, help="Cut-off rank"),
     gold: Path = typer.Option(None, help="Path to a gold JSONL file (defaults to eval/retrieval_gold.jsonl)"),
+    split: str = typer.Option("all", help="all | dev | test (test = held out from reranker training)"),
     show_all: bool = typer.Option(False, help="Print every query, not only misses"),
+    show_wrong: bool = typer.Option(False, help="Also print queries whose best answer is not ranked first"),
+    json_out: Path = typer.Option(None, help="Write the full report as JSON"),
 ) -> None:
     """Measure retrieval quality (hit@1, hit@k, MRR, latency) on the labelled gold set."""
     from lex_agent.evaluation import DEFAULT_GOLD, evaluate_retrieval
 
     rt = AgentRuntime.build()
     rt.build_index()
-    report = asyncio.run(evaluate_retrieval(rt.retriever, gold or DEFAULT_GOLD, k=k))
-    table = Table(title=f"Retrieval quality ({report['queries']} questions)")
+    report = asyncio.run(evaluate_retrieval(rt.retriever, gold or DEFAULT_GOLD, k=k, split=split))
+    table = Table(title=f"Retrieval quality ({report['queries']} questions, split={split}, reranker={rt.retriever.reranker.backend})")
+    table.add_column("metric")
+    table.add_column("value")
     for key in ("hit@1", f"hit@{k}", f"mrr@{k}", "p50_ms", "p95_ms"):
         table.add_row(key, str(report[key]))
     console.print(table)
-    rows = report["per_query"] if show_all else report["misses"]
+    for group, values in report["breakdown"].items():
+        line = "  ".join(f"{name}: {v['hit@1']:.2f}/{v[f'hit@{k}']:.2f} (n={v['n']})" for name, v in values.items())
+        console.print(f"[bold]{group}[/] hit@1/hit@{k}  {line}")
+    if json_out:
+        json_out.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    if show_all:
+        rows = report["per_query"]
+    elif show_wrong:
+        rows = [q for q in report["per_query"] if q["rank"] != 1]
+    else:
+        rows = report["misses"]
     for row in rows:
         console.print(f"[{'green' if row['rank'] else 'red'}]{row['rank'] or '✗'}[/] {row['q']}  →  {row['top']}")
 
