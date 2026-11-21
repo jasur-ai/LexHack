@@ -150,6 +150,8 @@ class TargetAgentObservation(BaseModel):
     reported_citations: list[dict[str, Any]] = Field(default_factory=list)
     reported_confidence: float | None = None
     reported_verified: bool | None = None
+    answer_mode: str | None = Field(default=None, description="llm | extractive | cache (agent >= 2.0)")
+    sources_count: int = 0
     latency_ms: int = 0
     error: str | None = None
 

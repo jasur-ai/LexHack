@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 from evaluator_agent.llm_client import AuditorLLMClient
@@ -182,7 +181,7 @@ class LegalAuditScorer:
 
         # 4. Cross-Lingual & Terminology Accuracy (0-15)
         ling_score = 14 if ErrorCode.TRANSLATION_OR_TERM_DRIFT not in error_codes else 5
-        if "[retrieval-only mode" in answer_low:
+        if "[retrieval-only mode" in answer_low or observation.answer_mode == "extractive":
             ling_score = 6
 
         # 5. Anti-Hallucination & Calibration (0-10)
@@ -385,11 +384,11 @@ class LegalAuditScorer:
                     "Verify article chunk boundaries in `parser.py` (avoid splitting exceptions from main clause) and tune FTS5 stem/reranker recall in `retrieval/bm25_store.py` & `reranker.py`.",
                 )
 
-        if "[retrieval-only mode" in observation.answer_text.lower():
+        if "[retrieval-only mode" in observation.answer_text.lower() or observation.answer_mode == "extractive":
             _add(
                 RootCauseComponent.TARGET_UNAVAILABLE,
                 "medium",
-                "Target agent responded in Retrieval-Only Mode without active LLM synthesis.",
+                "Target agent answered extractively (verbatim statute quotes) without LLM synthesis.",
                 "Verify `agent/.env` has a valid `LLM_API_KEY` and model name, then restart `agent/`.",
             )
 
