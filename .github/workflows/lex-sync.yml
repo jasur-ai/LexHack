@@ -1,0 +1,100 @@
+# Nightly lex.uz sync of the ~200 most-needed acts (agent/lex_agent/ingestion/lex_sync.py).
+#
+# Texts and bookkeeping live on the branch `lex-sync/data` (re-created from main every night, so code always comes
+# from main). When the synced texts differ from main a pull request is opened for review; merging it (and the
+# Render auto-deploy) puts the fresh texts in production. Requires: Settings -> Actions -> General ->
+# "Allow GitHub Actions to create and approve pull requests". If lex.uz refuses GitHub's runners, run the same
+# command on a machine in Uzbekistan or a self-hosted runner (runs-on: [self-hosted]).
+name: lex-sync
+
+on:
+  schedule:
+    - cron: "0 22 * * *"  # 03:00 Asia/Tashkent
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: "Max requests to lex.uz in this run"
+        default: "120"
+      force:
+        description: "Re-download every due act (true/false)"
+        default: "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: lex-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: agent
+    env:
+      DATA: data/corpus
+      FILES: lex_sync_uz.jsonl.gz lex_sync_ru.jsonl.gz lex_sync_catalog.json lex_sync_state.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: agent/requirements.txt
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install -e . --no-deps
+      - name: Restore the last synced data
+        run: |
+          if git ls-remote --exit-code --heads origin lex-sync/data > /dev/null; then
+            git fetch origin lex-sync/data
+            for f in $FILES; do
+              if git cat-file -e "origin/lex-sync/data:agent/$DATA/$f" 2>/dev/null; then
+                git show "origin/lex-sync/data:agent/$DATA/$f" > "$DATA/$f"
+              fi
+            done
+          fi
+      - name: Sync with lex.uz
+        run: |
+          FORCE=""
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then FORCE="--force"; fi
+          lex-agent sync --budget "${{ github.event.inputs.budget || '120' }}" $FORCE --report-json sync-report.json
+      - name: Commit to lex-sync/data and open a pull request when texts changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          r = json.load(open("sync-report.json", encoding="utf-8"))
+          lines = [f"Nightly lex.uz sync: {r['checked']} editions checked, {r['added']} added, {r['updated']} updated, "
+                   f"{r['unchanged']} unchanged, {r['failed']} failed, {r['suspect']} suspect, {r['deferred']} deferred.", ""]
+          lines += [f"- **{c['kind']}** `{c['act']}` ({c['lang']}): {c.get('title') or ''} — {c['articles']} articles"
+                    for c in r["changes"][:60]]
+          if r["errors"]:
+              lines += ["", "Problems:"] + [f"- {e}" for e in r["errors"][:30]]
+          lines += ["", "Merge to serve the new texts (the index is rebuilt on deploy). Suspect pages were not applied."]
+          open("sync-summary.md", "w", encoding="utf-8").write("\n".join(lines) + "\n")
+          PY
+          git config user.name "lex-sync-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B lex-sync/data
+          for f in $FILES; do [ -f "$DATA/$f" ] && git add "$DATA/$f"; done
+          if git diff --cached --quiet; then echo "Nothing new"; exit 0; fi
+          git commit -q -m "lex.uz sync $(date -u +%F)" -m "$(head -1 sync-summary.md)"
+          git push -f origin lex-sync/data
+          if git diff --quiet origin/main -- $DATA/lex_sync_uz.jsonl.gz $DATA/lex_sync_ru.jsonl.gz $DATA/lex_sync_catalog.json; then
+            echo "Synced texts are identical to main; bookkeeping saved on lex-sync/data"
+            exit 0
+          fi
+          if ! gh pr view lex-sync/data --json state -q .state 2>/dev/null | grep -q OPEN; then
+            gh pr create --base main --head lex-sync/data --title "lex.uz sync: updated legal texts" --body-file sync-summary.md
+          else
+            gh pr comment lex-sync/data --body-file sync-summary.md
+          fi

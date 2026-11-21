@@ -96,6 +96,14 @@ def create_app() -> FastAPI:
         rt.bm25_store._ensure_fts_synced()
         await rt.llm.warmup()
         warm_task = None
+        sync_task = None
+        if rt.settings.lex_sync_check_enabled:
+            from lex_agent.ingestion.lex_sync import nightly_check_loop
+
+            sync_task = asyncio.create_task(
+                nightly_check_loop(rt.settings.corpus_dir, hour=rt.settings.lex_sync_hour, rps=rt.settings.lex_sync_rps,
+                                   budget=rt.settings.lex_sync_budget)
+            )
         if rt.settings.warmup_on_start:
             # Speller vocabulary, lexicon, facts and the suggested questions: first real requests are fast
             warm_task = asyncio.create_task(rt.orchestrator.warm_up())
@@ -109,8 +117,9 @@ def create_app() -> FastAPI:
         try:
             yield
         finally:
-            if warm_task is not None and not warm_task.done():
-                warm_task.cancel()
+            for task in (warm_task, sync_task):
+                if task is not None and not task.done():
+                    task.cancel()
             await rt.close()
 
     app = FastAPI(
@@ -196,7 +205,19 @@ def create_app() -> FastAPI:
             "index_sources": {k: v.get("documents", 0) for k, v in (index_stats.get("sources") or {}).items()},
             "live_lex_enabled": rt.settings.lex_uz_enable_live_fallback,
             "answer_cache": rt.orchestrator.cache.stats(),
+            "lex_sync": _sync_summary(rt),
         }
+
+    def _sync_summary(rt: AgentRuntime) -> dict[str, Any]:
+        from lex_agent.ingestion.lex_sync import sync_status
+
+        try:
+            info = sync_status(rt.settings.corpus_dir)
+        except Exception as exc:  # pragma: no cover - health must never fail
+            return {"error": str(exc)}
+        info["nightly_check"] = rt.settings.lex_sync_check_enabled
+        info.pop("last_run_summary", None)
+        return info
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def serve_ui() -> HTMLResponse:

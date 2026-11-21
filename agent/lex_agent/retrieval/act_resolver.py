@@ -8,7 +8,6 @@ abbreviations lawyers and citizens actually use (MK, JK, FK, MJtK, ТК, УК, �
 
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -182,12 +181,10 @@ class ActResolver:
 
 @lru_cache(maxsize=4)
 def _load(corpus_dir: str) -> ActResolver:
-    path = Path(corpus_dir) / "catalog.json"
-    catalog: dict[str, dict] = {}
-    if path.exists():
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-            catalog = {str(d["doc_key"]): d for d in data.get("documents", [])}
-        except (OSError, ValueError, KeyError):
-            catalog = {}
+    from lex_agent.ingestion.open_corpora import load_catalog
+
+    try:
+        catalog = load_catalog(Path(corpus_dir))
+    except (OSError, ValueError, KeyError):
+        catalog = {}
     return ActResolver(catalog)

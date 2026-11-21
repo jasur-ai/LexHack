@@ -96,15 +96,11 @@ BUNDLED_SOURCES = frozenset(
         "lex_uz_live_cache",
         "curated_facts",
         "practical_facts",
+        "lex_uz_sync",
     }
 )
 
-_DOC_TYPES_BY_NAME: dict[str, DocumentType] = {
-    "constitution": DocumentType.CONSTITUTION,
-    "constitutional_law": DocumentType.CONSTITUTIONAL_LAW,
-    "code": DocumentType.CODE,
-    "law": DocumentType.LAW,
-}
+_DOC_TYPES_BY_NAME: dict[str, DocumentType] = {t.value: t for t in DocumentType}
 
 # lex.uz documents captured by the live fetcher that are NOT covered by the bundled corpora
 _LEX_CACHE_EXTRA: dict[str, dict[str, Any]] = {
@@ -360,16 +356,23 @@ def corpus_record_to_chunks(
 
 
 def load_catalog(corpus_dir: Path) -> dict[str, dict[str, Any]]:
-    """The LawCodex act catalog keyed by canonical (Uzbek lex.uz) document id; empty when not bundled."""
-    path = corpus_dir / "catalog.json"
-    if not path.exists():
-        return {}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        logger.warning("Unreadable act catalog %s: %s", path, exc)
-        return {}
-    return {str(d["doc_key"]): d for d in data.get("documents", [])}
+    """The act catalog keyed by canonical (Uzbek lex.uz) document id: the LawCodex snapshot plus the acts kept fresh
+    by ``lex-agent sync`` (``lex_sync_catalog.json``; its entries win for the same act). Empty when not bundled."""
+    out: dict[str, dict[str, Any]] = {}
+    for name in ("catalog.json", "lex_sync_catalog.json"):
+        path = corpus_dir / name
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("Unreadable act catalog %s: %s", path, exc)
+            continue
+        for d in data.get("documents", []):
+            key = str(d["doc_key"])
+            merged = {**out.get(key, {}), **{k: v for k, v in d.items() if v not in (None, "", [])}}
+            out[key] = merged
+    return out
 
 
 def _catalog_branches(entry: dict[str, Any] | None, doc_key: str) -> list[LegalBranch]:
@@ -583,7 +586,8 @@ def bundle_fingerprint(corpus_dir: Path, cache_dir: Path) -> str:
 
     h = hashlib.sha256(f"{INDEX_SCHEMA_VERSION}+{ANALYZER_VERSION}".encode())
     for p in sorted(corpus_dir.glob("*")):
-        if p.is_file() and p.suffix in {".gz", ".json"}:
+        # the sync bookkeeping changes every night without changing any text
+        if p.is_file() and p.suffix in {".gz", ".json"} and not p.name.endswith("_state.json"):
             st = p.stat()
             h.update(f"{p.name}:{st.st_size}".encode())
             h.update(hashlib.sha256(p.read_bytes()).digest())
@@ -695,9 +699,11 @@ def build_bundled_index(
     def _index_file(name: str, *, family: str | None = None, skip_family: str | None = None) -> None:
         nonlocal total
         batch: list[LegalChunk] = []
+        # Acts already indexed from an earlier (fresher) file of this family; taken before this file starts
+        skip = frozenset(covered[skip_family]) if skip_family else frozenset()
         for rec in iter_corpus_records(corpus_dir / name):
             doc_key = str(rec["doc_key"])
-            if skip_family and doc_key in covered[skip_family]:
+            if doc_key in skip:
                 continue
             entry = catalog.get(doc_key)
             rec_chunks = corpus_record_to_chunks(
@@ -722,8 +728,11 @@ def build_bundled_index(
             _account(batch)
             total += len(batch)
 
-    _index_file("lawcodex_uz.jsonl.gz", family="uz")
-    _index_file("lawcodex_ru.jsonl.gz", family="ru")
+    # Acts refreshed from lex.uz by ``lex-agent sync`` replace their snapshot version from the LawCodex export
+    _index_file("lex_sync_uz.jsonl.gz", family="uz")
+    _index_file("lex_sync_ru.jsonl.gz", family="ru")
+    _index_file("lawcodex_uz.jsonl.gz", family="uz", skip_family="uz")
+    _index_file("lawcodex_ru.jsonl.gz", family="ru", skip_family="ru")
     _index_file("historical_uz.jsonl.gz")
     _index_file("uz_latn_codes.jsonl.gz", skip_family="uz")
     _index_file("ru_codes.jsonl.gz", skip_family="ru")

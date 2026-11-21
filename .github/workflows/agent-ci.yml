@@ -1,0 +1,57 @@
+# Lint, tests and a retrieval-quality gate for the legal agent (agent/).
+name: agent-ci
+
+on:
+  push:
+    paths: ["agent/**", ".github/workflows/agent-ci.yml"]
+  pull_request:
+    paths: ["agent/**", ".github/workflows/agent-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: agent
+    env:
+      LLM_PROVIDER: mock
+      LEX_UZ_ENABLE_LIVE_FALLBACK: "false"
+      WARMUP_ON_START: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: agent/requirements*.txt
+      - name: Install
+        run: |
+          pip install -r requirements-dev.txt
+          pip install -e . --no-deps
+      - name: Lint
+        run: ruff check lex_agent scripts tests --select E9,F
+      - name: Unit, route and API tests
+        run: python -m pytest -q -p no:warnings
+      - name: Build the index from the bundled corpora
+        run: lex-agent build-index --force
+      - name: Retrieval quality gate
+        run: |
+          lex-agent eval --split test --json-out eval-test.json > /dev/null
+          lex-agent eval --split holdout2 --json-out eval-holdout2.json > /dev/null
+          python scripts/check_eval.py eval-test.json --min-hit1 0.88 --min-hit5 0.97 --max-p95-ms 400
+          python scripts/check_eval.py eval-holdout2.json --min-hit1 0.60 --min-hit5 0.85
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-reports
+          path: agent/eval-*.json
+          if-no-files-found: ignore

@@ -73,6 +73,14 @@ class Settings(BaseSettings):
     lex_uz_enable_live_fallback: bool = Field(default=True)
     lex_uz_live_fallback_timeout: float = Field(default=4.0, description="Max seconds spent on a live lex.uz lookup")
 
+    # Nightly lex.uz sync of the ~200 most-needed acts (lex-agent sync; see lex_agent/ingestion/lex_sync.py)
+    lex_sync_rps: float = Field(default=0.5, gt=0, le=2.0, description="Requests per second to lex.uz (0.5 = one every 2 s)")
+    lex_sync_budget: int = Field(default=80, ge=1, le=2000, description="Max requests per sync run")
+    lex_sync_check_enabled: bool = Field(
+        default=False, description="Run a nightly in-process *check* (no text changes) and report freshness in /api/health"
+    )
+    lex_sync_hour: int = Field(default=3, ge=0, le=23, description="Local hour (Asia/Tashkent) of the nightly check")
+
     # Agentic pipeline controls
     agent_max_hops: int = Field(default=3, ge=1, le=6)
     agent_top_k: int = Field(default=12, ge=1, le=50)
