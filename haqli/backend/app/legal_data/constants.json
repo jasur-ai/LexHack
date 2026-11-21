@@ -1,0 +1,175 @@
+{
+  "version": "2026.1-seed",
+  "entries": {
+    "bhm_uzs": {
+      "value": "375000",
+      "unit": "UZS",
+      "effective_from": "2024-10-01",
+      "source_ref": "PF-108 (Bazaviy hisoblash miqdori)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_bhm_decree"
+    },
+    "civil_code.simple_written_form_threshold_bhm": {
+      "value": "10",
+      "unit": "BHM",
+      "effective_from": "1997-03-01",
+      "source_ref": "Fuqarolik kodeksi 108-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_fk_108"
+    },
+    "consumer.daily_penalty_rate": {
+      "value": "0.01",
+      "unit": "ratio_per_day",
+      "effective_from": "1996-04-26",
+      "source_ref": "Iste'molchilar huquqlarini himoya qilish to'g'risida Qonun 19-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_consumer_19"
+    },
+    "consumer.penalty_cap_ratio": {
+      "value": "1.00",
+      "unit": "ratio_of_claim",
+      "effective_from": "1996-04-26",
+      "source_ref": "Iste'molchilar huquqlarini himoya qilish to'g'risida Qonun 19-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_consumer_19"
+    },
+    "labor.delay_annual_refinancing_rate": {
+      "value": "0.135",
+      "unit": "annual_rate",
+      "effective_from": "2023-04-30",
+      "source_ref": "Mehnat kodeksi 333-modda (MB asosiy stavkasi asosida)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mk_333"
+    },
+    "labor.delay_rate_multiplier": {
+      "value": "0.10",
+      "unit": "share_of_refinancing_per_day_basis",
+      "effective_from": "2023-04-30",
+      "source_ref": "Mehnat kodeksi 333-modda (har bir kechikkan kun uchun asosiy stavkaning 10% miqdorida yillik hisob)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mk_333"
+    },
+    "limitation.labor_days": {
+      "value": "180",
+      "unit": "calendar_days",
+      "effective_from": "2023-04-30",
+      "source_ref": "Mehnat kodeksi 560-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mk_560"
+    },
+    "limitation.general_civil_days": {
+      "value": "1095",
+      "unit": "calendar_days",
+      "effective_from": "1997-03-01",
+      "source_ref": "Fuqarolik kodeksi 150-modda (3 yil)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_fk_150"
+    },
+    "limitation.traffic_appeal_days": {
+      "value": "10",
+      "unit": "calendar_days",
+      "effective_from": "1995-04-01",
+      "source_ref": "MJtK 315-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mjtk_315"
+    },
+    "traffic.discount_50_days": {
+      "value": "15",
+      "unit": "calendar_days",
+      "effective_from": "2023-05-01",
+      "source_ref": "MJtK 332-1-modda (50% chegirma muddati)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mjtk_332_1"
+    },
+    "traffic.discount_30_days": {
+      "value": "30",
+      "unit": "calendar_days",
+      "effective_from": "2023-05-01",
+      "source_ref": "MJtK 332-1-modda (30% chegirma / 70% to'lash muddati)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_mjtk_332_1"
+    },
+    "response_deadline.talabnoma_days": {
+      "value": "10",
+      "unit": "calendar_days",
+      "effective_from": "1997-03-01",
+      "source_ref": "Fuqarolik kodeksi 242-modda (oqilona / talabnoma muddati)",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_fk_242"
+    },
+    "response_deadline.consumer_days": {
+      "value": "10",
+      "unit": "calendar_days",
+      "effective_from": "1996-04-26",
+      "source_ref": "Iste'molchilar huquqlarini himoya qilish to'g'risida Qonun 14-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_consumer_14"
+    },
+    "response_deadline.complaint_days": {
+      "value": "15",
+      "unit": "calendar_days",
+      "effective_from": "2017-09-11",
+      "source_ref": "Jismoniy va yuridik shaxslarning murojaatlari to'g'risida Qonun 28-modda",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_appeals_28"
+    },
+    "pricing.talabnoma_uzs": {
+      "value": "19000",
+      "unit": "UZS",
+      "effective_from": "2026-01-01",
+      "source_ref": "Haqli platforma tarifi",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_fk_242"
+    },
+    "mso.platform_fee_percent": {
+      "value": "15",
+      "unit": "percent",
+      "effective_from": "2026-01-01",
+      "source_ref": "Haqli MSO xizmat shartnomasi",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_advocacy_law"
+    },
+    "scanner.microloan_high_apr_threshold_percent": {
+      "value": "50",
+      "unit": "percent_annual",
+      "effective_from": "2024-01-01",
+      "source_ref": "Markaziy bank mikroqarz foiz cheklovi amaliyoti",
+      "verified_on": null,
+      "verified_by": null,
+      "status": "needs_review",
+      "legal_ref": "inst_fk_734"
+    }
+  }
+}

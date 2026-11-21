@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.hypothesis/
+backend/data/
+storage/
+
+# Real user fixtures stay out of git (§12)
+backend/tests/recognition/fixtures/local/
+
+# Node / Web
+web/node_modules/
+web/dist/
+.env
+agent/data/qdrant/collection/lex_uz_legislation/storage.sqlite

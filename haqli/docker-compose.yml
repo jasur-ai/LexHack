@@ -1,0 +1,41 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      APP_PORT: "8002"
+      DATABASE_URL: "sqlite+aiosqlite:///./storage/haqli.db"
+      STORAGE_DIR: "/app/storage"
+      DEMO_MODE: "true"
+    ports:
+      - "8002:8002"
+    volumes:
+      - haqli_storage:/app/storage
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2.9-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api
+      - web
+
+volumes:
+  haqli_storage:

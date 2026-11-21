@@ -1,0 +1,49 @@
+name: Haqli CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install system fonts for Cyrillic PDF tests
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-core fonts-dejavu-core
+      - name: Install backend dependencies
+        run: pip install -r requirements.txt
+      - name: Run legal audit report
+        run: python ../scripts/legal_audit.py
+      - name: Check PDF Cyrillic font glyph coverage
+        run: python ../scripts/gen_fonts_check.py
+      - name: Run pytest suite
+        run: pytest -q
+      - name: Run Recognition Engine evaluation CI gates
+        run: python -m app.engines.recognition.eval
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Run unit tests
+        run: npm test
+      - name: Build production bundle
+        run: npm run build
