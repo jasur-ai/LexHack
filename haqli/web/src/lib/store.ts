@@ -57,6 +57,8 @@ interface AppState {
   recognitionInitialMode: "document" | "receipt" | "id_mrz" | "voice" | "verify";
   prefill: RecognitionPrefill | null;
   toasts: ToastItem[];
+  aiPanelOpen: boolean;
+  setAiPanelOpen: (open: boolean) => void;
   /** Hidden while the chat composer has focus, so the on-screen keyboard leaves room for the conversation. */
   navHidden: boolean;
   setNavHidden: (hidden: boolean) => void;
@@ -103,6 +105,8 @@ export const useAppStore = create<AppState>((set) => ({
   recognitionInitialMode: "document",
   prefill: null,
   toasts: [],
+  aiPanelOpen: false,
+  setAiPanelOpen: (aiPanelOpen) => set({ aiPanelOpen }),
   navHidden: false,
   setNavHidden: (navHidden) => set({ navHidden }),
   setSession: ({ token, user, demoMode, constants }) =>

@@ -115,6 +115,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navHidden = useAppStore((s) => s.navHidden);
   const servicesCategory = useAppStore((s) => s.servicesCategory);
   const setServicesCategory = useAppStore((s) => s.setServicesCategory);
+  const aiPanelOpen = useAppStore((s) => s.aiPanelOpen);
+  const setAiPanelOpen = useAppStore((s) => s.setAiPanelOpen);
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -131,7 +133,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [paymentInfoOpen, setPaymentInfoOpen] = useState(false);
   const [mobileAppOpen, setMobileAppOpen] = useState(false);
-  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const userInitials = (name?: string) => {
     if (!name) return "F";
