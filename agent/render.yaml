@@ -24,8 +24,8 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: "*"
-      - key: LEX_UZ_ENABLE_LIVE_FALLBACK
-        value: "true"
+      - key: LEX_UZ_ENABLE_LIVE_FALLBACK   # no live lex.uz fetches in the request path; the nightly sync updates texts
+        value: "false"
       - key: LEX_SYNC_CHECK_ENABLED
         value: "false"
       - key: WEB_CONCURRENCY

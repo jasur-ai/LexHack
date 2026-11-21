@@ -53,6 +53,15 @@ How it copes with any wording:
 * **Act and article resolution:** "Mehnat kodeksi 131-modda" and "ст. 131 ТК" resolve to the right article.
 * **Conversation memory:** `history` resolves follow-ups ("unda qancha to'lashadi?").
 * **Prompt-injection guard:** instructions hidden in the question or `context` are ignored.
+* **False and outdated premises are corrected first:**
+  * articles that do not exist ("Oila kodeksining 412-moddasi": the Family Code has 238 articles);
+  * codes that were never adopted ("Kriptovalyuta kodeksi") and invented act numbers ("PF-9999");
+  * repealed editions and figures that changed: the 1995 Labour Code, the 1992 Constitution, old article numbers
+    such as Labour Code art. 100 → 161, VAT 15% → 12%, marriage age 17 → 18, 15 working days of leave → 21 calendar
+    days, 72 hours of detention → 48.
+
+  The answer then cites the current article. A non-existent act number is never repeated as if it were a citation
+  (`lex_agent/assistant/premises.py`).
 * **Follow-up suggestions:** answers offer three next questions. When the situation is recognised they are
   topic-specific (each legal domain has its own list, in all four languages) and never repeat the topic just asked
   about.
@@ -224,6 +233,9 @@ with HTTP 500. These are the contracts the haqli proxy and the counter-agent rel
 
 ### Render (recommended)
 
+The whole product (haqli + this agent) is deployed by `.github/workflows/deploy.yml`; see `deploy/README.md`.
+For the agent alone:
+
 1. In Render choose **New → Blueprint**, select this repository and set the blueprint path to `agent/render.yaml`.
 2. Set `GEMINI_API_KEY`. This step is optional: without it, answers are extractive.
 3. Every push to `main` redeploys (`autoDeploy`). Merging the nightly sync pull request publishes fresh texts the
@@ -288,9 +300,11 @@ which acts changed. No text changes without review.
 **CI** (`.github/workflows/agent-ci.yml`) runs on every push and pull request that touches `agent/`:
 
 1. Lint with `ruff` (E9, F).
-2. Unit, route and API tests: **198** tests. They include thread-safety, the SSE contract, a router battery of
-   real phrasings (emergency, illegal, vague requests and look-alike legal questions) and lex.uz sync on HTML
-   fixtures.
+2. Unit, route and API tests: **228** tests. They cover:
+   * thread-safety and the SSE contract;
+   * a router battery of real phrasings (emergency, illegal, vague requests and look-alike legal questions);
+   * false and outdated premises;
+   * lex.uz sync on HTML fixtures.
 3. Build the index.
 4. **Retrieval quality gate:** the test split needs hit@1 ≥ 0.88, hit@5 ≥ 0.97 and p95 ≤ 400 ms; the blind
    holdout2 split needs hit@1 ≥ 0.60 and hit@5 ≥ 0.85.
@@ -320,6 +334,23 @@ the best article first, and about 9 in 10 to have it among the five cited.
 * every answer passes the automatic checks: cited articles exist in the evidence, the language matches, no
   invented articles, length within limits;
 * 539 of 550 answers (98%) cite an expected article.
+
+**Counter-agent audit** (`scripts/counter_audit.py`, run with the counter-agent's interpreter): the red-team
+auditor in `agent_couinter/` interrogates the agent with its trap suites. It verifies every citation and scores
+each answer 0–100, without an auditor LLM and without the answer cache:
+
+| Suite | Before the premise checks | Now |
+|---|---|---|
+| curated traps (51) | mean 65.0, 4 PASS / 17 FAIL | mean 77.8, 17 PASS / 3 FAIL |
+| saved failures (22) | mean 62.5, 1 PASS / 8 FAIL | mean 79.3, 8 PASS / 0 FAIL |
+| **blind vault** (68; never shown while developing) | mean 69.3, 15 PASS / 16 FAIL | **mean 77.1, 26 PASS / 6 FAIL** |
+
+* fabricated-citation traps: mean 39 → 88;
+* repealed-norm traps: mean 53 → 89.
+
+The auditor gives extractive answers at most 6 of its 15 cross-lingual points, so without an LLM key a PASS needs
+an almost perfect answer; many answers are therefore PARTIAL. The deploy workflow runs the same audit against the
+deployed agent.
 
 **Load test** (`scripts/load_test.py`) setup:
 * server: Docker-equivalent, 1 worker, `AGENT_THREADS=4`, `SQLITE_READER_MMAP_MB=0`;

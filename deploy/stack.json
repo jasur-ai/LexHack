@@ -1,0 +1,62 @@
+{
+  "region": "frankfurt",
+  "repo": "https://github.com/jasur-ai/LexHack",
+  "services": [
+    {
+      "key": "agent",
+      "name": "lexhack-agent",
+      "rootDir": "agent",
+      "dockerfilePath": "./Dockerfile",
+      "dockerContext": ".",
+      "healthCheckPath": "/api/health",
+      "plan": "starter",
+      "env": {
+        "LLM_PROVIDER": "gemini",
+        "LLM_MODEL": "gemini-3.8-flash",
+        "LLM_FALLBACK_MODEL": "gemini-2.5-flash",
+        "CORS_ORIGINS": "*",
+        "LEX_UZ_ENABLE_LIVE_FALLBACK": "false",
+        "LEX_SYNC_CHECK_ENABLED": "false",
+        "WEB_CONCURRENCY": "1",
+        "AGENT_THREADS": "4",
+        "SQLITE_READER_MMAP_MB": "0",
+        "LOG_LEVEL": "INFO"
+      },
+      "generated": [
+        "ADMIN_TOKEN"
+      ],
+      "passthrough_secrets": [
+        "GEMINI_API_KEY"
+      ]
+    },
+    {
+      "key": "haqli",
+      "name": "haqli",
+      "rootDir": "haqli",
+      "dockerfilePath": "./Dockerfile",
+      "dockerContext": ".",
+      "healthCheckPath": "/healthz",
+      "plan": "starter",
+      "disk": {
+        "name": "haqli-storage",
+        "mountPath": "/app/storage",
+        "sizeGB": 1
+      },
+      "env": {
+        "APP_ENV": "production",
+        "DEMO_MODE": "true",
+        "ALLOW_WEB_GUESTS": "true",
+        "STORAGE_DIR": "/app/storage",
+        "AGENT_BASE_URL": "{agent.url}",
+        "AGENT_TIMEOUT_SEC": "75",
+        "AGENT_USER_QUESTIONS_PER_HOUR": "40",
+        "LLM_PROVIDER": "null"
+      },
+      "random_secrets": {
+        "JWT_SECRET": "token",
+        "FERNET_KEY": "fernet",
+        "ED25519_PRIVATE_KEY_B64": "ed25519"
+      }
+    }
+  ]
+}

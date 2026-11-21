@@ -1,0 +1,7 @@
+{
+  "nonce": 5,
+  "branch": "arena/8a21e194-lexhack",
+  "only": [],
+  "mode": "deploy",
+  "note": "Redeploy with the premise checks (follows an already queued autodeploy)"
+}
