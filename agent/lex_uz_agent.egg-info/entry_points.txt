@@ -1,0 +1,2 @@
+[console_scripts]
+lex-agent = lex_agent.cli:app

@@ -1,0 +1,32 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: lex-agent-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  lex-agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lex-agent-api
+    restart: unless-stopped
+    depends_on:
+      - qdrant
+    env_file:
+      - .env
+    environment:
+      - QDRANT_MODE=remote
+      - QDRANT_URL=http://qdrant:6333
+      - DATA_DIR=/app/data
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  qdrant_storage:

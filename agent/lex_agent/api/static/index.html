@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adolat · O'zbekiston Qonunchilik va Huquqiy Tahlil Tizimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&display=swap" rel="stylesheet">
+  <style>
+    /* =====================================================================
+       LEGALTECH PALETTE — Judicial Navy + Antique Brass + Architectural Stone
+       Light: Calm Muted Stone Gray (Zero white glare)
+       Dark:  Deep Midnight Graphite (Zero pitch black)
+       ===================================================================== */
+    :root, [data-theme="light"] {
+      --ambient-bg: #b4bac1;
+      --app-bg: #c4cad0;
+      --sidebar-bg: #bbc2c9;
+      --card: #d0d5db;
+      --card-elevated: #d7dce1;
+      --card-soft: #bfc6cd;
+      --input-bg: #cbd0d6;
+      --border: #a4adb7;
+      --border-strong: #8d97a3;
+
+      --text: #131b26;
+      --text-secondary: #2b3746;
+      --muted: #4b5868;
+
+      --primary: #1b365d;
+      --primary-hover: #234473;
+      --primary-soft: rgba(27, 54, 93, 0.12);
+      --primary-ink: #f1f4f8;
+
+      --brass: #8c6820;
+      --brass-soft: rgba(140, 104, 32, 0.14);
+
+      --verified: #17684b;
+      --verified-soft: rgba(23, 104, 75, 0.13);
+      --warn: #9b5c10;
+      --warn-soft: rgba(155, 92, 16, 0.14);
+      --danger: #9a293a;
+      --danger-soft: rgba(154, 41, 58, 0.14);
+
+      --code-bg: #bac1c9;
+      --shimmer-a: #bcc3cb;
+      --shimmer-b: #cfd5dc;
+      --shadow-sm: 0 1px 3px rgba(16, 24, 38, 0.08);
+      --shadow-md: 0 10px 28px rgba(16, 24, 38, 0.12);
+      --shadow-lg: 0 24px 64px rgba(16, 24, 38, 0.2);
+    }
+
+    [data-theme="dark"] {
+      --ambient-bg: #13161d;
+      --app-bg: #1a1f28;
+      --sidebar-bg: #151921;
+      --card: #222834;
+      --card-elevated: #282f3e;
+      --card-soft: #1d222d;
+      --input-bg: #242b38;
+      --border: #313a4b;
+      --border-strong: #445066;
+
+      --text: #e4e8ef;
+      --text-secondary: #b9c3d2;
+      --muted: #8492a6;
+
+      --primary: #315487;
+      --primary-hover: #3d659e;
+      --primary-soft: rgba(74, 121, 192, 0.18);
+      --primary-ink: #f2f5fa;
+
+      --brass: #c9a24b;
+      --brass-soft: rgba(201, 162, 75, 0.15);
+
+      --verified: #36a67c;
+      --verified-soft: rgba(54, 166, 124, 0.15);
+      --warn: #d89638;
+      --warn-soft: rgba(216, 150, 56, 0.15);
+      --danger: #dc5b6f;
+      --danger-soft: rgba(220, 91, 111, 0.15);
+
+      --code-bg: #181c25;
+      --shimmer-a: #272e3c;
+      --shimmer-b: #333c4e;
+      --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.26);
+      --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.36);
+      --shadow-lg: 0 28px 72px rgba(0, 0, 0, 0.52);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--ambient-bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Smooth tactile color transitions across surfaces when switching theme */
+    .workspace, .sidebar, .main-col, .card-surface, .bento-card, .ai-card,
+    .composer, .seg-bar, .conn-pill, .icon-btn, .quick-row, .assist-card, .tool-panel {
+      transition: background-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  color 220ms ease,
+                  box-shadow 260ms ease;
+    }
+
+    .serif { font-family: "Newsreader", Georgia, "Times New Roman", serif; }
+
+    svg.ico {
+      width: 17px; height: 17px;
+      stroke: currentColor; fill: none;
+      stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+      flex-shrink: 0; display: inline-block; vertical-align: middle;
+    }
+    svg.ico-sm { width: 14px; height: 14px; }
+    svg.ico-lg { width: 20px; height: 20px; }
+
+    /* =====================================================================
+       WORKSPACE SHELL
+       ===================================================================== */
+    .stage {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px;
+    }
+    .workspace {
+      width: 100%;
+      max-width: 1200px;
+      height: calc(100vh - 28px);
+      max-height: 920px;
+      background: var(--app-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    @media (max-width: 780px) {
+      .stage { padding: 0; }
+      .workspace { height: 100vh; max-height: none; border-radius: 0; border: none; }
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 266px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1), transform 240ms ease, opacity 200ms ease;
+      overflow: hidden;
+    }
+    .sidebar.collapsed { width: 0; border-right: none; opacity: 0; pointer-events: none; }
+    @media (max-width: 900px) {
+      .sidebar {
+        position: absolute; left: 0; top: 0; bottom: 0; z-index: 40;
+        box-shadow: var(--shadow-lg); width: 272px; transform: translateX(-100%);
+      }
+      .sidebar.mobile-open { transform: translateX(0); opacity: 1; pointer-events: auto; }
+      .sidebar.collapsed { width: 272px; transform: translateX(-100%); }
+    }
+    .sb-head {
+      padding: 16px 14px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sb-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .brand-emblem {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: var(--primary); color: var(--brass);
+      border: 1px solid rgba(201, 162, 75, 0.35);
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .brand-name { font-family: "Newsreader", Georgia, serif; font-weight: 700; font-size: 1.12rem; letter-spacing: -0.01em; line-height: 1.1; }
+    .brand-tag { font-size: 0.67rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .sb-new-btn {
+      margin: 4px 14px 12px;
+      background: var(--primary); color: var(--primary-ink);
+      border: 1px solid transparent; border-radius: 10px; padding: 9px 12px;
+      font-family: inherit; font-weight: 600; font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; box-shadow: var(--shadow-sm); transition: 160ms ease;
+    }
+    .sb-new-btn:hover { background: var(--primary-hover); }
+    .sb-section-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted); padding: 6px 16px;
+    }
+    .sb-list {
+      flex: 1; overflow-y: auto; padding: 2px 10px 12px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .sb-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 10px; border-radius: 9px;
+      color: var(--text-secondary); font-size: 0.81rem; font-weight: 500;
+      cursor: pointer; border: 1px solid transparent; transition: 140ms ease;
+    }
+    .sb-item:hover { background: var(--card); color: var(--text); }
+    .sb-item.active { background: var(--card-elevated); border-color: var(--border); color: var(--text); font-weight: 600; }
+    .sb-item-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; display: flex; align-items: center; gap: 8px; }
+    .sb-del { opacity: 0; border: none; background: transparent; color: var(--muted); cursor: pointer; padding: 2px; border-radius: 6px; }
+    .sb-item:hover .sb-del { opacity: 1; }
+    .sb-del:hover { color: var(--danger); }
+
+    .sb-foot {
+      padding: 10px 12px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .sb-tool-btn {
+      border: none; background: transparent; color: var(--text-secondary);
+      padding: 8px 10px; border-radius: 9px; font-family: inherit;
+      font-size: 0.81rem; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 9px; text-align: left;
+    }
+    .sb-tool-btn:hover { background: var(--card); color: var(--text); }
+
+    /* Main Column */
+    .main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--app-bg); }
+
+    /* Topbar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 20px 10px; flex-shrink: 0; gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .top-left, .top-right { display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 9px;
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: var(--shadow-sm);
+    }
+    .icon-btn:hover { border-color: var(--border-strong); background: var(--card-elevated); }
+
+    .conn-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border);
+      font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);
+    }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--verified); flex-shrink: 0; }
+    .live-dot.warn { background: var(--warn); }
+
+    /* Spring-Physics Sliding Theme Switch (Modern 2026 Tactile Control) */
+    .theme-switch {
+      position: relative;
+      display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center;
+      background: var(--card-soft); border: 1px solid var(--border);
+      border-radius: 999px; padding: 3px; width: 74px; height: 34px;
+      cursor: pointer; user-select: none;
+    }
+    .theme-thumb {
+      position: absolute; top: 3px; left: 3px; width: 32px; height: 26px;
+      border-radius: 999px; background: var(--primary);
+      box-shadow: var(--shadow-sm);
+      transition: transform 340ms cubic-bezier(0.34, 1.45, 0.64, 1), background-color 240ms ease;
+    }
+    [data-theme="dark"] .theme-thumb { transform: translateX(34px); }
+    .theme-opt {
+      position: relative; z-index: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--muted); transition: color 220ms ease;
+    }
+    [data-theme="light"] .theme-opt.opt-light { color: var(--primary-ink); }
+    [data-theme="dark"] .theme-opt.opt-dark { color: var(--primary-ink); }
+
+    /* Segmented Mode Tabs */
+    .seg-wrap { padding: 10px 20px 6px; display: flex; justify-content: center; flex-shrink: 0; }
+    .seg-bar {
+      display: inline-flex; background: var(--card-soft); border: 1px solid var(--border);
+      border-radius: 11px; padding: 3px; gap: 3px; width: 100%; max-width: 460px;
+    }
+    .seg-pill {
+      flex: 1; border: none; background: transparent; color: var(--muted);
+      font-family: inherit; font-weight: 600; font-size: 0.8rem;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: 180ms ease;
+    }
+    .seg-pill:hover { color: var(--text); }
+    .seg-pill.active {
+      background: var(--primary); color: var(--primary-ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Main Scroll Body */
+    .main-scroll { flex: 1; overflow-y: auto; padding: 14px 22px 24px; scroll-behavior: smooth; }
+    .reading-wrap { max-width: 760px; margin: 0 auto; }
+    .view { display: none; }
+    .view.active { display: block; animation: viewEnter 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes viewEnter {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HOME VIEW */
+    .greeting {
+      margin: 8px 0 20px;
+      display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+    }
+    .greeting-eyebrow {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--brass); margin-bottom: 5px; display: flex; align-items: center; gap: 6px;
+    }
+    .greeting h2 {
+      margin: 0; font-family: "Newsreader", Georgia, serif;
+      font-size: 1.85rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text);
+    }
+    .lang-chips { display: flex; gap: 4px; background: var(--card-soft); padding: 3px; border-radius: 9px; border: 1px solid var(--border); }
+    .lang-chip {
+      border: none; background: transparent; color: var(--muted);
+      font-family: inherit; font-size: 0.72rem; font-weight: 700;
+      padding: 5px 9px; border-radius: 6px; cursor: pointer; transition: 140ms;
+    }
+    .lang-chip.active { background: var(--primary); color: var(--primary-ink); }
+
+    /* Bento Grid — Authoritative Legal Cards */
+    .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 540px) { .bento-grid { grid-template-columns: 1fr; } }
+    .bento-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px; display: flex; flex-direction: column; justify-content: space-between;
+      min-height: 132px; cursor: pointer; box-shadow: var(--shadow-sm);
+      transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms ease, background-color 180ms ease;
+    }
+    .bento-card:hover { transform: translateY(-2px); border-color: var(--brass); background: var(--card-elevated); }
+    .bento-card.featured {
+      background: var(--primary); color: var(--primary-ink);
+      border-color: rgba(201, 162, 75, 0.45);
+    }
+    .bento-card.featured:hover { background: var(--primary-hover); }
+    .bento-top { display: flex; align-items: center; gap: 10px; }
+    .bento-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--brass-soft); color: var(--brass);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .bento-card.featured .bento-icon { background: rgba(201, 162, 75, 0.18); color: #e2bd6b; }
+    .bento-tag { font-weight: 700; font-size: 0.92rem; letter-spacing: -0.01em; }
+    .bento-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 14px; }
+    .bento-desc { font-size: 0.81rem; color: var(--muted); line-height: 1.48; }
+    .bento-card.featured .bento-desc { color: rgba(241, 244, 248, 0.84); }
+    .arrow-badge {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--card-soft); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .bento-card.featured .arrow-badge { background: rgba(255,255,255,0.14); color: #fff; }
+
+    .sec-head { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 10px; }
+    .sec-head h3 { margin: 0; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .sec-link {
+      font-size: 0.78rem; font-weight: 600; color: var(--brass); cursor: pointer;
+      background: none; border: none; font-family: inherit; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .quick-list { display: flex; flex-direction: column; gap: 8px; }
+    .quick-row {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      cursor: pointer; transition: 150ms ease;
+    }
+    .quick-row:hover { border-color: var(--brass); background: var(--card-elevated); }
+    .quick-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .quick-avatar {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--primary-soft); color: var(--primary);
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    [data-theme="dark"] .quick-avatar { color: var(--brass); background: var(--brass-soft); }
+    .quick-title { font-weight: 600; font-size: 0.85rem; }
+    .quick-sub { font-size: 0.76rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 520px; }
+
+    /* =====================================================================
+       CHAT TIMELINE & 2026 LINEAR/PERPLEXITY REASONING RAIL
+       ===================================================================== */
+    .chat-feed { display: flex; flex-direction: column; gap: 18px; padding-bottom: 12px; }
+    .msg-row { display: flex; flex-direction: column; gap: 6px; animation: msgEnter 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes msgEnter {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg-row.user { align-items: flex-end; }
+    .msg-row.ai { align-items: stretch; }
+
+    .bubble-user {
+      background: var(--primary); color: var(--primary-ink);
+      padding: 11px 16px; border-radius: 14px 14px 4px 14px;
+      max-width: 82%; font-size: 0.91rem; font-weight: 500;
+      box-shadow: var(--shadow-sm); word-break: break-word;
+    }
+    .ai-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px;
+      box-shadow: var(--shadow-sm); width: 100%;
+    }
+    .ai-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .ai-identity { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 0.84rem; }
+    .ai-badge-ico {
+      width: 24px; height: 24px; border-radius: 7px;
+      background: var(--primary); color: var(--brass);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* Modern 2026 Vertical Reasoning Rail (Zero cheesy spinners!) */
+    .reason-rail {
+      background: var(--card-soft);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+    .reason-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      cursor: pointer; user-select: none;
+    }
+    .reason-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .reason-right { display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    /* Subtle Breathing Brass-Navy Indicator */
+    .pulse-beacon {
+      width: 9px; height: 9px; border-radius: 50%; background: var(--brass);
+      position: relative; flex-shrink: 0;
+    }
+    .pulse-beacon::after {
+      content: ""; position: absolute; inset: -4px; border-radius: 50%;
+      border: 1.5px solid var(--brass);
+      animation: beaconRing 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    }
+    @keyframes beaconRing {
+      0% { transform: scale(0.6); opacity: 0.85; }
+      100% { transform: scale(2.1); opacity: 0; }
+    }
+
+    /* Calm Horizontal Precision Track */
+    .sheen-track {
+      height: 2px; border-radius: 2px; background: var(--border);
+      margin-top: 9px; overflow: hidden; position: relative;
+    }
+    .sheen-bar {
+      position: absolute; inset: 0; width: 40%;
+      background: linear-gradient(90deg, transparent, var(--brass), var(--primary), transparent);
+      animation: sheenSlide 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    @keyframes sheenSlide {
+      0% { transform: translateX(-110%); }
+      100% { transform: translateX(280%); }
+    }
+    .reason-rail.finished .sheen-track { display: none; }
+
+    .reason-title { font-size: 0.81rem; font-weight: 600; color: var(--text); }
+    .reason-rail.finished .reason-title { color: var(--verified); }
+
+    .reason-timeline {
+      margin-top: 10px; padding-left: 14px; border-left: 1.5px solid var(--border-strong);
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .reason-rail.collapsed .reason-timeline { display: none; }
+    .reason-step {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      font-size: 0.77rem; color: var(--muted);
+      animation: stepIn 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reason-step.running { color: var(--text); font-weight: 600; }
+    .reason-step.done { color: var(--text-secondary); }
+    .reason-step-l { display: flex; align-items: center; gap: 7px; }
+    .reason-step.done svg { color: var(--verified); }
+
+    /* Calm Matte Skeleton Lines */
+    .skeleton-wrap { display: flex; flex-direction: column; gap: 9px; padding: 6px 0 8px; }
+    .skel-line {
+      height: 10px; border-radius: 5px;
+      background: linear-gradient(90deg, var(--shimmer-a) 25%, var(--shimmer-b) 50%, var(--shimmer-a) 75%);
+      background-size: 200% 100%;
+      animation: skelSweep 1.5s ease-in-out infinite;
+    }
+    .skel-line.w-92 { width: 92%; }
+    .skel-line.w-78 { width: 78%; }
+    .skel-line.w-55 { width: 55%; }
+    @keyframes skelSweep { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Legal Answer Typography */
+    .ai-content { font-size: 0.93rem; line-height: 1.74; color: var(--text); }
+    .ai-content h2, .ai-content h3, .ai-content h4 {
+      font-family: "Newsreader", Georgia, serif; margin: 14px 0 6px; font-size: 1.08rem; font-weight: 600; color: var(--text);
+    }
+    .ai-content ul { margin: 6px 0 12px; padding-left: 20px; }
+    .ai-content li { margin-bottom: 5px; }
+    .ai-content a { color: var(--brass); text-decoration: none; font-weight: 600; border-bottom: 1px solid transparent; }
+    .ai-content a:hover { border-bottom-color: var(--brass); }
+    .ai-content code { background: var(--code-bg); padding: 2px 6px; border-radius: 5px; font-size: 0.85em; }
+    .ai-content blockquote {
+      margin: 10px 0; padding: 9px 14px; border-left: 3px solid var(--brass);
+      background: var(--card-soft); border-radius: 0 8px 8px 0; color: var(--text-secondary);
+    }
+    .stream-caret {
+      display: inline-block; width: 2px; height: 15px; background: var(--brass);
+      vertical-align: middle; margin-left: 3px; animation: caretBlink 0.9s step-end infinite;
+    }
+    @keyframes caretBlink { 50% { opacity: 0; } }
+
+    /* Verified Legal Citations Strip */
+    .sources-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin: 16px 0 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .sources-row { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; }
+    .source-card {
+      min-width: 235px; max-width: 270px; flex-shrink: 0;
+      background: var(--card-soft); border: 1px solid var(--border); border-radius: 11px;
+      padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;
+      text-decoration: none; color: inherit; transition: 150ms ease;
+    }
+    .source-card:hover { border-color: var(--brass); background: var(--card-elevated); }
+    .source-ico {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--card); border: 1px solid var(--border); color: var(--brass);
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .source-meta { min-width: 0; }
+    .source-title {
+      font-size: 0.77rem; font-weight: 600; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .source-sub { font-size: 0.7rem; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .pill-mini {
+      font-size: 0.64rem; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+      background: var(--verified-soft); color: var(--verified);
+    }
+    .pill-mini.danger { background: var(--danger-soft); color: var(--danger); }
+
+    .msg-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap;
+    }
+    .act-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .act-btn {
+      border: 1px solid var(--border); background: var(--card-soft); color: var(--text-secondary);
+      border-radius: 8px; padding: 5px 10px; font-size: 0.74rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .act-btn:hover { color: var(--text); border-color: var(--border-strong); background: var(--card-elevated); }
+    .verify-pill {
+      font-size: 0.71rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      background: var(--verified-soft); color: var(--verified);
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .verify-pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+    .followup-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .followup-chip {
+      border: 1px solid var(--border); background: var(--card-soft); color: var(--text-secondary);
+      font-family: inherit; font-size: 0.77rem; font-weight: 600;
+      padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    }
+    .followup-chip:hover { border-color: var(--brass); color: var(--text); }
+
+    /* ASSISTANTS & TOOLS */
+    .cat-pills { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 6px; }
+    .cat-pill {
+      border: 1px solid var(--border); background: var(--card); color: var(--muted);
+      font-family: inherit; font-weight: 600; font-size: 0.78rem;
+      padding: 6px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+    }
+    .cat-pill.active { background: var(--primary); color: var(--primary-ink); border-color: transparent; }
+    .assist-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+    @media (min-width: 760px) { .assist-grid { grid-template-columns: repeat(3, 1fr); } }
+    .assist-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 15px; cursor: pointer; box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; gap: 8px;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+    .assist-card:hover { transform: translateY(-2px); border-color: var(--brass); background: var(--card-elevated); }
+    .assist-ico {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: var(--brass-soft); color: var(--brass);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .assist-name { font-weight: 700; font-size: 0.87rem; }
+    .assist-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.45; }
+
+    /* INTEGRATED TOOLS */
+    .tool-panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: 15px;
+      padding: 20px; box-shadow: var(--shadow-sm);
+    }
+    .tool-panel h3 {
+      margin: 0 0 14px; font-family: "Newsreader", Georgia, serif; font-size: 1.25rem; font-weight: 600;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.76rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    .field input, .field select, .field textarea {
+      width: 100%; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);
+      border-radius: 10px; padding: 9px 12px; font-family: inherit; font-size: 0.88rem;
+    }
+    .field textarea { min-height: 130px; resize: vertical; }
+    .btn-primary {
+      background: var(--primary); color: var(--primary-ink); border: 1px solid rgba(201,162,75,0.35);
+      border-radius: 10px; padding: 10px 18px; font-family: inherit; font-weight: 600; font-size: 0.84rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-soft {
+      background: var(--card-soft); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 14px; font-family: inherit; font-weight: 600;
+      font-size: 0.81rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-soft:hover { border-color: var(--border-strong); background: var(--card-elevated); }
+    .tool-result {
+      margin-top: 16px; background: var(--card-soft); border: 1px solid var(--border);
+      border-radius: 12px; padding: 15px; font-size: 0.89rem;
+    }
+    .source-card-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px;
+    }
+    .ingest-box {
+      background: var(--card-soft); border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+    }
+    .ingest-box h4 { margin: 0 0 8px; font-size: 0.84rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+
+    /* FLOATING MULTILINE COMPOSER */
+    .composer-wrap { padding: 10px 20px 14px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--app-bg); }
+    .composer-inner { max-width: 760px; margin: 0 auto; }
+    .options-popover {
+      display: none; margin-bottom: 9px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 10px 14px; box-shadow: var(--shadow-md);
+    }
+    .options-popover.open { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .opt-item { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 600; color: var(--muted); }
+    .opt-item input[type="date"], .opt-item select {
+      border: 1px solid var(--border); border-radius: 7px; padding: 4px 8px;
+      font-family: inherit; font-size: 0.76rem; background: var(--input-bg); color: var(--text);
+    }
+    .composer {
+      display: flex; align-items: flex-end; gap: 8px;
+      background: var(--card); border: 1px solid var(--border-strong);
+      border-radius: 14px; padding: 6px 8px 6px 10px; box-shadow: var(--shadow-sm);
+    }
+    .composer:focus-within { border-color: var(--primary); }
+    .comp-ico {
+      width: 34px; height: 34px; border-radius: 9px;
+      border: none; background: var(--card-soft); color: var(--muted);
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+    .comp-ico:hover { color: var(--text); background: var(--border); }
+    .comp-input {
+      flex: 1; border: none; outline: none; background: transparent; resize: none;
+      font-family: inherit; font-size: 0.92rem; color: var(--text);
+      padding: 7px 4px; min-height: 34px; max-height: 140px; line-height: 1.45;
+    }
+    .comp-input::placeholder { color: var(--muted); }
+    .send-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: none; background: var(--primary); color: var(--primary-ink);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; transition: 150ms ease;
+    }
+    .send-btn:hover { background: var(--primary-hover); }
+    .send-btn.stop-mode { background: var(--danger); }
+    .composer-hint { margin-top: 6px; text-align: center; font-size: 0.7rem; color: var(--muted); }
+
+    .sb-backdrop { display: none; position: absolute; inset: 0; background: rgba(12, 16, 22, 0.45); z-index: 35; }
+    .sb-backdrop.open { display: block; }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="workspace">
+      <div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar(false)"></div>
+
+      <!-- LEFT SIDEBAR -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sb-head">
+          <div class="sb-brand">
+            <span class="brand-emblem">
+              <svg class="ico" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            </span>
+            <div>
+              <div class="brand-name">Adolat</div>
+              <div class="brand-tag">Huquqiy Tizim</div>
+            </div>
+          </div>
+          <button class="icon-btn" style="width:30px;height:30px;" title="Panelni yopish" onclick="toggleSidebar(false)">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+          </button>
+        </div>
+
+        <button class="sb-new-btn" onclick="startNewChat()">
+          <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>Yangi huquqiy so'rov</span>
+        </button>
+
+        <div class="sb-section-label">Suhbatlar tarixi</div>
+        <div class="sb-list" id="historyList"></div>
+
+        <div class="sb-foot">
+          <button class="sb-tool-btn" onclick="openTool('audit'); closeMobileSidebar();">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>
+            <span>Hujjat va Shartnoma Auditi</span>
+          </button>
+          <button class="sb-tool-btn" onclick="openTool('translate'); closeMobileSidebar();">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            <span>UZ / RU / EN Taqqoslash</span>
+          </button>
+          <button class="sb-tool-btn" onclick="openTool('temporal'); closeMobileSidebar();">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Tarixiy Qonun Tahriri</span>
+          </button>
+          <button class="sb-tool-btn" onclick="openTool('ingest'); closeMobileSidebar();">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+            <span>Kodekslar va Manbalar O'qitish</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- MAIN COLUMN -->
+      <div class="main-col">
+        <header class="topbar">
+          <div class="top-left">
+            <button class="icon-btn" title="Tarix va menyu" onclick="toggleSidebar()">
+              <svg class="ico" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+            </button>
+            <div class="conn-pill" title="Qonunchilik bazasi holati">
+              <span class="live-dot" id="statusDot"></span>
+              <span id="healthSub">Faol</span>
+            </div>
+          </div>
+
+          <div class="top-right">
+            <!-- Tactile Spring-Physics Theme Pill Switch -->
+            <div class="theme-switch" role="switch" aria-label="Yorug' yoki tungi rejim" onclick="toggleTheme()">
+              <span class="theme-thumb"></span>
+              <span class="theme-opt opt-light">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              </span>
+              <span class="theme-opt opt-dark">
+                <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+              </span>
+            </div>
+            <button class="icon-btn" title="Yangi so'rov (Ctrl+K)" onclick="startNewChat()">
+              <svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="seg-wrap">
+          <div class="seg-bar">
+            <button class="seg-pill active" id="pillHome" onclick="switchView('home')">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Bosh sahifa</span>
+            </button>
+            <button class="seg-pill" id="pillChat" onclick="switchView('chat')">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Huquqiy Maslahat</span>
+            </button>
+            <button class="seg-pill" id="pillAssist" onclick="switchView('assist')">
+              <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+              <span>Kodekslar va Asboblar</span>
+            </button>
+          </div>
+        </div>
+
+        <main class="main-scroll" id="mainScroll">
+          <div class="reading-wrap">
+            <!-- VIEW 1: HOME -->
+            <section id="view-home" class="view active">
+              <div class="greeting">
+                <div>
+                  <div class="greeting-eyebrow">
+                    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+                    <span>O'zbekiston Respublikasi Qonunchilik Tahlili</span>
+                  </div>
+                  <h2>Qanday huquqiy masala bo'yicha yordam kerak?</h2>
+                </div>
+                <div class="lang-chips" title="Javob tili">
+                  <button class="lang-chip active" onclick="setLang('', this)">AUTO</button>
+                  <button class="lang-chip" onclick="setLang('uz_latn', this)">O'Z</button>
+                  <button class="lang-chip" onclick="setLang('uz_cyrl', this)">ЎЗ</button>
+                  <button class="lang-chip" onclick="setLang('ru', this)">РУ</button>
+                  <button class="lang-chip" onclick="setLang('en', this)">EN</button>
+                </div>
+              </div>
+
+              <div class="bento-grid">
+                <div class="bento-card featured" onclick="switchView('chat'); document.getElementById('chatInput').focus();">
+                  <div class="bento-top">
+                    <div class="bento-icon">
+                      <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+                    </div>
+                    <span class="bento-tag">Huquqiy Maslahat</span>
+                  </div>
+                  <div class="bento-bottom">
+                    <div class="bento-desc">Konstitutsiya, 18 ta Kodeks, qonunlar va Oliy sud Plenumi asosida aniq modda havolali javob</div>
+                    <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                  </div>
+                </div>
+
+                <div class="bento-card" onclick="openTool('audit')">
+                  <div class="bento-top">
+                    <div class="bento-icon">
+                      <svg class="ico ico-lg" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>
+                    </div>
+                    <span class="bento-tag">Shartnoma va Hujjat Auditi</span>
+                  </div>
+                  <div class="bento-bottom">
+                    <div class="bento-desc">Shartnoma, da'vo arizasi yoki nizomni (PDF / DOCX) amaldagi qonunchilikka tekshirish</div>
+                    <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                  </div>
+                </div>
+
+                <div class="bento-card" onclick="openTool('translate')">
+                  <div class="bento-top">
+                    <div class="bento-icon">
+                      <svg class="ico ico-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    </div>
+                    <span class="bento-tag">UZ / RU / EN Taqqoslash</span>
+                  </div>
+                  <div class="bento-bottom">
+                    <div class="bento-desc">Rasmiy huquqiy atamalar bilan tarjima va o'zbekcha matn bilan tafovutni aniqlash</div>
+                    <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                  </div>
+                </div>
+
+                <div class="bento-card" onclick="openTool('ingest')">
+                  <div class="bento-top">
+                    <div class="bento-icon">
+                      <svg class="ico ico-lg" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                    </div>
+                    <span class="bento-tag">Kodekslar va Manbalar O'qitish</span>
+                  </div>
+                  <div class="bento-bottom">
+                    <div class="bento-desc">Barcha 18 kodeks, sud.uz, norma.uz, adliya.uz yoki shaxsiy PDF/DOCX hujjatlarni bazaga o'qitish</div>
+                    <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sec-head">
+                <h3>Namuna huquqiy so'rovlar</h3>
+                <button class="sec-link" onclick="switchView('assist')">
+                  <span>Barcha kodekslar</span>
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </button>
+              </div>
+              <div class="quick-list">
+                <div class="quick-row" onclick="quickAsk('Voyaga yetmagan bolalar uchun aliment miqdori qancha belgilangan?')">
+                  <div class="quick-left">
+                    <div class="quick-avatar"><svg class="ico" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div>
+                      <div class="quick-title">Oila kodeksi · 99-modda</div>
+                      <div class="quick-sub">Voyaga yetmagan bolalar uchun aliment miqdori qancha belgilangan?</div>
+                    </div>
+                  </div>
+                  <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                </div>
+
+                <div class="quick-row" onclick="quickAsk('Yangi Mehnat kodeksiga ko\'ra ish beruvchi tashabbusi bilan ishdan bo\'shatishda ogohlantirish muddatlari qanday?')">
+                  <div class="quick-left">
+                    <div class="quick-avatar"><svg class="ico" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                    <div>
+                      <div class="quick-title">Mehnat kodeksi · 161 va 165-moddalar</div>
+                      <div class="quick-sub">Ish beruvchi tashabbusi bilan bo'shatishda ogohlantirish muddatlari qanday?</div>
+                    </div>
+                  </div>
+                  <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                </div>
+
+                <div class="quick-row" onclick="quickAsk('Soliq kodeksi bo\'yicha QQS, foyda solig\'i va aylanmadan olinadigan soliq stavkalari qancha?')">
+                  <div class="quick-left">
+                    <div class="quick-avatar"><svg class="ico" viewBox="0 0 24 24"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                    <div>
+                      <div class="quick-title">Soliq kodeksi · Asosiy stavkalar</div>
+                      <div class="quick-sub">QQS, foyda solig'i va aylanmadan olinadigan soliq stavkalari qancha?</div>
+                    </div>
+                  </div>
+                  <span class="arrow-badge"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                </div>
+              </div>
+            </section>
+
+            <!-- VIEW 2: CHAT -->
+            <section id="view-chat" class="view">
+              <div class="chat-feed" id="chatFeed"></div>
+            </section>
+
+            <!-- VIEW 3: CODES & TOOLS -->
+            <section id="view-assist" class="view">
+              <div class="cat-pills">
+                <button class="cat-pill active" onclick="filterAssist('all', this)">Barchasi</button>
+                <button class="cat-pill" onclick="filterAssist('law', this)">Kodekslar va Sohalar</button>
+                <button class="cat-pill" onclick="filterAssist('tool', this)">Tahlil va O'qitish</button>
+              </div>
+              <div class="assist-grid" id="assistGrid">
+                <div class="assist-card" data-cat="law" onclick="quickAsk('O\'zbekiston Respublikasi Konstitutsiyasining 28 va 29-moddalarida fuqaro huquqlari qanday kafolatlangan?')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></div>
+                  <div class="assist-name">Konstitutsiyaviy Huquq</div>
+                  <div class="assist-desc">2023-yil Konstitutsiya, qonunlar iyerarxiyasi (O'RQ-682), asosiy huquqlar.</div>
+                </div>
+                <div class="assist-card" data-cat="law" onclick="quickAsk('Yangi Mehnat kodeksi bo\'yicha dastlabki sinov muddati va yillik ta\'til davomiyligi qancha?')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                  <div class="assist-name">Mehnat Kodeksi</div>
+                  <div class="assist-desc">Mehnat shartnomasi, sinov muddati, 21 kunlik ta'til va bo'shatish tartibi.</div>
+                </div>
+                <div class="assist-card" data-cat="law" onclick="quickAsk('Soliq kodeksiga ko\'ra QQS, foyda solig\'i va JShODS stavkalari qancha?')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                  <div class="assist-name">Soliq va Korporativ</div>
+                  <div class="assist-desc">Soliq kodeksi, MCHJ, QQS, foyda solig'i, aylanmadan soliq.</div>
+                </div>
+                <div class="assist-card" data-cat="law" onclick="quickAsk('Fuqarolik kodeksi bo\'yicha umumiy da\'vo muddati va shartnoma erkinligi qanday tartibga solingan?')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/></svg></div>
+                  <div class="assist-name">Fuqarolik Kodeksi</div>
+                  <div class="assist-desc">Shartnomalar, mulk, qarz, neustoyka va 3 yillik da'vo muddati.</div>
+                </div>
+                <div class="assist-card" data-cat="law" onclick="quickAsk('Jinoyat kodeksining 168-moddasi (firibgarlik) va MJtK 332-1-moddasi (jarima chegirmasi) qanday qo\'llaniladi?')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                  <div class="assist-name">Jinoyat va Ma'muriy</div>
+                  <div class="assist-desc">JK, JPK, MJtK moddalari, BHM jarimalari va 50%/70% chegirma qoidasi.</div>
+                </div>
+                <div class="assist-card" data-cat="tool" onclick="openTool('audit')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg></div>
+                  <div class="assist-name">Hujjat Auditi</div>
+                  <div class="assist-desc">Shartnoma va da'vo arizalarini (PDF/DOCX) qonunga tekshirish.</div>
+                </div>
+                <div class="assist-card" data-cat="tool" onclick="openTool('translate')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+                  <div class="assist-name">UZ / RU / EN Taqqoslash</div>
+                  <div class="assist-desc">Rasmiy tarjima va o'zbekcha matn bilan tafovut auditi.</div>
+                </div>
+                <div class="assist-card" data-cat="tool" onclick="openTool('temporal')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                  <div class="assist-name">Tarixiy Taqqoslash</div>
+                  <div class="assist-desc">Avvalgi sana va bugungi tahrir o'rtasidagi farqlarni ko'rish.</div>
+                </div>
+                <div class="assist-card" data-cat="tool" onclick="openTool('ingest')">
+                  <div class="assist-ico"><svg class="ico" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></div>
+                  <div class="assist-name">Ko'p Manbali O'qitish</div>
+                  <div class="assist-desc">18 ta Kodeks, sud.uz, norma.uz, adliya.uz va shaxsiy PDF/DOCX yuklash.</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- VIEW 4: INTEGRATED TOOLS -->
+            <section id="view-tool" class="view">
+              <div style="margin-bottom:12px;">
+                <button class="btn-soft" onclick="switchView('home')">
+                  <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                  <span>Bosh sahifaga qaytish</span>
+                </button>
+              </div>
+
+              <div id="tool-audit" class="tool-panel" style="display:none;">
+                <h3>
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>
+                  <span>Shartnoma va Hujjat Auditi</span>
+                </h3>
+                <div class="field-grid">
+                  <div class="field">
+                    <label>Hujjat turi</label>
+                    <select id="auditKind">
+                      <option value="contract">Tijorat / Fuqarolik shartnomasi</option>
+                      <option value="employment">Mehnat shartnomasi</option>
+                      <option value="court_filing">Sud da'vo arizasi</option>
+                      <option value="corporate_charter">Ta'sis hujjati / Ustav</option>
+                      <option value="regulation">Normativ hujjat loyihasi</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Fayl yuklash (PDF / DOCX / TXT)</label>
+                    <input id="auditFile" type="file" accept=".pdf,.docx,.txt,.md" />
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Yoki hujjat matnini kiriting</label>
+                  <textarea id="auditText" placeholder="Shartnoma bandlarini shu yerga joylang..."></textarea>
+                </div>
+                <button class="btn-primary" onclick="runAudit()">Qonunga muvofiqlikni tekshirish</button>
+                <div id="auditResult"></div>
+              </div>
+
+              <div id="tool-translate" class="tool-panel" style="display:none;">
+                <h3>
+                  <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                  <span>UZ / RU / EN Tarjima va Tafovut Auditi</span>
+                </h3>
+                <div class="field-grid">
+                  <div class="field"><label>Lex.uz Hujjat ID (ixtiyoriy)</label><input id="trDocId" placeholder="Masalan: 6257288" /></div>
+                  <div class="field"><label>Modda raqami (ixtiyoriy)</label><input id="trArticle" placeholder="Masalan: 161" /></div>
+                  <div class="field">
+                    <label>Maqsadli til</label>
+                    <select id="trTarget">
+                      <option value="en">English</option>
+                      <option value="ru">Русский</option>
+                      <option value="uz_latn">O'zbek (Lotin)</option>
+                      <option value="uz_cyrl">Ўзбек (Кирилл)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Yoki huquqiy matn kiriting</label>
+                  <textarea id="trSource" placeholder="Tarjima va taqqoslash uchun modda matni..."></textarea>
+                </div>
+                <button class="btn-primary" onclick="runTranslate()">Tarjima va UZ asl nusxa tekshiruvi</button>
+                <div id="trResult"></div>
+              </div>
+
+              <div id="tool-temporal" class="tool-panel" style="display:none;">
+                <h3>
+                  <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Tarixiy va Joriy Qonunchilik Taqqoslash</span>
+                </h3>
+                <div class="field" style="margin-bottom:12px;">
+                  <label>Huquqiy mavzu yoki modda</label>
+                  <input id="tmpQuery" placeholder="Masalan: Mehnat kodeksida yillik ta'til muddati" />
+                </div>
+                <div class="field-grid">
+                  <div class="field"><label>Tarixiy sana</label><input id="tmpHistDate" type="date" value="2020-01-01" /></div>
+                  <div class="field"><label>Taqqoslash sanasi (bo'sh = bugun)</label><input id="tmpCurrDate" type="date" /></div>
+                </div>
+                <button class="btn-primary" onclick="runTemporal()">Taqqoslash</button>
+                <div id="tmpResult"></div>
+              </div>
+
+              <!-- MULTI-SOURCE KNOWLEDGE CENTER (Lex.uz + All 18 Codes + sud.uz/norma.uz/adliya.uz + PDF/DOCX Upload) -->
+              <div id="tool-ingest" class="tool-panel" style="display:none;">
+                <h3>
+                  <svg class="ico" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                  <span>Ko'p Manbali Huquqiy Baza (Lex.uz · Kodekslar · Sud amaliyoti · PDF/DOCX)</span>
+                </h3>
+
+                <div class="source-card-grid">
+                  <div class="ingest-box">
+                    <h4>
+                      <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                      <span>Kodeks / Plenum / Kitob yuklash</span>
+                    </h4>
+                    <div class="field" style="margin-bottom:8px;">
+                      <label>PDF, DOCX yoki TXT fayl</label>
+                      <input id="kbFile" type="file" accept=".pdf,.docx,.txt,.md" />
+                    </div>
+                    <div class="field" style="margin-bottom:10px;">
+                      <label>Hujjat nomi (ixtiyoriy)</label>
+                      <input id="kbFileTitle" placeholder="Masalan: Oliy sud Plenumi qarori № 12" />
+                    </div>
+                    <button class="btn-primary" onclick="runIngestUpload()">Bazaga o'qitish</button>
+                  </div>
+
+                  <div class="ingest-box">
+                    <h4>
+                      <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
+                      <span>Tashqi portal (sud.uz · norma.uz · adliya.uz)</span>
+                    </h4>
+                    <div class="field" style="margin-bottom:10px;">
+                      <label>Huquqiy maqola yoki qaror URL manzili</label>
+                      <input id="kbExtUrl" placeholder="https://sud.uz/... yoki https://norma.uz/..." />
+                    </div>
+                    <button class="btn-primary" onclick="runIngestUrl()">URL dan o'qitish</button>
+                  </div>
+
+                  <div class="ingest-box">
+                    <h4>
+                      <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                      <span>Lex.uz Hujjat ID (UZ / RU / EN)</span>
+                    </h4>
+                    <div class="field" style="margin-bottom:10px;">
+                      <label>Hujjat ID yoki qidiruv so'zi</label>
+                      <input id="ingDocId" placeholder="Masalan: 6445147 (Konstitutsiya)" />
+                    </div>
+                    <button class="btn-soft" onclick="runIngestDoc()">Lex.uz ID yuklash</button>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn-primary" onclick="runBootstrapCore()">Barcha 18 ta Kodeks + Konstitutsiyani Yuklash</button>
+                  <button class="btn-soft" onclick="refreshHealth()">Baza statistikasini yangilash</button>
+                </div>
+                <div id="ingResult"></div>
+              </div>
+            </section>
+          </div>
+        </main>
+
+        <!-- FLOATING COMPOSER -->
+        <div class="composer-wrap">
+          <div class="composer-inner">
+            <div class="options-popover" id="optionsPopover">
+              <div class="opt-item"><span>Sana:</span><input id="optDate" type="date" /></div>
+              <div class="opt-item">
+                <span>Tahlil chuqurligi:</span>
+                <select id="optHops">
+                  <option value="1">Tezkor (1 hop)</option>
+                  <option value="2" selected>Optimal (2 hop)</option>
+                  <option value="3">Chuqur (3 hop)</option>
+                </select>
+              </div>
+              <label class="opt-item" style="cursor:pointer;"><input id="optLive" type="checkbox" checked /> Jonli Lex.uz</label>
+              <label class="opt-item" style="cursor:pointer;"><input id="optCompare" type="checkbox" /> UZ/RU/EN tafovut</label>
+            </div>
+
+            <div class="composer">
+              <input type="file" id="quickFileUpload" accept=".pdf,.docx,.txt,.md" style="display:none" onchange="handleQuickFile(this)" />
+              <button class="comp-ico" title="PDF / DOCX shartnoma auditi" onclick="document.getElementById('quickFileUpload').click()">
+                <svg class="ico" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="comp-ico" title="Qidiruv sozlamalari" onclick="toggleOptions()">
+                <svg class="ico" viewBox="0 0 24 24"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
+              </button>
+              <textarea id="chatInput" class="comp-input" rows="1" placeholder="Huquqiy savolingizni kiriting (O'zbek, Rus yoki Ingliz tilida)..."></textarea>
+              <button class="send-btn" id="btnSend" title="Yuborish (Enter)" onclick="handleComposerAction()">
+                <svg class="ico" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+              </button>
+            </div>
+            <div class="composer-hint">Enter — yuborish · Shift+Enter — yangi qator · Ctrl+K — yangi so'rov · Rasmiy normativ manbalar bilan tekshiriladi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INITIAL_HEALTH = __INITIAL_HEALTH_JSON__;
+
+    const SVG = {
+      send: '<svg class="ico" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>',
+      stop: '<svg class="ico ico-sm" viewBox="0 0 24 24"><rect width="14" height="14" x="5" y="5" rx="2" fill="currentColor" stroke="none"/></svg>',
+      scale: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>',
+      check: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
+      checkCircle: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>',
+      alert: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+      copy: '<svg class="ico ico-sm" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+      redo: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+      download: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+      book: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
+      msg: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+      trash: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+      chevron: '<svg class="ico ico-sm" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
+      beacon: '<span class="pulse-beacon"></span>',
+    };
+
+    let selectedLang = '';
+    let isBusy = false;
+    let currentAbort = null;
+    let sessions = JSON.parse(localStorage.getItem('adolat_sessions_v1') || '[]');
+    let activeSessionId = null;
+
+    /* THEME SWITCH (Spring-Physics Pill Thumb + Clean Surface Transition) */
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('adolat_theme', theme);
+    }
+    (function initTheme() {
+      const saved = localStorage.getItem('adolat_theme');
+      applyTheme(saved || 'light');
+    })();
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+    }
+
+    /* INSTANT CONNECTION STATUS (Zero vendor/model names exposed) */
+    function renderHealth(d) {
+      if (!d || d.status !== 'ok') {
+        document.getElementById('healthSub').textContent = 'Qayta ulanilmoqda...';
+        document.getElementById('statusDot').className = 'live-dot warn';
+        return;
+      }
+      const chunks = Number(d.bm25_chunks || 0).toLocaleString();
+      const statusText = d.llm_mode === 'retrieval-only' ? 'Faqat qidiruv' : 'Faol';
+      document.getElementById('healthSub').textContent = `${statusText} · ${chunks} norma`;
+      document.getElementById('statusDot').className = d.llm_mode === 'retrieval-only' ? 'live-dot warn' : 'live-dot';
+    }
+    async function refreshHealth() {
+      try {
+        const res = await fetch('/api/health', { cache: 'no-store' });
+        renderHealth(await res.json());
+      } catch {
+        renderHealth(null);
+      }
+    }
+    renderHealth(INITIAL_HEALTH);
+    setInterval(refreshHealth, 30000);
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function renderMarkdownLite(md) {
+      let html = esc(md || '');
+      html = html.replace(/^###\s+(.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^##\s+(.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^#\s+(.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^&gt;\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+      html = html.replace(/\n/g, '<br/>');
+      return html;
+    }
+
+    function toggleSidebar(forceState) {
+      const sb = document.getElementById('sidebar');
+      const bd = document.getElementById('sbBackdrop');
+      if (window.innerWidth <= 900) {
+        const open = forceState !== undefined ? forceState : !sb.classList.contains('mobile-open');
+        sb.classList.toggle('mobile-open', open);
+        bd.classList.toggle('open', open);
+      } else {
+        const collapse = forceState !== undefined ? !forceState : !sb.classList.contains('collapsed');
+        sb.classList.toggle('collapsed', collapse);
+      }
+    }
+    function closeMobileSidebar() { if (window.innerWidth <= 900) toggleSidebar(false); }
+
+    function switchView(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + name).classList.add('active');
+      document.querySelectorAll('.seg-pill').forEach(p => p.classList.remove('active'));
+      if (name === 'home') document.getElementById('pillHome').classList.add('active');
+      if (name === 'chat') document.getElementById('pillChat').classList.add('active');
+      if (name === 'assist') document.getElementById('pillAssist').classList.add('active');
+      document.getElementById('mainScroll').scrollTop = 0;
+    }
+
+    function setLang(code, btn) {
+      selectedLang = code;
+      document.querySelectorAll('.lang-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function toggleOptions() { document.getElementById('optionsPopover').classList.toggle('open'); }
+    function openTool(toolName) {
+      switchView('tool');
+      ['audit', 'translate', 'temporal', 'ingest'].forEach(t => {
+        document.getElementById('tool-' + t).style.display = (t === toolName) ? 'block' : 'none';
+      });
+    }
+    function filterAssist(cat, btn) {
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.assist-card').forEach(c => {
+        c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'flex' : 'none';
+      });
+    }
+
+    function saveSessions() {
+      localStorage.setItem('adolat_sessions_v1', JSON.stringify(sessions.slice(0, 25)));
+      renderHistoryList();
+    }
+    function renderHistoryList() {
+      const box = document.getElementById('historyList');
+      if (!sessions.length) {
+        box.innerHTML = '<div style="padding:12px 10px;font-size:0.77rem;color:var(--muted);">Suhbatlar tarixi bo\'sh</div>';
+        return;
+      }
+      box.innerHTML = sessions.map(s => `
+        <div class="sb-item ${s.id === activeSessionId ? 'active' : ''}" onclick="loadSession('${s.id}')">
+          <div class="sb-item-title">${SVG.msg}<span>${esc(s.title)}</span></div>
+          <button class="sb-del" title="O'chirish" onclick="event.stopPropagation(); deleteSession('${s.id}')">${SVG.trash}</button>
+        </div>
+      `).join('');
+    }
+    function deleteSession(id) {
+      sessions = sessions.filter(x => x.id !== id);
+      if (activeSessionId === id) activeSessionId = null;
+      saveSessions();
+    }
+    function loadSession(id) {
+      const s = sessions.find(x => x.id === id);
+      if (!s) return;
+      activeSessionId = id;
+      const feed = document.getElementById('chatFeed');
+      feed.innerHTML = '';
+      for (const m of s.messages) {
+        const r = document.createElement('div');
+        if (m.role === 'user') {
+          r.className = 'msg-row user';
+          r.innerHTML = `<div class="bubble-user">${esc(m.text)}</div>`;
+        } else {
+          r.className = 'msg-row ai';
+          r.innerHTML = `
+            <div class="ai-card">
+              <div class="ai-header">
+                <div class="ai-identity"><span class="ai-badge-ico">${SVG.scale}</span><span>Adolat · Huquqiy Maslahatchi</span></div>
+                <span class="verify-pill">${SVG.checkCircle}<span>Tasdiqlangan</span></span>
+              </div>
+              <div class="ai-content">${renderMarkdownLite(m.text)}</div>
+              ${renderSourceCards(m.citations || [])}
+            </div>
+          `;
+        }
+        feed.appendChild(r);
+      }
+      switchView('chat');
+      renderHistoryList();
+      closeMobileSidebar();
+    }
+
+    function startNewChat() {
+      activeSessionId = null;
+      document.getElementById('chatFeed').innerHTML = `
+        <div class="msg-row ai">
+          <div class="ai-card">
+            <div class="ai-header">
+              <div class="ai-identity"><span class="ai-badge-ico">${SVG.scale}</span><span>Adolat · Huquqiy Maslahatchi</span></div>
+            </div>
+            <div class="ai-content">
+              <strong>O'zbekiston Respublikasi qonunchiligi bo'yicha savolingizni kiriting.</strong><br/>
+              Har bir javob Konstitutsiya, Kodekslar, qonunlar va Lex.uz manbalari asosida moddalar ko'rsatilgan holda taqdim etiladi.
+            </div>
+            <div class="followup-row">
+              <button class="followup-chip" onclick="quickAsk('Voyaga yetmagan bolalar uchun aliment miqdori qancha?')">Aliment miqdori</button>
+              <button class="followup-chip" onclick="quickAsk('Soliq kodeksida QQS va foyda solig\'i stavkalari qancha?')">Soliq stavkalari</button>
+              <button class="followup-chip" onclick="quickAsk('Yangi Mehnat kodeksida yillik ta\'til necha kun?')">Mehnat ta'tili</button>
+            </div>
+          </div>
+        </div>
+      `;
+      switchView('chat');
+      renderHistoryList();
+      closeMobileSidebar();
+      document.getElementById('chatInput').focus();
+    }
+
+    function renderSourceCards(citations) {
+      if (!citations || !citations.length) return '';
+      return `
+        <div class="sources-label">${SVG.book}<span>Normativ-huquqiy manbalar (${citations.length})</span></div>
+        <div class="sources-row">
+          ${citations.slice(0, 8).map(c => `
+            <a class="source-card" href="${esc(c.url)}" target="_blank" rel="noopener">
+              <div class="source-ico">${SVG.scale}</div>
+              <div class="source-meta">
+                <div class="source-title">${esc(c.doc_title)}</div>
+                <div class="source-sub">
+                  ${c.article ? `<span>${esc(c.article)}</span>` : ''}
+                  <span class="pill-mini ${c.status === 'repealed' ? 'danger' : ''}">${esc(c.status)}</span>
+                </div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text || '');
+      btn.innerHTML = `${SVG.check}<span>Nusxalandi</span>`;
+      setTimeout(() => btn.innerHTML = `${SVG.copy}<span>Nusxalash</span>`, 1500);
+    }
+    function exportMarkdown(query, answer) {
+      const blob = new Blob([`# ${query}\n\n${answer}\n`], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'adolat-huquqiy-xulosa.md';
+      a.click();
+    }
+
+    const chatInput = document.getElementById('chatInput');
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
+    });
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleComposerAction();
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        startNewChat();
+      }
+    });
+
+    function quickAsk(text) { chatInput.value = text; submitComposer(); }
+    function handleQuickFile(input) {
+      if (!input.files || !input.files.length) return;
+      openTool('audit');
+      document.getElementById('auditFile').files = input.files;
+      runAudit();
+    }
+    function setComposerBusy(busy) {
+      isBusy = busy;
+      const btn = document.getElementById('btnSend');
+      btn.classList.toggle('stop-mode', busy);
+      btn.title = busy ? 'To\'xtatish' : 'Yuborish (Enter)';
+      btn.innerHTML = busy ? SVG.stop : SVG.send;
+    }
+    function handleComposerAction() {
+      if (isBusy && currentAbort) { currentAbort.abort(); return; }
+      submitComposer();
+    }
+
+    async function submitComposer() {
+      const query = chatInput.value.trim();
+      if (!query || isBusy) return;
+
+      switchView('chat');
+      chatInput.value = '';
+      chatInput.style.height = '34px';
+
+      if (!activeSessionId) {
+        activeSessionId = 's_' + Date.now();
+        sessions.unshift({ id: activeSessionId, title: query.slice(0, 48), messages: [] });
+        document.getElementById('chatFeed').innerHTML = '';
+      }
+      const session = sessions.find(x => x.id === activeSessionId);
+      if (session) { session.messages.push({ role: 'user', text: query }); saveSessions(); }
+
+      currentAbort = new AbortController();
+      setComposerBusy(true);
+
+      const feed = document.getElementById('chatFeed');
+      const scrollBox = document.getElementById('mainScroll');
+
+      const userRow = document.createElement('div');
+      userRow.className = 'msg-row user';
+      userRow.innerHTML = `<div class="bubble-user">${esc(query)}</div>`;
+      feed.appendChild(userRow);
+
+      const uid = 'ai_' + Date.now();
+      const aiRow = document.createElement('div');
+      aiRow.className = 'msg-row ai';
+      aiRow.innerHTML = `
+        <div class="ai-card">
+          <div class="ai-header">
+            <div class="ai-identity"><span class="ai-badge-ico">${SVG.scale}</span><span>Adolat · Huquqiy Maslahatchi</span></div>
+            <span id="${uid}_timer" style="font-size:0.75rem;color:var(--muted);font-variant-numeric:tabular-nums;">0.0s</span>
+          </div>
+
+          <div class="reason-rail" id="${uid}_rail">
+            <div class="reason-head" onclick="document.getElementById('${uid}_rail').classList.toggle('collapsed')">
+              <div class="reason-left">
+                <span id="${uid}_beacon">${SVG.beacon}</span>
+                <span id="${uid}_rtitle" class="reason-title">Normativ-huquqiy baza tahlil qilinmoqda...</span>
+              </div>
+              <div class="reason-right">${SVG.chevron}</div>
+            </div>
+            <div class="sheen-track"><div class="sheen-bar"></div></div>
+            <div class="reason-timeline" id="${uid}_steps"></div>
+          </div>
+
+          <div class="skeleton-wrap" id="${uid}_skel">
+            <div class="skel-line w-92"></div>
+            <div class="skel-line w-78"></div>
+            <div class="skel-line w-55"></div>
+          </div>
+          <div class="ai-content" id="${uid}_body"></div>
+          <div id="${uid}_sources"></div>
+          <div id="${uid}_footer"></div>
+        </div>
+      `;
+      feed.appendChild(aiRow);
+      scrollBox.scrollTop = scrollBox.scrollHeight;
+
+      const t0 = performance.now();
+      const stepsState = {};
+      let streamedText = '';
+      const timer = setInterval(() => {
+        const el = document.getElementById(uid + '_timer');
+        if (el) el.textContent = ((performance.now() - t0) / 1000).toFixed(1) + 's';
+      }, 100);
+
+      function renderSteps(doneAll, activeLabel) {
+        const rail = document.getElementById(uid + '_rail');
+        const stepsBox = document.getElementById(uid + '_steps');
+        const titleEl = document.getElementById(uid + '_rtitle');
+        const beacon = document.getElementById(uid + '_beacon');
+        if (!rail || !stepsBox) return;
+
+        if (doneAll) {
+          rail.classList.add('finished', 'collapsed');
+          beacon.innerHTML = SVG.checkCircle;
+          beacon.style.color = 'var(--verified)';
+          titleEl.textContent = `Huquqiy tahlil yakunlandi · ${Object.keys(stepsState).length} bosqich`;
+        } else if (activeLabel) {
+          titleEl.textContent = activeLabel;
+        }
+
+        stepsBox.innerHTML = Object.keys(stepsState).sort((a,b) => Number(a) - Number(b)).map(k => {
+          const s = stepsState[k];
+          const sIco = s.status === 'done' ? SVG.check : SVG.beacon;
+          const ts = s.elapsed_ms != null ? `${(s.elapsed_ms / 1000).toFixed(2)}s` : '';
+          return `
+            <div class="reason-step ${s.status}">
+              <div class="reason-step-l">${sIco}<span>${esc(s.label)}</span></div>
+              <span>${ts}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      try {
+        const res = await fetch('/api/ask/stream', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          signal: currentAbort.signal,
+          body: JSON.stringify({
+            query,
+            response_language: selectedLang || null,
+            as_of_date: document.getElementById('optDate').value || null,
+            max_hops: Number(document.getElementById('optHops').value) || 2,
+            enable_live_lex: document.getElementById('optLive').checked,
+            compare_translations: document.getElementById('optCompare').checked,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith('data:')) continue;
+            const ev = JSON.parse(line.slice(5).trim());
+
+            if (ev.type === 'step') {
+              stepsState[ev.step] = ev;
+              renderSteps(false, ev.label);
+              scrollBox.scrollTop = scrollBox.scrollHeight;
+            } else if (ev.type === 'token') {
+              const skel = document.getElementById(uid + '_skel');
+              if (skel) skel.remove();
+              streamedText += ev.text;
+              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(streamedText) + '<span class="stream-caret"></span>';
+              scrollBox.scrollTop = scrollBox.scrollHeight;
+            } else if (ev.type === 'replace_answer') {
+              streamedText = ev.text;
+              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(streamedText);
+            } else if (ev.type === 'done') {
+              const skel = document.getElementById(uid + '_skel');
+              if (skel) skel.remove();
+              renderSteps(true);
+              const d = ev.response;
+              const v = d.verification || {};
+              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(d.answer);
+              document.getElementById(uid + '_sources').innerHTML = renderSourceCards(d.citations);
+              document.getElementById(uid + '_footer').innerHTML = `
+                <div class="msg-actions">
+                  <div class="act-btns">
+                    <button class="act-btn" id="${uid}_copy">${SVG.copy}<span>Nusxalash</span></button>
+                    <button class="act-btn" id="${uid}_redo">${SVG.redo}<span>Qayta</span></button>
+                    <button class="act-btn" id="${uid}_md">${SVG.download}<span>Eksport .md</span></button>
+                  </div>
+                  <span class="verify-pill ${v.passed ? '' : 'warn'}">
+                    ${v.passed ? SVG.checkCircle : SVG.alert}
+                    <span>${v.passed ? 'Manbalar tasdiqlandi' : 'Tekshiring'} · ${Math.round((v.confidence_score || 0) * 100)}%</span>
+                  </span>
+                </div>
+              `;
+              document.getElementById(uid + '_copy').onclick = function() { copyText(d.answer, this); };
+              document.getElementById(uid + '_redo').onclick = () => quickAsk(query);
+              document.getElementById(uid + '_md').onclick = () => exportMarkdown(query, d.answer);
+
+              if (session) { session.messages.push({ role: 'ai', text: d.answer, citations: d.citations }); saveSessions(); }
+              scrollBox.scrollTop = scrollBox.scrollHeight;
+            } else if (ev.type === 'error') {
+              throw new Error(ev.detail || 'Xatolik yuz berdi');
+            }
+          }
+        }
+      } catch (err) {
+        const skel = document.getElementById(uid + '_skel');
+        if (skel) skel.remove();
+        renderSteps(true);
+        if (err.name === 'AbortError') {
+          document.getElementById(uid + '_body').innerHTML =
+            renderMarkdownLite(streamedText) + '<div style="margin-top:8px;font-size:0.8rem;color:var(--muted);">So\'rov to\'xtatildi.</div>';
+        } else {
+          document.getElementById(uid + '_body').innerHTML =
+            `<div style="color:var(--danger);font-weight:600;">Xatolik: ${esc(err.message)}</div>`;
+        }
+      } finally {
+        clearInterval(timer);
+        currentAbort = null;
+        setComposerBusy(false);
+      }
+    }
+
+    /* TOOLS */
+    async function runAudit() {
+      const out = document.getElementById('auditResult');
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Hujjat bandma-band qonunchilikka solishtirilmoqda...</span></div>`;
+      try {
+        const fileInput = document.getElementById('auditFile');
+        let res;
+        if (fileInput.files && fileInput.files.length > 0) {
+          const fd = new FormData();
+          fd.append('file', fileInput.files[0]);
+          fd.append('document_kind', document.getElementById('auditKind').value);
+          res = await fetch('/api/audit/upload', { method: 'POST', body: fd });
+        } else {
+          res = await fetch('/api/audit', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              document_text: document.getElementById('auditText').value,
+              document_kind: document.getElementById('auditKind').value,
+            })
+          });
+        }
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.detail || JSON.stringify(d));
+        const findingsHtml = (d.findings || []).map(f => `
+          <div style="margin-top:10px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+            <span class="pill-mini ${['critical','high'].includes(f.severity) ? 'danger' : ''}">${esc(f.severity).toUpperCase()}</span>
+            <strong> ${esc(f.clause_reference)}</strong>
+            <div style="margin-top:5px;">${esc(f.issue_summary)}</div>
+            <div style="margin-top:5px;color:var(--verified);font-weight:600;">Tavsiya: ${esc(f.recommendation)}</div>
+          </div>
+        `).join('');
+        out.innerHTML = `
+          <div class="tool-result">
+            <div><span class="verify-pill warn">Xatar darajasi: ${esc(d.overall_risk).toUpperCase()}</span></div>
+            <div class="ai-content" style="margin-top:10px;">${renderMarkdownLite(d.executive_summary)}</div>
+            ${findingsHtml}
+            ${renderSourceCards(d.citations)}
+          </div>
+        `;
+      } catch (err) {
+        out.innerHTML = `<div class="tool-result" style="color:var(--danger);">Xatolik: ${esc(err.message)}</div>`;
+      }
+    }
+
+    async function runTranslate() {
+      const out = document.getElementById('trResult');
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Tarjima qilinmoqda va o'zbekcha matn bilan taqqoslanmoqda...</span></div>`;
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            doc_id: document.getElementById('trDocId').value || null,
+            article: document.getElementById('trArticle').value || null,
+            source_text: document.getElementById('trSource').value || null,
+            target_language: document.getElementById('trTarget').value,
+            verify_against_uz_primary: true,
+          })
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.detail || JSON.stringify(d));
+        out.innerHTML = `
+          <div class="tool-result">
+            <div><span class="pill-mini">${esc(d.source_language)} → ${esc(d.target_language)}</span></div>
+            <div class="ai-content" style="margin-top:10px;">${renderMarkdownLite(d.translated_text)}</div>
+            <div style="margin-top:10px;font-size:0.79rem;color:var(--muted);">${esc(d.legal_note)}</div>
+          </div>
+        `;
+      } catch (err) {
+        out.innerHTML = `<div class="tool-result" style="color:var(--danger);">Xatolik: ${esc(err.message)}</div>`;
+      }
+    }
+
+    async function runTemporal() {
+      const out = document.getElementById('tmpResult');
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Tarixiy va joriy tahrir solishtirilmoqda...</span></div>`;
+      try {
+        const res = await fetch('/api/temporal', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            query: document.getElementById('tmpQuery').value,
+            historical_date: document.getElementById('tmpHistDate').value,
+            comparison_date: document.getElementById('tmpCurrDate').value || null,
+          })
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.detail || JSON.stringify(d));
+        out.innerHTML = `
+          <div class="tool-result">
+            <strong>Tarixiy (${esc(d.historical_date)}):</strong>
+            <div class="ai-content">${renderMarkdownLite(d.historical_regime_summary)}</div>
+            <br/><strong>Joriy (${esc(d.comparison_date)}):</strong>
+            <div class="ai-content">${renderMarkdownLite(d.current_regime_summary)}</div>
+            <br/><strong>Asosiy o'zgarishlar:</strong>
+            <ul>${(d.key_changes || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            ${renderSourceCards([...(d.historical_citations || []), ...(d.current_citations || [])])}
+          </div>
+        `;
+      } catch (err) {
+        out.innerHTML = `<div class="tool-result" style="color:var(--danger);">Xatolik: ${esc(err.message)}</div>`;
+      }
+    }
+
+    async function runIngestUpload() {
+      const out = document.getElementById('ingResult');
+      const fileEl = document.getElementById('kbFile');
+      if (!fileEl.files || !fileEl.files.length) {
+        out.innerHTML = '<div class="tool-result" style="color:var(--warn);">Avval PDF, DOCX yoki TXT fayl tanlang.</div>';
+        return;
+      }
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Hujjat o'qilib, moddalar bo'yicha bazaga indekslanmoqda...</span></div>`;
+      const fd = new FormData();
+      fd.append('file', fileEl.files[0]);
+      const titleVal = document.getElementById('kbFileTitle').value.trim();
+      if (titleVal) fd.append('title', titleVal);
+      const res = await fetch('/api/ingest/upload', { method: 'POST', body: fd });
+      out.innerHTML = `<div class="tool-result"><pre style="margin:0;white-space:pre-wrap;">${esc(JSON.stringify(await res.json(), null, 2))}</pre></div>`;
+      refreshHealth();
+    }
+
+    async function runIngestUrl() {
+      const out = document.getElementById('ingResult');
+      const url = document.getElementById('kbExtUrl').value.trim();
+      if (!url) return;
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Tashqi huquqiy portaldan matn yuklanib o'qitilmoqda...</span></div>`;
+      const res = await fetch('/api/ingest/url', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ url })
+      });
+      out.innerHTML = `<div class="tool-result"><pre style="margin:0;white-space:pre-wrap;">${esc(JSON.stringify(await res.json(), null, 2))}</pre></div>`;
+      refreshHealth();
+    }
+
+    async function runIngestDoc() {
+      const out = document.getElementById('ingResult');
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Lex.uz hujjati (UZ/RU/EN) yuklanmoqda...</span></div>`;
+      const res = await fetch('/api/ingest/lex-doc', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ doc_id: document.getElementById('ingDocId').value, fetch_all_languages: true })
+      });
+      out.innerHTML = `<div class="tool-result"><pre style="margin:0;white-space:pre-wrap;">${esc(JSON.stringify(await res.json(), null, 2))}</pre></div>`;
+      refreshHealth();
+    }
+
+    async function runBootstrapCore() {
+      const out = document.getElementById('ingResult');
+      out.innerHTML = `<div class="tool-result" style="display:flex;align-items:center;gap:10px;">${SVG.beacon}<span>Konstitutsiya va barcha 18 ta Kodeks yuklanmoqda...</span></div>`;
+      const res = await fetch('/api/ingest/bootstrap-core', { method: 'POST' });
+      out.innerHTML = `<div class="tool-result"><pre style="margin:0;white-space:pre-wrap;">${esc(JSON.stringify(await res.json(), null, 2))}</pre></div>`;
+      refreshHealth();
+    }
+
+    renderHistoryList();
+  </script>
+</body>
+</html>
