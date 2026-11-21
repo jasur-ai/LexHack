@@ -957,39 +957,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </Sheet>
 
-      {/* Floating Quick AI Yuridik Agent Button (Pastki o'ng burchak) */}
-      <div className="fixed bottom-24 lg:bottom-6 right-4 sm:right-6 z-40">
-        <button
-          type="button"
-          onClick={() => {
-            haptics.impact("medium");
-            setAiPanelOpen((v) => !v);
-          }}
-          className={`group flex items-center gap-2.5 sm:gap-3 rounded-full text-white pl-3.5 sm:pl-4 pr-4 sm:pr-5 py-2.5 sm:py-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 ${
-            aiPanelOpen
-              ? "bg-slate-800 hover:bg-slate-700 border-slate-600 shadow-slate-900/30"
-              : "bg-[#0074ff] hover:bg-[#0063db] border-white/40 shadow-blue-500/25"
-          }`}
-          aria-label="AI Yuridik Agent"
-        >
-          <div className="relative flex items-center justify-center">
-            <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-            </span>
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-xs sm:text-sm font-bold leading-tight flex items-center gap-1.5">
-              {aiPanelOpen ? "Chatni yopish" : "AI Yuridik Agent"}
-              {!aiPanelOpen && <Sparkles className="h-3.5 w-3.5 text-amber-300" />}
-            </span>
-            <span className="text-[10px] sm:text-[11px] text-blue-100 font-medium leading-tight">
-              {aiPanelOpen ? "O'ng panelda faol" : "24/7 Bepul Huquqiy Yordam"}
-            </span>
-          </div>
-        </button>
-      </div>
+      {/* Floating Quick AI Yuridik Agent Button (Pastki o'ng burchak - faqat panel yopiq bo'lganda chiqadi) */}
+      {!aiPanelOpen && (
+        <div className="fixed bottom-24 lg:bottom-6 right-4 sm:right-6 z-40">
+          <button
+            type="button"
+            onClick={() => {
+              haptics.impact("medium");
+              setAiPanelOpen(true);
+            }}
+            className="group flex items-center gap-2.5 sm:gap-3 rounded-full text-white pl-3.5 sm:pl-4 pr-4 sm:pr-5 py-2.5 sm:py-3 shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 bg-[#0074ff] hover:bg-[#0063db] border-white/40 shadow-blue-500/25"
+            aria-label="AI Yuridik Agent"
+          >
+            <div className="relative flex items-center justify-center">
+              <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+              </span>
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-xs sm:text-sm font-bold leading-tight flex items-center gap-1.5">
+                <span>AI Yuridik Agent</span>
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              </span>
+              <span className="text-[10px] sm:text-[11px] text-blue-100 font-medium leading-tight">
+                24/7 Bepul Huquqiy Yordam
+              </span>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* User Profile / Login Sheet */}
       <Sheet

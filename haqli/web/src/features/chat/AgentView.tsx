@@ -416,6 +416,16 @@ export function AgentView({
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-slate-200/60 text-slate-600 cursor-pointer transition-colors"
+                title="Yopish"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       ) : (
