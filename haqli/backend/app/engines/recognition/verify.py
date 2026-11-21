@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.engines.recognition.entities.money import extract_money
 from app.engines.recognition.types import VerifyDocumentResult
 from app.models.entities import ContractAudit, DisputeCase, TilxatAgreement
+from app.security.canonical import tilxat_hash_candidates
 from app.security.crypto import get_crypto
 
 _META_DOC_ID_RE = re.compile(r"HaqliDocId[=:]\s*([0-9a-fA-F\-]{8,36})")
@@ -190,29 +191,7 @@ async def verify_document_authenticity(
 
     if isinstance(target, TilxatAgreement):
         # Verify hash chain H_n = SHA256(H_{n-1} || canonical_json) for signed or pending Tilxat
-        if target.status == "signed" and target.party_b_signed_at:
-            signed_payload = {
-                "id": target.id,
-                "prevHash": target.chain_prev_hash,
-                "partyATg": target.party_a_tg_id,
-                "partyBTg": target.party_b_tg_id,
-                "signedAt": target.party_b_signed_at.isoformat(),
-                "amountUzs": str(target.amount_uzs),
-            }
-            recomputed = crypto.chain_hash(target.chain_prev_hash, signed_payload)
-            chain_ok = crypto.constant_time_eq(recomputed, stored_hash)
-        else:
-            canonical = {
-                "docType": target.doc_type,
-                "partyA": target.party_a_name,
-                "partyB": target.party_b_name,
-                "amountUzs": str(target.amount_uzs),
-                "dueDate": target.due_date.isoformat(),
-                "penalty": str(target.daily_penalty_percent),
-                "terms": target.terms_summary,
-            }
-            recomputed = crypto.chain_hash(target.chain_prev_hash, canonical)
-            chain_ok = crypto.constant_time_eq(recomputed, stored_hash)
+        chain_ok = any(crypto.constant_time_eq(candidate, stored_hash) for candidate in tilxat_hash_candidates(target))
 
         expected_amount = Decimal(str(target.amount_uzs))
         expected_parties = [target.party_a_name, target.party_b_name]

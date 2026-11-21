@@ -1,4 +1,4 @@
-"""Optional schema-validated LLM gateway with 5s timeout, 1 retry, 60s circuit breaker, PII masking, and NullProvider."""
+"""Optional schema-validated LLM gateway: configurable timeout, 1 retry, 60s circuit breaker, PII masking, NullProvider."""
 
 from __future__ import annotations
 
@@ -83,18 +83,23 @@ class CircuitBrokenProvider:
     def circuit_state(self) -> str:
         return "open" if time.monotonic() < self._open_until else "closed"
 
-    async def generate_structured(self, schema: type[T], prompt: str, timeout: float = 5.0) -> T:
+    async def generate_structured(self, schema: type[T], prompt: str, timeout: float | None = None) -> T:
         if self.inner.name == "null":
             raise ProviderUnavailable("NullProvider active.")
         if time.monotonic() < self._open_until:
             raise ProviderUnavailable("LLM circuit breaker is open.")
 
+        call_timeout = timeout if timeout is not None else get_settings().llm_timeout_sec
         last_exc: Exception | None = None
         for _attempt in range(2):
             try:
-                res = await self.inner.generate_structured(schema, prompt, timeout=timeout)
+                res = await self.inner.generate_structured(schema, prompt, timeout=call_timeout)
                 self._failures = 0
                 return res
+            except httpx.TimeoutException as exc:
+                # A timed-out call is not retried: the user is waiting and a retry would double the delay.
+                last_exc = exc
+                break
             except Exception as exc:
                 last_exc = exc
         self._failures += 1
@@ -133,6 +138,23 @@ class OpenAIProvider:
             return _parse_json_to_schema(content, schema)
 
 
+def gemini_generation_config(model: str) -> dict[str, Any]:
+    """Fast, JSON-only config each Gemini family accepts.
+
+    Gemini 3+/4 take no temperature and reject ``thinkingLevel: minimal`` on non-lite models; leaving thinking on
+    its default (dynamic/high) makes simple extraction take many seconds, so the lowest supported level is used.
+    """
+    low = model.lower()
+    cfg: dict[str, Any] = {"responseMimeType": "application/json"}
+    if re.search(r"gemini-(?:3|4)", low):
+        cfg["thinkingConfig"] = {"thinkingLevel": "minimal" if "lite" in low else "low"}
+    else:
+        cfg["temperature"] = 0.1
+        if "gemini-2.5" in low and "pro" not in low:
+            cfg["thinkingConfig"] = {"thinkingBudget": 0}
+    return cfg
+
+
 class GeminiProvider:
     def __init__(self, api_key: str, model: str = "gemini-3.8-flash") -> None:
         self.name = "gemini"
@@ -143,18 +165,18 @@ class GeminiProvider:
         if not self.api_key:
             raise ProviderUnavailable("Missing Gemini API key.")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        gen_cfg = gemini_generation_config(self.model)
         async with httpx.AsyncClient(timeout=timeout) as client:
-            resp = await client.post(
-                url,
-                headers={"Content-Type": "application/json", "x-goog-api-key": self.api_key},
-                json={
-                    "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                    "generationConfig": {
-                        "temperature": 0.1,
-                        "responseMimeType": "application/json",
-                    },
-                },
-            )
+            for attempt in range(2):
+                resp = await client.post(
+                    url,
+                    headers={"Content-Type": "application/json", "x-goog-api-key": self.api_key},
+                    json={"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": gen_cfg},
+                )
+                if resp.status_code == 400 and attempt == 0 and "thinking" in resp.text.lower():
+                    gen_cfg = {k: v for k, v in gen_cfg.items() if k != "thinkingConfig"}
+                    continue
+                break
             resp.raise_for_status()
             parts = resp.json()["candidates"][0]["content"]["parts"]
             text = "".join(p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought"))

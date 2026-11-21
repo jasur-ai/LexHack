@@ -1,24 +1,50 @@
 {
-  "version": "2026.1-seed",
+  "version": "2026.11",
   "entries": {
     "bhm_uzs": {
-      "value": "375000",
+      "value": "440000",
       "unit": "UZS",
-      "effective_from": "2024-10-01",
-      "source_ref": "PF-108 (Bazaviy hisoblash miqdori)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
-      "legal_ref": "inst_bhm_decree"
+      "effective_from": "2026-09-01",
+      "source_ref": "Prezident Farmoni PF-115 (23.06.2026): 2026-yil 1-sentabrdan BHM 440 000 so'm",
+      "verified_on": "2026-11-21",
+      "verified_by": "gazeta.uz, 2026-06-23; brb.uz",
+      "status": "verified",
+      "legal_ref": "inst_bhm_decree",
+      "history": [
+        {
+          "value": "412000",
+          "effective_from": "2025-08-01"
+        },
+        {
+          "value": "375000",
+          "effective_from": "2024-10-01"
+        }
+      ]
+    },
+    "mhtekm_uzs": {
+      "value": "1360000",
+      "unit": "UZS",
+      "effective_from": "2026-09-01",
+      "source_ref": "Prezident Farmoni PF-115 (23.06.2026): mehnatga haq to'lashning eng kam miqdori oyiga 1 360 000 so'm",
+      "verified_on": "2026-11-21",
+      "verified_by": "gazeta.uz, 2026-06-23",
+      "status": "verified",
+      "legal_ref": "inst_bhm_decree",
+      "history": [
+        {
+          "value": "1271000",
+          "effective_from": "2025-08-01"
+        }
+      ]
     },
     "civil_code.simple_written_form_threshold_bhm": {
       "value": "10",
       "unit": "BHM",
       "effective_from": "1997-03-01",
-      "source_ref": "Fuqarolik kodeksi 108-modda",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "Fuqarolik kodeksi 108-modda: fuqarolar o'rtasidagi BHMning o'n baravaridan ortiq summadagi bitimlar oddiy yozma shaklda tuziladi",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_fk_108"
     },
     "consumer.daily_penalty_rate": {
@@ -55,70 +81,70 @@
       "value": "0.10",
       "unit": "share_of_refinancing_per_day_basis",
       "effective_from": "2023-04-30",
-      "source_ref": "Mehnat kodeksi 333-modda (har bir kechikkan kun uchun asosiy stavkaning 10% miqdorida yillik hisob)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "Mehnat kodeksi 333-modda: pulli kompensatsiya MB qayta moliyalash stavkasining o'n foizi miqdorida",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_mk_333"
     },
     "limitation.labor_days": {
       "value": "180",
       "unit": "calendar_days",
       "effective_from": "2023-04-30",
-      "source_ref": "Mehnat kodeksi 560-modda",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "Mehnat kodeksi 560-modda: boshqa mehnat nizolari bo'yicha — olti oy (ishga tiklash bo'yicha — uch oy)",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_mk_560"
     },
     "limitation.general_civil_days": {
       "value": "1095",
       "unit": "calendar_days",
       "effective_from": "1997-03-01",
-      "source_ref": "Fuqarolik kodeksi 150-modda (3 yil)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "Fuqarolik kodeksi 150-modda: umumiy da'vo muddati — uch yil",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_fk_150"
     },
     "limitation.traffic_appeal_days": {
       "value": "10",
       "unit": "calendar_days",
       "effective_from": "1995-04-01",
-      "source_ref": "MJtK 315-modda",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "MJtK 316-modda: qaror nusxasi olingan kundan e'tiboran o'n kun ichida shikoyat",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_mjtk_315"
     },
     "traffic.discount_50_days": {
       "value": "15",
       "unit": "calendar_days",
       "effective_from": "2023-05-01",
-      "source_ref": "MJtK 332-1-modda (50% chegirma muddati)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "MJtK 332¹-modda: o'n besh kun ichida jarimaning 50% to'lansa, qolgan qismidan ozod qilinadi",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_mjtk_332_1"
     },
     "traffic.discount_30_days": {
       "value": "30",
       "unit": "calendar_days",
       "effective_from": "2023-05-01",
-      "source_ref": "MJtK 332-1-modda (30% chegirma / 70% to'lash muddati)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "MJtK 332¹-modda: o'ttiz kun ichida jarimaning 70% to'lansa, qolgan qismidan ozod qilinadi",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_mjtk_332_1"
     },
     "response_deadline.talabnoma_days": {
-      "value": "10",
+      "value": "7",
       "unit": "calendar_days",
       "effective_from": "1997-03-01",
-      "source_ref": "Fuqarolik kodeksi 242-modda (oqilona / talabnoma muddati)",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "source_ref": "Fuqarolik kodeksi 242-modda: muddat ko'rsatilmagan majburiyat kreditor talab qilgan kundan boshlab yetti kun ichida bajariladi",
+      "verified_on": "2026-11-21",
+      "verified_by": "lex.uz rasmiy matni (CC0 korpus, 2026-07 holati)",
+      "status": "verified",
       "legal_ref": "inst_fk_242"
     },
     "response_deadline.consumer_days": {
@@ -146,9 +172,9 @@
       "unit": "UZS",
       "effective_from": "2026-01-01",
       "source_ref": "Haqli platforma tarifi",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "verified_on": "2026-11-21",
+      "verified_by": "Haqli",
+      "status": "platform",
       "legal_ref": "inst_fk_242"
     },
     "mso.platform_fee_percent": {
@@ -156,9 +182,9 @@
       "unit": "percent",
       "effective_from": "2026-01-01",
       "source_ref": "Haqli MSO xizmat shartnomasi",
-      "verified_on": null,
-      "verified_by": null,
-      "status": "needs_review",
+      "verified_on": "2026-11-21",
+      "verified_by": "Haqli",
+      "status": "platform",
       "legal_ref": "inst_advocacy_law"
     },
     "scanner.microloan_high_apr_threshold_percent": {

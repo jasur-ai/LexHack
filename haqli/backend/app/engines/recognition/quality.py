@@ -81,6 +81,9 @@ def assess_image_quality(image_bytes: bytes) -> QualityMetrics:
         brightness = float(stat.mean[0])
         contrast = float(stat.stddev[0])
         lap = gray_pil.filter(ImageFilter.Kernel((3, 3), [0, 1, 0, 1, -4, 1, 0, 1, 0], scale=1, offset=128))
+        # Pillow leaves the 1-px border unfiltered (raw pixel values); exclude it or flat images look "sharp".
+        if lap.size[0] > 2 and lap.size[1] > 2:
+            lap = lap.crop((1, 1, lap.size[0] - 1, lap.size[1] - 1))
         lap_stat = ImageStat.Stat(lap)
         blur = float(lap_stat.var[0])
         hist = gray_pil.histogram()

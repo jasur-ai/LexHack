@@ -154,7 +154,7 @@ async def test_verify_valid_regenerated_layout_tampered_and_unknown(api_client: 
             doc_id=rec.id,
             title="RE-RENDERED LAYOUT TILXAT",
             subtitle="Alternative layout check",
-            body_paragraphs=[f"Azizbek Karimov va Javohir Alimov. Summa: 8000000 so'm. Muddat: 2026-09-01."],
+            body_paragraphs=["Azizbek Karimov va Javohir Alimov. Summa: 8000000 so'm. Muddat: 2026-09-01."],
             doc_hash=rec.doc_hash,
             seal_signature=rec.seal_signature,
         )
@@ -162,7 +162,7 @@ async def test_verify_valid_regenerated_layout_tampered_and_unknown(api_client: 
             doc_id=rec.id,
             title="TAMPERED AMOUNT TILXAT",
             subtitle="Edited amount",
-            body_paragraphs=[f"Azizbek Karimov va Javohir Alimov. Summa: 99000000 so'm. Muddat: 2026-09-01."],
+            body_paragraphs=["Azizbek Karimov va Javohir Alimov. Summa: 99000000 so'm. Muddat: 2026-09-01."],
             doc_hash=rec.doc_hash,
             seal_signature=rec.seal_signature,
         )
@@ -188,7 +188,7 @@ async def test_verify_valid_regenerated_layout_tampered_and_unknown(api_client: 
 
 @pytest.mark.asyncio
 async def test_purge_expired_job_and_file(api_client: httpx.AsyncClient, tmp_path: Path) -> None:
-    headers = await _auth_headers(api_client, 100005, "PurgeUser")
+    await _auth_headers(api_client, 100005, "PurgeUser")  # creates the user row
     # Insert an already-expired job & unattached disk file
     dummy_file = tmp_path / "expired.txt"
     dummy_file.write_text("secret", encoding="utf-8")

@@ -25,6 +25,16 @@ class CamelModel(BaseModel):
 class TelegramAuthRequest(CamelModel):
     init_data: str = ""
     demo_name: str | None = None
+    # Random per-browser id (UUID v4) used for guest sessions outside Telegram.
+    device_id: str | None = Field(default=None, min_length=16, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
+
+
+class AgentAskRequest(CamelModel):
+    query: str = Field(min_length=3, max_length=2000)
+    locale: Literal["uz_lat", "uz_cyr", "ru"] | None = None
+    answer_style: Literal["concise", "detailed"] = "concise"
+    # Previous question, sent when the user taps a suggested follow-up, so the agent keeps the topic.
+    context: str | None = Field(default=None, max_length=600)
 
 
 class PreferencesPatch(CamelModel):

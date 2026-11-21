@@ -17,6 +17,7 @@ from app.engines.drafter import draft_tilxat_summary
 from app.engines.rules import check_written_form, load_constants
 from app.models.entities import AdvocateLead, DisputeCase, LawAlert, TilxatAgreement, User
 from app.routers.tilxat import _render_tilxat_pdf
+from app.security.canonical import tilxat_draft_payload, tilxat_signed_payload
 from app.security.crypto import get_crypto
 
 
@@ -103,11 +104,14 @@ async def seed_demo_data(db: AsyncSession) -> None:
                 strength_breakdown={"written_evidence": 25, "dates_consistent": 15, "amount_documented": 15, "within_limitation": 15, "clear_statutory_basis": 16},
                 assessment_text=f"{resp_name} bo'yicha {amt} so'm undirish ishi advokatga uzatildi.",
                 status="escalated",
-                doc_hash=crypto.sha256_canonical({"resp": resp_name, "amt": str(amt)}),
             )
-            c.seal_signature = crypto.sign_seal(c.doc_hash)
             db.add(c)
             await db.flush()
+            # Same canonical payload the dispute analyzer seals, so the demo case verifies as "valid".
+            c.doc_hash = crypto.sha256_canonical(
+                {"id": c.id, "category": cat, "respondent": resp_name, "totalUzs": str(amt), "talabnoma": c.talabnoma_text}
+            )
+            c.seal_signature = crypto.sign_seal(c.doc_hash)
             db.add(
                 AdvocateLead(
                     case_id=c.id,
@@ -142,7 +146,18 @@ async def seed_demo_data(db: AsyncSession) -> None:
             daily_penalty_percent=Decimal("0.1"),
             locale="uz_lat",
         )
-        doc_hash = crypto.chain_hash("0" * 64, {"sample": "tilxat", "amount": str(amt)})
+        draft_hash = crypto.chain_hash(
+            "0" * 64,
+            tilxat_draft_payload(
+                doc_type="loan",
+                party_a="Azizbek Karimov",
+                party_b="Bobur Tursunov",
+                amount_uzs=amt,
+                due_date=due,
+                penalty_percent=Decimal("0.1"),
+                terms=summary,
+            ),
+        )
         t = TilxatAgreement(
             user_id=citizen.id,
             doc_type="loan",
@@ -164,13 +179,27 @@ async def seed_demo_data(db: AsyncSession) -> None:
             sign_token=secrets.token_urlsafe(24),
             sign_token_expires_at=utcnow() + timedelta(days=7),
             chain_prev_hash="0" * 64,
-            doc_hash=doc_hash,
-            seal_signature=crypto.sign_seal(doc_hash),
+            doc_hash=draft_hash,
+            seal_signature=crypto.sign_seal(draft_hash),
             status="signed",
             locale_used="uz_lat",
         )
         db.add(t)
         await db.flush()
+        # Counter-signature re-seal, exactly like POST /api/tilxat/public/{token}/sign does.
+        t.chain_prev_hash = draft_hash
+        t.doc_hash = crypto.chain_hash(
+            draft_hash,
+            tilxat_signed_payload(
+                tilxat_id=t.id,
+                prev_hash=draft_hash,
+                party_a_tg=t.party_a_tg_id,
+                party_b_tg=t.party_b_tg_id,
+                signed_at=t.party_b_signed_at,
+                amount_uzs=amt,
+            ),
+        )
+        t.seal_signature = crypto.sign_seal(t.doc_hash)
         pdf_path: Path = _render_tilxat_pdf(t)
         t.pdf_path = str(pdf_path)
 

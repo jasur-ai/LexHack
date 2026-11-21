@@ -178,7 +178,7 @@ def build_mrz_fixtures() -> list[dict[str, Any]]:
         doc_num = f"AD{1000000 + i}"
         dob = f"9{i % 10}0{(i % 9) + 1}1{(i % 8) + 1}"
         exp = f"3{i % 10}0{(i % 9) + 1}1{(i % 8) + 1}"
-        mrz = make_td3(f"KARIMOV", f"AZIZBEK", doc_num, dob, exp)
+        mrz = make_td3("KARIMOV", "AZIZBEK", doc_num, dob, exp)
         if i % 5 == 0:
             # Inject repairable filler OCR noise
             mrz = mrz.replace("<<<", "««<", 1)

@@ -22,12 +22,22 @@ from app.engines.recognition.pipeline import prewarm_recognition_engines
 from app.engines.recognition.purge import purge_expired_recognition_data
 from app.engines.retrieval import get_instrument_store
 from app.engines.rules import load_constants
-from app.routers import auth, disputes, recognition, scanner, system, tilxat
+from app.routers import agent, auth, disputes, recognition, scanner, system, tilxat
 from app.routers.radar_mso import mso_router, radar_router
 from app.security.ratelimit import SlidingWindowRateLimiter, problem_response
 from app.seed import seed_demo_data
 
 logger = structlog.get_logger()
+
+
+class ImmutableStaticFiles(StaticFiles):
+    """Vite emits content-hashed file names under /assets, so they can be cached forever."""
+
+    async def get_response(self, path, scope):  # type: ignore[override]
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
 
 
 def create_app() -> FastAPI:
@@ -135,6 +145,7 @@ def create_app() -> FastAPI:
         )
 
     app.include_router(auth.router)
+    app.include_router(agent.router)
     app.include_router(disputes.router)
     app.include_router(tilxat.router)
     app.include_router(scanner.router)
@@ -148,14 +159,22 @@ def create_app() -> FastAPI:
     if web_dist.exists():
         assets_dir = web_dist / "assets"
         if assets_dir.exists():
-            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+            app.mount("/assets", ImmutableStaticFiles(directory=str(assets_dir)), name="assets")
+
+        dist_root = web_dist.resolve()
 
         @app.get("/{full_path:path}", include_in_schema=False)
         async def spa_fallback(full_path: str):
-            candidate = web_dist / full_path
-            if full_path and candidate.exists() and candidate.is_file():
-                return FileResponse(candidate)
-            return FileResponse(web_dist / "index.html")
+            if full_path.startswith(("api/", "ws/")) or full_path in {"api", "ws"}:
+                raise HTTPException(status_code=404, detail="Not found.")
+            if full_path:
+                candidate = (web_dist / full_path).resolve()
+                # Never serve anything outside web/dist (path traversal guard)
+                if candidate.is_relative_to(dist_root) and candidate.is_file():
+                    headers = {"Cache-Control": "no-cache"} if candidate.name in {"sw.js", "manifest.webmanifest"} else None
+                    return FileResponse(candidate, headers=headers)
+            # The SPA shell must always be revalidated so a new deploy is picked up immediately.
+            return FileResponse(web_dist / "index.html", headers={"Cache-Control": "no-cache"})
     else:
         @app.get("/", response_class=HTMLResponse, include_in_schema=False)
         async def api_index() -> HTMLResponse:

@@ -66,6 +66,7 @@ class LegalInstrumentStore:
                     "summary": summary,
                     "effectiveFrom": it["effective_from"],
                     "sourceRef": it["source_ref"],
+                    "sourceUrl": it.get("source_url"),
                     "status": it["status"],
                 }
             )

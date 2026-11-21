@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -28,6 +29,11 @@ from app.security.telegram_auth import TelegramAuthError, validate_init_data
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
+def guest_telegram_id(device_id: str) -> int:
+    digest = hashlib.sha256(f"haqli-guest:{device_id}".encode()).hexdigest()
+    return -(int(digest[:15], 16) + 1)
+
+
 def _user_dto(u: User) -> dict[str, Any]:
     return {
         "id": u.id,
@@ -41,6 +47,7 @@ def _user_dto(u: User) -> dict[str, Any]:
         "profileTags": u.profile_tags or [],
         "pushEnabled": u.push_enabled,
         "consentVersion": u.consent_version,
+        "isGuest": u.telegram_id < 0,
     }
 
 
@@ -66,13 +73,19 @@ async def auth_telegram(
         username = tg_user.get("username")
         raw_lang = str(tg_user.get("language_code") or "uz").lower()
         lang = "ru" if raw_lang.startswith("ru") else "uz_lat"
+    elif req.device_id and (cfg.allow_web_guests or cfg.demo_mode):
+        # Private guest account per browser; negative ids never collide with real Telegram users.
+        tg_id = guest_telegram_id(req.device_id)
+        full_name = (req.demo_name or "").strip()[:120]
+        username = None
+        lang = "uz_lat"
     elif cfg.demo_mode:
         tg_id = 999000111
         full_name = req.demo_name or "Azizbek Karimov"
         username = "demo_citizen"
         lang = "uz_lat"
     else:
-        raise HTTPException(status_code=401, detail="initData is required outside DEMO_MODE.")
+        raise HTTPException(status_code=401, detail="Telegram initData or a device id is required.")
 
     res = await db.execute(select(User).where(User.telegram_id == tg_id))
     user = res.scalar_one_or_none()

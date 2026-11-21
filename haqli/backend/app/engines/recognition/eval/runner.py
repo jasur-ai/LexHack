@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import statistics
 import time
 from dataclasses import asdict, dataclass
 from datetime import date
-from typing import Any
 
 from app.engines.recognition.classify import classify_document_sync
 from app.engines.recognition.entities.dates import extract_dates

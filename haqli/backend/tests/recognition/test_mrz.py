@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 
 from app.engines.recognition.eval.fixtures import build_mrz_fixtures, make_td1, make_td3
-from app.engines.recognition.parsers.mrz import parse_mrz, parse_mrz_td1, parse_mrz_td3
+from app.engines.recognition.parsers.mrz import parse_mrz, parse_mrz_td3
 
 
 def test_td1_id_card_mrz_valid_and_ocr_cleanup() -> None:
