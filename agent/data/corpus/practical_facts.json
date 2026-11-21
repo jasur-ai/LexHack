@@ -1,0 +1,215 @@
+{
+  "updated": "2026-11-21",
+  "note": "Practical figures the agent answers directly and uses in calculators. Every value cites the act (or the official announcement of the act) that set it and the date it took effect. Review after every new presidential decree on wages/BHM and every Central Bank rate decision.",
+  "series": {
+    "bhm": {
+      "unit": "so'm",
+      "names": {
+        "uz": "Bazaviy hisoblash miqdori (BHM)",
+        "ru": "Базовая расчётная величина (БРВ)",
+        "en": "Base calculation amount (BCA, BHM)"
+      },
+      "usage": {
+        "uz": "Jarimalar, davlat boji, yigʻimlar va boshqa toʻlovlar BHMga karrali qilib belgilanadi. Qaysi qiymat qoʻllanishi huquqbuzarlik yoki toʻlov sanasiga bogʻliq.",
+        "ru": "Штрафы, госпошлины, сборы и другие платежи устанавливаются в кратном размере БРВ. Применяется величина, действующая на дату правонарушения или платежа.",
+        "en": "Fines, state duties and fees are set as multiples of the BHM; the value in force on the date of the offence or payment applies."
+      },
+      "complete_from": "2023-12-01",
+      "values": [
+        {"from": "2026-09-01", "to": null, "value": 440000, "source": "Prezident Farmoni PF-115, 23.06.2026", "url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/"},
+        {"from": "2025-08-01", "to": "2026-08-31", "value": 412000, "source": "Prezident Farmoni PF-91, 02.06.2025", "url": "https://lex.uz/doc-passport/-7553322"},
+        {"from": "2024-10-01", "to": "2025-07-31", "value": 375000, "source": "Prezident Farmoni (2024-yil avgust), 2024-yil 1-oktabrdan", "url": "https://www.spot.uz/oz/2024/09/26/1st-october-changes/"},
+        {"from": "2023-12-01", "to": "2024-09-30", "value": 340000, "source": "Prezident Farmoni (2023-yil), 2023-yil 1-dekabrdan", "url": "https://uz.wikipedia.org/wiki/Bazaviy_hisoblash_miqdori"}
+      ]
+    },
+    "mhtekm": {
+      "unit": "so'm",
+      "names": {
+        "uz": "Mehnatga haq toʻlashning eng kam miqdori (MHTEKM, eng kam ish haqi)",
+        "ru": "Минимальный размер оплаты труда (МРОТ)",
+        "en": "Minimum wage (MHTEKM)"
+      },
+      "usage": {
+        "uz": "Oylik ish haqi MHTEKMdan kam boʻlishi mumkin emas (Mehnat kodeksi, 245-modda); har bir bola uchun aliment MHTEKMning 26,5 foizidan kam boʻlmaydi (Oila kodeksi, 99-modda).",
+        "ru": "Месячная зарплата не может быть ниже МРОТ (ТК, ст. 245); алименты на каждого ребёнка — не менее 26,5% МРОТ (Семейный кодекс, ст. 99).",
+        "en": "Monthly pay may not be below the minimum wage (Labour Code art. 245); child support per child is at least 26.5% of it (Family Code art. 99)."
+      },
+      "complete_from": "2024-09-01",
+      "values": [
+        {"from": "2026-09-01", "to": null, "value": 1360000, "source": "Prezident Farmoni PF-115, 23.06.2026", "url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/"},
+        {"from": "2025-08-01", "to": "2026-08-31", "value": 1271000, "source": "Prezident Farmoni PF-91, 02.06.2025", "url": "https://lex.uz/doc-passport/-7553322"},
+        {"from": "2024-09-01", "to": "2025-07-31", "value": 1155000, "source": "Prezident Farmoni (2024-yil avgust), 2024-yil 1-sentabrdan", "url": "https://aniq.uz/uz/yangiliklar/2024-yil-1-sentyabrdan-ish-haqi-pensiyalar-va-nafaqalar-15-foizga-oshirildi"}
+      ]
+    },
+    "pension_base": {
+      "unit": "so'm",
+      "names": {
+        "uz": "Pensiyani hisoblashning bazaviy miqdori",
+        "ru": "Базовая величина для исчисления пенсий",
+        "en": "Pension calculation base amount"
+      },
+      "usage": {
+        "uz": "Pensiyalar miqdorini hisoblashda qoʻllaniladi.",
+        "ru": "Применяется при исчислении размеров пенсий.",
+        "en": "Used to compute pension amounts."
+      },
+      "complete_from": "2024-09-01",
+      "values": [
+        {"from": "2026-07-01", "to": null, "value": 504000, "source": "Prezident Farmoni PF-115, 23.06.2026", "url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/"},
+        {"from": "2025-07-01", "to": "2026-06-30", "value": 471000, "source": "Prezident Farmoni PF-91, 02.06.2025", "url": "https://lex.uz/doc-passport/-7553322"},
+        {"from": "2024-09-01", "to": "2025-06-30", "value": 428000, "source": "Prezident Farmoni (2024-yil avgust), 2024-yil 1-sentabrdan", "url": "https://aniq.uz/uz/yangiliklar/2024-yil-1-sentyabrdan-ish-haqi-pensiyalar-va-nafaqalar-15-foizga-oshirildi"}
+      ]
+    },
+    "cbu_rate": {
+      "unit": "%",
+      "names": {
+        "uz": "Markaziy bankning asosiy (qayta moliyalash) stavkasi",
+        "ru": "Основная ставка (ставка рефинансирования) ЦБ",
+        "en": "Central Bank main (refinancing) rate"
+      },
+      "usage": {
+        "uz": "Ish haqi kechiktirilganda kompensatsiya (Mehnat kodeksi, 333-modda) va soliq penyasi (Soliq kodeksi, 110-modda) shu stavkadan hisoblanadi.",
+        "ru": "От неё считаются компенсация за задержку зарплаты (ТК, ст. 333) и налоговая пеня (НК, ст. 110).",
+        "en": "Basis for wage-delay compensation (Labour Code art. 333) and tax penalties (Tax Code art. 110)."
+      },
+      "complete_from": null,
+      "values": [
+        {"from": null, "to": null, "value": 14, "as_of": "2026-11-04", "source": "Markaziy bank Boshqaruvining 2026-yil 4-noyabrdagi qarori (stavka 14% da saqlandi; navbatdagi koʻrib chiqish 16.12.2026)", "url": "https://yuz.uz/ru/news/tsentralny-bank-uzbekistana-soxranil-osnovnuyu-stavku-na-urovne-14-godovx---"}
+      ]
+    }
+  },
+  "rules": [
+    {"id": "income_tax", "doc": "4674902", "article": "381",
+     "uz": "Rezident jismoniy shaxslarning daromadlariga 12 foizlik stavka boʻyicha soliq solinadi; dividendlar va foizlarga — 5 foiz.",
+     "ru": "Доходы физических лиц — резидентов облагаются налогом по ставке 12%; дивиденды и проценты — 5%.",
+     "en": "Resident individuals' income is taxed at 12%; dividends and interest at 5%."},
+    {"id": "alimony", "doc": "104720", "article": "99",
+     "uz": "Kelishuv boʻlmasa, aliment ota-onaning har oydagi ish haqi va boshqa daromadidan undiriladi: bir bola uchun — toʻrtdan bir, ikki bola uchun — uchdan bir, uch va undan ortiq bola uchun — yarmi. Har bir bola uchun aliment MHTEKMning 26,5 foizidan kam boʻlmasligi kerak; sud miqdorni kamaytirishi yoki koʻpaytirishi mumkin.",
+     "ru": "При отсутствии соглашения алименты взыскиваются с заработка и иного дохода: на одного ребёнка — 1/4, на двух — 1/3, на трёх и более — 1/2. На каждого ребёнка — не менее 26,5% МРОТ; суд может уменьшить или увеличить размер.",
+     "en": "Without an agreement, child support is 1/4 of monthly earnings for one child, 1/3 for two and 1/2 for three or more; at least 26.5% of the minimum wage per child. The court may adjust the amount."},
+    {"id": "severance", "doc": "6257288", "article": "173",
+     "uz": "Ishdan boʻshatish nafaqasi shu ish beruvchidagi stajga bogʻliq va oʻrtacha oylik ish haqining: 3 yilgacha — 50%, 3–5 yil — 75%, 5–10 yil — 100%, 10–15 yil — 150%, 15 yildan ortiq — 200% dan kam boʻlmaydi.",
+     "ru": "Выходное пособие зависит от стажа у данного работодателя и составляет не менее: до 3 лет — 50%, 3–5 лет — 75%, 5–10 лет — 100%, 10–15 лет — 150%, свыше 15 лет — 200% среднемесячной зарплаты.",
+     "en": "Severance depends on service with the employer: at least 50% of average monthly pay (under 3 years), 75% (3–5), 100% (5–10), 150% (10–15), 200% (over 15)."},
+    {"id": "wage_delay", "doc": "6257288", "article": "333",
+     "uz": "Ish haqi, taʼtil puli yoki boʻshatishdagi toʻlovlar kechiktirilsa, ish beruvchi har bir kechiktirilgan kun uchun Markaziy bank stavkasining 10 foizi miqdorida kompensatsiya toʻlaydi (stavka 14% boʻlsa — kuniga 1,4%), aybidan qatʼi nazar.",
+     "ru": "За каждый день задержки зарплаты, отпускных или расчёта при увольнении работодатель выплачивает компенсацию в размере 10% ставки рефинансирования ЦБ (при ставке 14% — 1,4% в день) независимо от вины.",
+     "en": "For each day of delayed wages, holiday pay or final pay the employer owes compensation of 10% of the Central Bank rate per day (1.4% a day at a 14% rate), regardless of fault."},
+    {"id": "tax_penalty", "doc": "4674902", "article": "110",
+     "uz": "Soliq kechiktirilgan har bir kalendar kun uchun penya toʻlanmagan summaning Markaziy bank qayta moliyalash stavkasining 1/300 qismi miqdorida hisoblanadi.",
+     "ru": "Пеня за каждый календарный день просрочки — 1/300 ставки рефинансирования ЦБ от неуплаченной суммы налога.",
+     "en": "Tax penalty interest: 1/300 of the Central Bank rate per calendar day on the unpaid tax."},
+    {"id": "vacation_pay", "doc": "6257288", "article": "233",
+     "uz": "Taʼtil puli: oʻrtacha oylik ish haqi (oldingi 12 oy daromadining 1/12 qismi, 257-modda) ÷ 25,3 × haq toʻlanadigan kunlar; yakshanba va bayram kunlari toʻlanmaydi. Taʼtil puli taʼtil boshlanishidan oldingi oxirgi ish kunidan kechiktirmay beriladi.",
+     "ru": "Отпускные: среднемесячная зарплата (1/12 дохода за 12 месяцев, ст. 257) ÷ 25,3 × оплачиваемые дни; воскресенья и праздники не оплачиваются. Выплата — не позднее последнего рабочего дня перед отпуском.",
+     "en": "Holiday pay: average monthly pay (1/12 of the previous 12 months, art. 257) ÷ 25.3 × paid days; Sundays and public holidays are not paid. Paid no later than the last working day before the leave."},
+    {"id": "consumer_exchange", "doc": "4704", "article": "18",
+     "uz": "Maqbul sifatli nooziq-ovqat tovarini xarid qilingan kundan eʼtiboran 10 kun ichida almashtirish yoki pulini qaytarib olish mumkin (foydalanilmagan, qadogʻi va cheki saqlangan boʻlsa).",
+     "ru": "Непродовольственный товар надлежащего качества можно обменять или вернуть в течение 10 дней со дня покупки (не использован, сохранены упаковка и подтверждение покупки).",
+     "en": "Non-food goods of proper quality can be exchanged or refunded within 10 days of purchase if unused and with proof of purchase."}
+  ],
+  "deadlines": [
+    {"id": "appeal_civil", "months": 1, "doc": "3517337", "article": "385.1",
+     "uz": "Fuqarolik ishi boʻyicha apellyatsiya shikoyati — hal qiluv qarori qabul qilingan kundan 1 oy ichida (soddalashtirilgan tartibdagi ishlar — 10 kun).",
+     "ru": "Апелляционная жалоба по гражданскому делу — в течение 1 месяца со дня принятия решения (упрощённое производство — 10 дней).",
+     "en": "Civil appeal: within 1 month of the judgment (simplified proceedings: 10 days)."},
+    {"id": "cassation_civil", "months": 6, "doc": "3517337", "article": "405.1",
+     "uz": "Kassatsiya shikoyati — hal qiluv qarori qonuniy kuchga kirgan kundan 6 oy ichida.",
+     "ru": "Кассационная жалоба — в течение 6 месяцев со дня вступления решения в законную силу.",
+     "en": "Cassation appeal: within 6 months of the judgment entering into force."},
+    {"id": "admin_complaint", "days": 10, "doc": "97664", "article": "316",
+     "uz": "Maʼmuriy huquqbuzarlik toʻgʻrisidagi qarorga shikoyat — qaror nusxasi olingan kundan 10 kun ichida.",
+     "ru": "Жалоба на постановление по делу об административном правонарушении — 10 дней со дня получения копии.",
+     "en": "Complaint against an administrative-offence decision: within 10 days of receiving its copy."},
+    {"id": "labour_reinstatement", "months": 3, "doc": "6257288", "article": "560",
+     "uz": "Ishga tiklash toʻgʻrisida sudga — boʻshatish buyrugʻi nusxasi topshirilgan kundan 3 oy ichida; boshqa mehnat nizolari — 6 oy; xodimdan zarar undirish — 1 yil.",
+     "ru": "Иск о восстановлении на работе — 3 месяца со дня вручения копии приказа; другие трудовые споры — 6 месяцев; взыскание ущерба с работника — 1 год.",
+     "en": "Reinstatement claim: within 3 months of receiving the dismissal order; other labour disputes: 6 months; employer's damage claims: 1 year."},
+    {"id": "labour_dispute", "months": 6, "doc": "6257288", "article": "560",
+     "uz": "Boshqa yakka tartibdagi mehnat nizolari boʻyicha sudga — huquq buzilganini bilgan kundan 6 oy ichida.",
+     "ru": "Иные индивидуальные трудовые споры — 6 месяцев со дня, когда работник узнал о нарушении.",
+     "en": "Other individual labour disputes: within 6 months of learning of the violation."},
+    {"id": "limitation_general", "years": 3, "doc": "111189", "article": "150",
+     "uz": "Umumiy daʼvo muddati — 3 yil (huquq buzilganini bilgan kundan).",
+     "ru": "Общий срок исковой давности — 3 года.",
+     "en": "General limitation period: 3 years."},
+    {"id": "inheritance_certificate", "months": 6, "doc": "180552", "article": "1146",
+     "uz": "Merosga boʻlgan huquq toʻgʻrisidagi guvohnoma meros ochilgan kundan 6 oy oʻtgach beriladi.",
+     "ru": "Свидетельство о праве на наследство выдаётся по истечении 6 месяцев со дня открытия наследства.",
+     "en": "The certificate of inheritance is issued 6 months after the opening of the inheritance."},
+    {"id": "state_body_reply", "days": 15, "doc": "3336169", "article": "28",
+     "uz": "Davlat organiga ariza yoki shikoyat — 15 kun ichida, qoʻshimcha oʻrganish kerak boʻlsa 1 oygacha koʻrib chiqiladi.",
+     "ru": "Заявление или жалоба в госорган рассматривается в течение 15 дней, при необходимости дополнительного изучения — до 1 месяца.",
+     "en": "Applications and complaints to state bodies: answered within 15 days, up to 1 month if extra checks are needed."},
+    {"id": "resignation_notice", "days": 14, "doc": "6257288", "article": "160",
+     "uz": "Oʻz xohishi bilan ishdan ketishda ish beruvchini 14 kalendar kun oldin yozma ogohlantirish kerak.",
+     "ru": "При увольнении по собственному желанию — письменное предупреждение за 14 календарных дней.",
+     "en": "Resigning: give the employer 14 calendar days' written notice."},
+    {"id": "final_pay", "days": 0, "doc": "6257288", "article": "254",
+     "uz": "Boʻshatilganda barcha toʻlovlar oxirgi ish kunida, xodim oʻsha kuni ishlamagan boʻlsa — talab qilinganidan keyin 3 kundan kechiktirmay toʻlanadi.",
+     "ru": "Расчёт при увольнении — в день увольнения; если работник не работал в этот день — не позднее 3 дней после требования.",
+     "en": "Final pay: on the last day; if the employee did not work that day, within 3 days of the request."},
+    {"id": "annual_leave", "days": 21, "doc": "6257288", "article": "217",
+     "uz": "Har yilgi asosiy eng kam mehnat taʼtili — 21 kalendar kun.",
+     "ru": "Ежегодный основной минимальный отпуск — 21 календарный день.",
+     "en": "Minimum annual leave: 21 calendar days."},
+    {"id": "probation", "months": 3, "doc": "6257288", "article": "130",
+     "uz": "Dastlabki sinov — 3 oydan, rahbarlar va bosh buxgalterlar uchun 6 oydan oshmaydi.",
+     "ru": "Испытательный срок — не более 3 месяцев, для руководителей и главных бухгалтеров — 6 месяцев.",
+     "en": "Probation: up to 3 months (6 months for managers and chief accountants)."},
+    {"id": "tax_declaration", "date": "04-01", "doc": "4674902", "article": "397",
+     "uz": "Jami yillik daromad toʻgʻrisidagi deklaratsiya hisobot yilidan keyingi yilning 1-aprelidan kechiktirmay topshiriladi.",
+     "ru": "Декларация о совокупном годовом доходе — не позднее 1 апреля следующего года.",
+     "en": "Annual income tax return: by 1 April of the following year."}
+  ],
+  "state_duty": [
+    {"id": "divorce", "bhm": 2, "doc": "4680944", "article": "annex", "item": "1-v",
+     "uz": "Nikohni bekor qilish haqidagi daʼvo — BHMning 2 baravari (takroriy nikohni bekor qilish — 4 baravari; mol-mulk boʻlinsa — daʼvo bahosidan).",
+     "ru": "Иск о расторжении брака — 2 БРВ (повторный — 4 БРВ; при разделе имущества — от цены иска).",
+     "en": "Divorce claim: 2 × BHM (repeat divorce: 4 × BHM; with property division: by claim value)."},
+    {"id": "divorce_repeat", "bhm": 4, "doc": "4680944", "article": "annex", "item": "1-g",
+     "uz": "Takroriy nikohni bekor qilish haqidagi daʼvo — BHMning 4 baravari.",
+     "ru": "Иск о расторжении повторного брака — 4 БРВ.",
+     "en": "Repeat divorce claim: 4 × BHM."},
+    {"id": "civil_property_claim", "percent": 4, "min_bhm": 1, "doc": "4680944", "article": "annex", "item": "1-a",
+     "uz": "Fuqarolik sudiga mulkiy daʼvo — daʼvo bahosining 4 foizi, lekin BHMning 1 baravaridan kam emas.",
+     "ru": "Имущественный иск в суд по гражданским делам — 4% цены иска, но не менее 1 БРВ.",
+     "en": "Property claim in a civil court: 4% of the claim value, at least 1 × BHM."},
+    {"id": "economic_property_claim", "percent": 2, "min_bhm": 1, "doc": "4680944", "article": "annex", "item": "2-a",
+     "uz": "Iqtisodiy sudga mulkiy daʼvo — daʼvo bahosining 2 foizi, lekin BHMning 1 baravaridan kam emas.",
+     "ru": "Имущественный иск в экономический суд — 2% цены иска, но не менее 1 БРВ.",
+     "en": "Property claim in an economic court: 2% of the claim value, at least 1 × BHM."},
+    {"id": "economic_nonproperty_claim", "bhm": 10, "doc": "4680944", "article": "annex", "item": "2-b",
+     "uz": "Iqtisodiy sudga nomulkiy daʼvo — BHMning 10 baravari.",
+     "ru": "Неимущественный иск в экономический суд — 10 БРВ.",
+     "en": "Non-property claim in an economic court: 10 × BHM."},
+    {"id": "special_proceedings", "bhm": 1, "doc": "4680944", "article": "annex", "item": "1-j",
+     "uz": "Alohida tartibda koʻriladigan ishlar boʻyicha ariza — BHMning 1 baravari.",
+     "ru": "Заявление по делам особого производства — 1 БРВ.",
+     "en": "Special (non-contentious) proceedings: 1 × BHM."},
+    {"id": "appeal_fee", "share": 0.5, "doc": "4680944", "article": "annex", "item": "1-z",
+     "uz": "Apellyatsiya, kassatsiya va taftish shikoyatlari — birinchi instansiyada toʻlanadigan stavkaning 50 foizi.",
+     "ru": "Апелляционные, кассационные и надзорные жалобы — 50% ставки, уплачиваемой в первой инстанции.",
+     "en": "Appeal, cassation and review complaints: 50% of the first-instance rate."},
+    {"id": "admin_court_citizen", "bhm": 0.7, "doc": "4680944", "article": "annex", "item": "3-b",
+     "uz": "Maʼmuriy sudga davlat organi qarori yoki harakati ustidan shikoyat (fuqarolar) — BHMning 70 foizi.",
+     "ru": "Жалоба в административный суд на решения и действия госорганов (граждане) — 70% БРВ.",
+     "en": "Administrative-court complaint against a state body (citizens): 70% of BHM."},
+    {"id": "notary_real_estate_city", "bhm": 1, "doc": "4680944", "article": "annex", "item": "4-a",
+     "uz": "Koʻchmas mulkni oʻtkazish shartnomasini notarial tasdiqlash — Toshkent, Nukus va viloyat markazlarida BHMning 1 baravari, boshqa joylarda 50 foizi (yaqin qarindoshlar oʻrtasida imtiyozlar bor).",
+     "ru": "Нотариальное удостоверение договора отчуждения недвижимости — 1 БРВ в Ташкенте, Нукусе и областных центрах, 50% БРВ в других местах (для близких родственников есть льготы).",
+     "en": "Notarising a real-estate transfer: 1 × BHM in Tashkent, Nukus and regional centres, 50% elsewhere (reliefs for close relatives)."},
+    {"id": "notary_will", "bhm": 0.05, "doc": "4680944", "article": "annex", "item": "4-l",
+     "uz": "Vasiyatnomani tasdiqlash — BHMning 5 foizi.",
+     "ru": "Удостоверение завещания — 5% БРВ.",
+     "en": "Notarising a will: 5% of BHM."},
+    {"id": "inheritance_certificate_fee", "bhm": 0.5, "doc": "4680944", "article": "annex", "item": "4-m",
+     "uz": "Merosga boʻlgan huquq toʻgʻrisida guvohnoma — koʻchmas mulk yoki avtomobil uchun (har biri) BHMning 50 foizi, boshqa mol-mulk uchun 30 foizi.",
+     "ru": "Свидетельство о праве на наследство — 50% БРВ за каждый объект недвижимости или автомобиль, 30% — за иное имущество.",
+     "en": "Certificate of inheritance: 50% of BHM per real-estate item or vehicle, 30% for other property."},
+    {"id": "notary_loan", "bhm": 0.25, "doc": "4680944", "article": "annex", "item": "4-z",
+     "uz": "Qarz shartnomasini notarial tasdiqlash — BHMning 25 foizi.",
+     "ru": "Удостоверение договора займа — 25% БРВ.",
+     "en": "Notarising a loan agreement: 25% of BHM."}
+  ]
+}
