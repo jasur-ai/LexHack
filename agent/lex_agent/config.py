@@ -57,9 +57,13 @@ class Settings(BaseSettings):
     qdrant_api_key: str = Field(default="")
     qdrant_collection: str = Field(default="lex_uz_legislation")
 
-    # Cross-encoder reranker
+    # Second-stage reranker
     reranker_enabled: bool = Field(default=True)
-    reranker_model: str = Field(default="BAAI/bge-reranker-v2-m3")
+    reranker_backend: Literal["auto", "trained", "heuristic", "cross_encoder"] = Field(
+        default="auto",
+        description="auto = bundled trained model when present, else the heuristic; cross_encoder needs the [ml] extra",
+    )
+    reranker_model: str = Field(default="BAAI/bge-reranker-v2-m3", description="Cross-encoder (only for cross_encoder)")
 
     # Live Lex.uz fetching
     lex_uz_base_url: str = Field(default="https://lex.uz")
@@ -69,6 +73,14 @@ class Settings(BaseSettings):
     lex_uz_enable_live_fallback: bool = Field(default=True)
     lex_uz_live_fallback_timeout: float = Field(default=4.0, description="Max seconds spent on a live lex.uz lookup")
 
+    # Nightly lex.uz sync of the ~200 most-needed acts (lex-agent sync; see lex_agent/ingestion/lex_sync.py)
+    lex_sync_rps: float = Field(default=0.5, gt=0, le=2.0, description="Requests per second to lex.uz (0.5 = one every 2 s)")
+    lex_sync_budget: int = Field(default=80, ge=1, le=2000, description="Max requests per sync run")
+    lex_sync_check_enabled: bool = Field(
+        default=False, description="Run a nightly in-process *check* (no text changes) and report freshness in /api/health"
+    )
+    lex_sync_hour: int = Field(default=3, ge=0, le=23, description="Local hour (Asia/Tashkent) of the nightly check")
+
     # Agentic pipeline controls
     agent_max_hops: int = Field(default=3, ge=1, le=6)
     agent_top_k: int = Field(default=12, ge=1, le=50)
@@ -77,6 +89,17 @@ class Settings(BaseSettings):
     answer_style_default: Literal["concise", "detailed"] = "concise"
     answer_cache_ttl_sec: int = Field(default=6 * 3600, ge=0)
     answer_cache_size: int = Field(default=512, ge=0)
+    warmup_on_start: bool = Field(default=True, description="Load lazy resources and pre-answer suggested questions")
+    agent_threads: int = Field(
+        default=4, ge=1, le=32, description="Worker threads for CPU-bound search steps (keeps the event loop streaming)"
+    )
+    sqlite_reader_mmap_mb: int = Field(
+        default=256, ge=0, le=4096,
+        description="Memory-mapped reads of the search index per reader (0 = off: lower RSS, ~10 ms slower answers)",
+    )
+    warmup_llm_answers: bool = Field(
+        default=False, description="Also pre-generate LLM answers for the suggested questions at startup (uses quota)"
+    )
     vector_search_mode: Literal["auto", "on", "off"] = Field(
         default="auto", description="auto = dense search only when real neural embeddings are configured"
     )

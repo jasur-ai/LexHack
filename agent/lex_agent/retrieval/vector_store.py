@@ -2,19 +2,33 @@
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 import uuid
 from datetime import date
-
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as qmodels
+from typing import TYPE_CHECKING, Any
 
 from lex_agent.config import Settings, get_settings
 from lex_agent.llm.client import EmbeddingClient
 from lex_agent.models import LegalChunk, NormStatus, RetrievalFilter, RetrievedChunk
 from lex_agent.retrieval.bm25_store import chunk_matches_filter
 
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from qdrant_client import QdrantClient
+
 logger = logging.getLogger(__name__)
+
+
+def _qdrant() -> tuple[Any, Any]:
+    """Import qdrant-client lazily: it is an optional dependency, only needed when dense search is enabled."""
+    try:
+        from qdrant_client import QdrantClient
+        from qdrant_client.http import models as qmodels
+    except ImportError as exc:  # pragma: no cover - depends on the installed extras
+        raise RuntimeError(
+            "Dense vector search needs the optional dependency: pip install 'lex-uz-agent[vector]'"
+        ) from exc
+    return QdrantClient, qmodels
 
 
 def _date_to_ordinal(d: date | None) -> int | None:
@@ -43,7 +57,7 @@ class QdrantVectorStore:
     def enabled(self) -> bool:
         """Dense search is meaningful only with real neural embeddings (hash vectors are random noise)."""
         mode = self.settings.vector_search_mode
-        if mode == "off":
+        if mode == "off" or importlib.util.find_spec("qdrant_client") is None:
             return False
         if mode == "on":
             return True
@@ -51,6 +65,7 @@ class QdrantVectorStore:
 
     def _get_client(self) -> QdrantClient:
         if self._client is None:
+            QdrantClient, _ = _qdrant()  # noqa: N806 - class imported lazily
             mode = self.settings.qdrant_mode
             if mode == "memory":
                 self._client = QdrantClient(":memory:")
@@ -69,6 +84,7 @@ class QdrantVectorStore:
         client = self._get_client()
         if self._initialized:
             return
+        _, qmodels = _qdrant()
         if not client.collection_exists(self.collection_name):
             logger.info("Creating Qdrant collection '%s' (dim=%d)", self.collection_name, vector_dim)
             client.create_collection(
@@ -91,6 +107,7 @@ class QdrantVectorStore:
             return 0
 
         self._ensure_collection(len(vectors[0]))
+        _, qmodels = _qdrant()
         points = []
         for chunk, vec in zip(chunks, vectors):
             payload = {
@@ -173,11 +190,12 @@ class QdrantVectorStore:
         return results
 
     @staticmethod
-    def _build_qdrant_filter(flt: RetrievalFilter | None) -> qmodels.Filter | None:
+    def _build_qdrant_filter(flt: RetrievalFilter | None) -> Any:
         if flt is None:
             return None
-        must: list[qmodels.Condition] = []
-        must_not: list[qmodels.Condition] = []
+        _, qmodels = _qdrant()
+        must: list[Any] = []
+        must_not: list[Any] = []
 
         if flt.languages:
             must.append(

@@ -1,4 +1,8 @@
-# Core API & Framework
+# Lex.uz legal agent — runtime dependencies (fits a 512 MB instance; no torch, no vector DB).
+# Optional extras live in pyproject.toml: [vector] qdrant-client, [hf] HuggingFace corpora,
+# [train] reranker training, [ml] local neural models (needs ~2 GB RAM).
+
+# API & framework
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 pydantic>=2.9.0
@@ -6,37 +10,27 @@ pydantic-settings>=2.6.0
 python-multipart>=0.0.12
 python-dotenv>=1.0.1
 
-# Async Networking & Lex.uz Scraping
+# Networking & lex.uz fetching
 httpx>=0.27.2
 beautifulsoup4>=4.12.3
 lxml>=5.3.0
 tenacity>=9.0.0
-# Optional JS rendering fallback for complex Lex.uz pages:
-# playwright>=1.48.0
 
-# Hybrid Retrieval (Dense Vector + Sparse BM25 + Reranker)
-qdrant-client>=1.12.0
-rank-bm25>=0.2.2
+# Search: stemming (RU/EN), typo-tolerant matching, numeric reranker inference
+snowballstemmer>=2.2.0
+rapidfuzz>=3.9.0
 numpy>=1.26.4
 
-# LLM Client (OpenAI / OpenRouter / Gemini OpenAI-compat / Ollama)
+# LLM client (Gemini OpenAI-compatible endpoint / OpenAI / OpenRouter / Ollama)
 openai>=1.55.0
 
-# Offline HuggingFace Corpora Bootstrap (optional but recommended for full corpus)
-datasets>=3.0.0
-huggingface-hub>=0.26.0
-pyarrow>=17.0.0
-
-# Local Multilingual Embeddings & Cross-Encoder Reranker (optional)
-# sentence-transformers>=3.2.0
-# torch>=2.4.0
-
-# Document Upload Parsing (PDF / DOCX contracts & filings)
+# Document upload parsing (PDF / DOCX)
 pypdf>=5.0.0
 python-docx>=1.1.2
 
-# CLI & Testing
+# CLI
 rich>=13.9.0
 typer>=0.13.0
-pytest>=8.3.0
-pytest-asyncio>=0.24.0
+
+# IANA time zones for the nightly lex.uz check (slim images ship without system zone data)
+tzdata>=2024.1

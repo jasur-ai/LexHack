@@ -1,0 +1,11 @@
+# Generated search index and SQLite side files (rebuilt by `lex-agent build-index`)
+data/.cache/
+*.sqlite3-shm
+*.sqlite3-wal
+*.sqlite3-journal
+
+# Local run artefacts (CI uploads them as workflow artifacts instead)
+eval-*.json
+load-test.json
+server.log
+sync-report.json

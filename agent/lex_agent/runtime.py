@@ -45,7 +45,7 @@ class AgentRuntime:
 
         llm = LLMClient(cfg)
         embedder = EmbeddingClient(cfg)
-        bm25_store = BM25Store(cfg.bm25_db_path)
+        bm25_store = BM25Store(cfg.bm25_db_path, reader_mmap_mb=cfg.sqlite_reader_mmap_mb)
         vector_store = QdrantVectorStore(embedder=embedder, settings=cfg)
         reranker = LegalReranker(cfg)
         fetcher = LexUzFetcher(cfg)

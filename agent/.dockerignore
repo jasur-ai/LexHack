@@ -1,0 +1,15 @@
+.venv
+**/__pycache__
+**/*.pyc
+*.egg-info
+.env
+.env.*
+!.env.example
+data/.cache
+data/runtime
+tests
+eval
+.pytest_cache
+.ruff_cache
+*.sqlite3
+sync-report.json

@@ -48,19 +48,34 @@ def build_index(force: bool = typer.Option(False, help="Rebuild even if the bund
 def eval_retrieval(
     k: int = typer.Option(5, help="Cut-off rank"),
     gold: Path = typer.Option(None, help="Path to a gold JSONL file (defaults to eval/retrieval_gold.jsonl)"),
+    split: str = typer.Option("all", help="all | dev | test (test = held out from reranker training)"),
     show_all: bool = typer.Option(False, help="Print every query, not only misses"),
+    show_wrong: bool = typer.Option(False, help="Also print queries whose best answer is not ranked first"),
+    json_out: Path = typer.Option(None, help="Write the full report as JSON"),
 ) -> None:
     """Measure retrieval quality (hit@1, hit@k, MRR, latency) on the labelled gold set."""
     from lex_agent.evaluation import DEFAULT_GOLD, evaluate_retrieval
 
     rt = AgentRuntime.build()
     rt.build_index()
-    report = asyncio.run(evaluate_retrieval(rt.retriever, gold or DEFAULT_GOLD, k=k))
-    table = Table(title=f"Retrieval quality ({report['queries']} questions)")
+    report = asyncio.run(evaluate_retrieval(rt.retriever, gold or DEFAULT_GOLD, k=k, split=split))
+    table = Table(title=f"Retrieval quality ({report['queries']} questions, split={split}, reranker={rt.retriever.reranker.backend})")
+    table.add_column("metric")
+    table.add_column("value")
     for key in ("hit@1", f"hit@{k}", f"mrr@{k}", "p50_ms", "p95_ms"):
         table.add_row(key, str(report[key]))
     console.print(table)
-    rows = report["per_query"] if show_all else report["misses"]
+    for group, values in report["breakdown"].items():
+        line = "  ".join(f"{name}: {v['hit@1']:.2f}/{v[f'hit@{k}']:.2f} (n={v['n']})" for name, v in values.items())
+        console.print(f"[bold]{group}[/] hit@1/hit@{k}  {line}")
+    if json_out:
+        json_out.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    if show_all:
+        rows = report["per_query"]
+    elif show_wrong:
+        rows = [q for q in report["per_query"] if q["rank"] != 1]
+    else:
+        rows = report["misses"]
     for row in rows:
         console.print(f"[{'green' if row['rank'] else 'red'}]{row['rank'] or '✗'}[/] {row['q']}  →  {row['top']}")
 
@@ -147,6 +162,56 @@ def chat() -> None:
             await rt.close()
 
     asyncio.run(_loop())
+
+
+@app.command("sync")
+def sync(
+    only: list[str] = typer.Option(None, "--only", help="Sync only these catalog slugs / lex.uz ids (repeatable)"),
+    check_only: bool = typer.Option(False, help="Only detect changes; do not write any text"),
+    force: bool = typer.Option(False, help="Re-download and re-parse even when nothing changed"),
+    budget: int = typer.Option(None, help="Max requests for this run (default LEX_SYNC_BUDGET)"),
+    rps: float = typer.Option(None, help="Requests per second (default LEX_SYNC_RPS = 0.5)"),
+    report_json: Path = typer.Option(None, help="Write the run report as JSON"),
+) -> None:
+    """Refresh the most-needed acts from lex.uz (polite, cached, incremental; see lex_agent/ingestion/lex_sync.py)."""
+    from lex_agent.config import get_settings
+    from lex_agent.ingestion.lex_sync import LexSync
+
+    settings = get_settings()
+
+    async def _run() -> dict:
+        syncer = LexSync(settings.corpus_dir, rps=rps or settings.lex_sync_rps,
+                         max_requests=budget or settings.lex_sync_budget)
+        try:
+            report = await syncer.run(only=only or None, check_only=check_only, force=force)
+        finally:
+            await syncer.close()
+        return report.as_dict()
+
+    rep = asyncio.run(_run())
+    if report_json:
+        report_json.write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
+    table = Table(title="lex.uz sync" + (" (check only)" if check_only else ""))
+    table.add_column("metric")
+    table.add_column("value", justify="right")
+    for k in ("requests", "checked", "unchanged", "added", "updated", "failed", "suspect", "unresolved", "deferred"):
+        table.add_row(k, str(rep[k]))
+    console.print(table)
+    for ch in rep["changes"][:40]:
+        console.print(f"  {ch['kind']:<8} {ch['act']} ({ch['lang']}): {ch.get('title') or ''} — {ch['articles']} articles")
+    for err in rep["errors"][:20]:
+        console.print(f"  [yellow]{err}[/yellow]")
+    if rep["added"] or rep["updated"]:
+        console.print("[green]Texts changed: run `lex-agent build-index` (or redeploy) to serve them.[/green]")
+
+
+@app.command("sync-status")
+def sync_status_cmd() -> None:
+    """How fresh the synced acts are (last run, acts synced, acts due for a check)."""
+    from lex_agent.config import get_settings
+    from lex_agent.ingestion.lex_sync import sync_status
+
+    console.print_json(data=sync_status(get_settings().corpus_dir))
 
 
 @app.command("ingest-doc")

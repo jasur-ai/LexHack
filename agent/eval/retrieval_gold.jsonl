@@ -1,40 +1,576 @@
-{"q": "Ish beruvchi meni ishdan haydadi, bu qonuniymi?", "lang": "uz_latn", "expect": [["6257288", ["161", "165", "166"]]]}
-{"q": "Yillik ta'til necha kun beriladi?", "lang": "uz_latn", "expect": [["6257288", ["217", "216"]]]}
-{"q": "Ish haqini oyiga necha marta to'lash kerak?", "lang": "uz_latn", "expect": [["6257288", ["253"]]]}
-{"q": "Ishga kirganda sinov muddati qancha bo'ladi?", "lang": "uz_latn", "expect": [["6257288", ["130", "129"]]]}
-{"q": "O'z xohishim bilan ishdan bo'shamoqchiman, qancha oldin ogohlantirishim kerak?", "lang": "uz_latn", "expect": [["6257288", ["160"]]]}
-{"q": "Ish vaqti haftasiga necha soatdan oshmasligi kerak?", "lang": "uz_latn", "expect": [["6257288", ["182"]]]}
-{"q": "Mehnat shartnomasi yozma tuzilishi shartmi?", "lang": "uz_latn", "expect": [["6257288", ["106"]]]}
-{"q": "Nikoh yoshi necha yosh?", "lang": "uz_latn", "expect": [["104720", ["15"]]]}
-{"q": "Bitta bola uchun aliment miqdori qancha?", "lang": "uz_latn", "expect": [["104720", ["99", "98"]]]}
-{"q": "Ajrashish uchun qayerga murojaat qilish kerak?", "lang": "uz_latn", "expect": [["104720", ["38", "41", "42", "43"]]]}
-{"q": "Do'stimga qarz berdim, tilxat yozish shartmi?", "lang": "uz_latn", "expect": [["180552", ["733", "732"]], ["111189", ["108"]]]}
-{"q": "Qarzni qaytarmasa necha yil ichida sudga murojaat qilsam bo'ladi?", "lang": "uz_latn", "expect": [["111189", ["150", "153", "154"]], ["180552", ["737"]]]}
-{"q": "Sotib olgan telefonim buzuq chiqdi, do'konga qaytarsam bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["434", "433", "435", "408"]]]}
-{"q": "Meros qachon ochiladi?", "lang": "uz_latn", "expect": [["180552", ["1116"]]]}
-{"q": "Vasiyatnoma notarial tasdiqlanishi kerakmi?", "lang": "uz_latn", "expect": [["180552", ["1124", "1125"]]]}
-{"q": "Firibgarlik uchun qanday jazo bor?", "lang": "uz_latn", "expect": [["111453", ["168"]]]}
-{"q": "O'g'rilik jinoyati uchun javobgarlik", "lang": "uz_latn", "expect": [["111453", ["169"]]]}
-{"q": "Mast holda mashina haydaganlik uchun jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["131"]], ["111453", ["261.1"]]]}
-{"q": "Mayda bezorilik uchun javobgarlik", "lang": "uz_latn", "expect": [["97664", ["183"]]]}
-{"q": "Neustoyka nima va qachon to'lanadi?", "lang": "uz_latn", "expect": [["111189", ["260", "261", "263"]]]}
-{"q": "Sudga da'vo arizasi berishda davlat boji", "lang": "uz_latn", "expect": [["3517337", ["128", "270.6"]], ["3523891", ["113"]]]}
-{"q": "BHM qancha hozir?", "lang": "uz_latn", "expect": [["pf-115-2026", ["*"]]]}
-{"q": "Eng kam ish haqi qancha?", "lang": "uz_latn", "expect": [["pf-115-2026", ["*"]], ["6257288", ["245"]]]}
-{"q": "Shaxsiy hayot daxlsizligi huquqi", "lang": "uz_latn", "expect": [["6445145", ["31"]]]}
-{"q": "Shaxsga doir ma'lumotlarga ishlov berish uchun rozilik kerakmi?", "lang": "uz_latn", "expect": [["4396419", ["21", "18"]]]}
-{"q": "Soliq to'lashdan bo'yin tovlash jinoyati", "lang": "uz_latn", "expect": [["111453", ["184"]]]}
-{"q": "Turar joydan majburan ko'chirish mumkinmi?", "lang": "uz_latn", "expect": [["106136", ["70", "71", "74"]]]}
-{"q": "Увольнение работника по инициативе работодателя", "lang": "ru", "expect": [["6257288", ["161", "165", "166"]]]}
-{"q": "Сколько дней составляет ежегодный трудовой отпуск?", "lang": "ru", "expect": [["6257288", ["217", "216"]]]}
-{"q": "Размер алиментов на одного ребенка", "lang": "ru", "expect": [["104720", ["99", "98"]]]}
-{"q": "Форма договора займа между гражданами", "lang": "ru", "expect": [["180552", ["733"]]]}
-{"q": "Какой срок исковой давности?", "lang": "ru", "expect": [["111189", ["150", "149"]]]}
-{"q": "Расторжение брака через ЗАГС", "lang": "ru", "expect": [["104720", ["42", "43"]]]}
-{"q": "Наказание за мошенничество", "lang": "ru", "expect": [["111453", ["168"]]]}
-{"q": "Испытательный срок при приеме на работу", "lang": "ru", "expect": [["6257288", ["130", "129"]]]}
-{"q": "Штраф за мелкое хулиганство", "lang": "ru", "expect": [["97664", ["183"]]]}
-{"q": "Какая сейчас БРВ?", "lang": "ru", "expect": [["pf-115-2026", ["*"]]]}
-{"q": "Иш берувчи мени ишдан бўшатди, нима қилишим керак?", "lang": "uz_cyrl", "expect": [["6257288", ["161", "165", "166"]]]}
-{"q": "Алимент миқдори қанча?", "lang": "uz_cyrl", "expect": [["104720", ["99", "98", "101"]]]}
-{"q": "Мерос қачон очилади?", "lang": "uz_cyrl", "expect": [["180552", ["1116"]]]}
+{"q": "Ish beruvchi meni ishdan haydadi, bu qonuniymi?", "lang": "uz_latn", "expect": [["6257288", ["161", "165", "166", "163"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Yillik ta'til necha kun beriladi?", "lang": "uz_latn", "expect": [["6257288", ["217", "216"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Ish haqini oyiga necha marta to'lash kerak?", "lang": "uz_latn", "expect": [["6257288", ["253"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Ishga kirganda sinov muddati qancha bo'ladi?", "lang": "uz_latn", "expect": [["6257288", ["130", "129"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "O'z xohishim bilan ishdan bo'shamoqchiman, qancha oldin ogohlantirishim kerak?", "lang": "uz_latn", "expect": [["6257288", ["160"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Ish vaqti haftasiga necha soatdan oshmasligi kerak?", "lang": "uz_latn", "expect": [["6257288", ["182"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Mehnat shartnomasi yozma tuzilishi shartmi?", "lang": "uz_latn", "expect": [["6257288", ["106"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "3 oydan beri oylik bermayapti, nima qilsam bo'ladi?", "lang": "uz_latn", "expect": [["6257288", ["333", "253", "546", "545"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "ishdan boshatishganda qancha kompensatsiya berilishi kerak", "lang": "uz_latn", "expect": [["6257288", ["173", "172"]]], "domain": "labour", "typo": true, "split": "test"}
+{"q": "Dam olish kuni ishlatsa ikki barobar to'lanadimi?", "lang": "uz_latn", "expect": [["6257288", ["263", "209", "210"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Tungi smenada ishlaganlik uchun qo'shimcha haq bormi?", "lang": "uz_latn", "expect": [["6257288", ["264", "188"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Homilador ayolni ishdan bo'shatish mumkinmi?", "lang": "uz_latn", "expect": [["6257288", ["408", "392", "163"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Dekret ta'tili necha kun?", "lang": "uz_latn", "expect": [["6257288", ["404"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Bola parvarishi bo'yicha ta'til uch yoshgacha beriladimi?", "lang": "uz_latn", "expect": [["6257288", ["405"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Ishlatilmagan ta'til uchun pul to'lanadimi ishdan ketganda?", "lang": "uz_latn", "expect": [["6257288", ["235", "234"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Ish beruvchi oyligimdan shtraf ushlab qoldi, haqqi bormi?", "lang": "uz_latn", "expect": [["6257288", ["269", "270"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Mehnat daftarchamni bermayapti", "lang": "uz_latn", "expect": [["6257288", ["171", "125"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Qisqartirish bo'lsa kimlar ishda qoladi?", "lang": "uz_latn", "expect": [["6257288", ["167", "161"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Masofadan ishlash qonunda bormi?", "lang": "uz_latn", "expect": [["6257288", ["452", "453", "456"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "16 yoshli bola ishlashi mumkinmi va necha soat?", "lang": "uz_latn", "expect": [["6257288", ["118", "415", "411", "413"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Xizmat safari uchun qanday kompensatsiya to'lanadi?", "lang": "uz_latn", "expect": [["6257288", ["287"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Intizomiy jazo qanday qo'llaniladi?", "lang": "uz_latn", "expect": [["6257288", ["313", "312", "314"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Xodim ish beruvchiga yetkazgan zararni to'liq to'laydimi?", "lang": "uz_latn", "expect": [["6257288", ["340", "341", "342", "337"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Mehnat nizosi bo'yicha sudga necha oy ichida murojaat qilish mumkin?", "lang": "uz_latn", "expect": [["6257288", ["560", "559"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Noqonuniy bo'shatilgan bo'lsam ishga tiklanishim mumkinmi?", "lang": "uz_latn", "expect": [["6257288", ["174", "564"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Sinov muddatida ishdan bo'shatish mumkinmi?", "lang": "uz_latn", "expect": [["6257288", ["132", "130"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Bayram kunlari qaysilar dam olish kuni hisoblanadi?", "lang": "uz_latn", "expect": [["6257288", ["208"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Ortiqcha ishlagan soatlarim uchun qancha to'lanishi kerak?", "lang": "uz_latn", "expect": [["6257288", ["262", "189"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "O'rindoshlik asosida ishlasam ta'til beriladimi?", "lang": "uz_latn", "expect": [["6257288", ["439", "432"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Kasal bo'lib qolsam kasallik varaqasi bo'yicha pul to'lanadimi?", "lang": "uz_latn", "expect": [["7886679", ["7", "16"]], ["6257288", ["202"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "tatilga chiqsam otpusknoy qachon beriladi", "lang": "uz_latn", "expect": [["6257288", ["233"]]], "domain": "labour", "typo": true, "split": "dev"}
+{"q": "mehant shartnomasi muddatli bolsa tugaganda nima boladi", "lang": "uz_latn", "expect": [["6257288", ["158", "110"]]], "domain": "labour", "typo": true, "split": "dev"}
+{"q": "Ишдан бўшатилганда ҳисоб-китоб қачон қилинади?", "lang": "uz_cyrl", "expect": [["6257288", ["172", "254"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Меҳнат таътилини қисмларга бўлиш мумкинми?", "lang": "uz_cyrl", "expect": [["6257288", ["231"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Иш берувчи мени ишдан бўшатди, нима қилишим керак?", "lang": "uz_cyrl", "expect": [["6257288", ["161", "165", "166", "174"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Ходимни бошқа ишга ўтказиш учун розилик керакми?", "lang": "uz_cyrl", "expect": [["6257288", ["140", "138"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Увольнение работника по инициативе работодателя", "lang": "ru", "expect": [["6257288", ["161", "165", "166"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Сколько дней составляет ежегодный трудовой отпуск?", "lang": "ru", "expect": [["6257288", ["217", "216"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Испытательный срок при приеме на работу", "lang": "ru", "expect": [["6257288", ["130", "129"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Задерживают зарплату уже два месяца, что делать?", "lang": "ru", "expect": [["6257288", ["333", "253", "546"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Могут ли уволить во время больничного?", "lang": "ru", "expect": [["6257288", ["163"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Как уволиться по собственному желанию и за сколько предупредить?", "lang": "ru", "expect": [["6257288", ["160"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Оплата сверхурочной работы", "lang": "ru", "expect": [["6257288", ["262", "189"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Положено ли выходное пособие при сокращении?", "lang": "ru", "expect": [["6257288", ["173", "100"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Нужен ли письменный трудовой договор?", "lang": "ru", "expect": [["6257288", ["106"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Отпуск без сохранения заработной платы сколько дней можно взять?", "lang": "ru", "expect": [["6257288", ["241", "242"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "My employer fired me without notice. Is that legal?", "lang": "en", "expect": [["6257288", ["161", "165", "163"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "How many days of annual leave do employees get in Uzbekistan?", "lang": "en", "expect": [["6257288", ["217", "216"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "How long is the probation period?", "lang": "en", "expect": [["6257288", ["130"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Nikoh yoshi necha yosh?", "lang": "uz_latn", "expect": [["104720", ["15"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Bitta bola uchun aliment miqdori qancha?", "lang": "uz_latn", "expect": [["104720", ["99", "98"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Ajrashish uchun qayerga murojaat qilish kerak?", "lang": "uz_latn", "expect": [["104720", ["38", "41", "42", "43", "40"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Eri aliment to'lamayapti, nima qilish kerak?", "lang": "uz_latn", "expect": [["104720", ["139", "142", "116", "136"]], ["111453", ["122"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Ajrashganda uy kimga qoladi?", "lang": "uz_latn", "expect": [["104720", ["27", "28", "23"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Nikoh shartnomasi qanday tuziladi?", "lang": "uz_latn", "expect": [["104720", ["30", "29", "31"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Bolani otasiga ko'rsatmayapti, qanday huquqlari bor?", "lang": "uz_latn", "expect": [["104720", ["76", "66"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Otalikni sud orqali belgilash mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["62"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Ikki farzand uchun aliment necha foiz?", "lang": "uz_latn", "expect": [["104720", ["99"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Aliment miqdorini kamaytirish mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["105", "146"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Farzandlikka olish uchun qanday shartlar bor?", "lang": "uz_latn", "expect": [["104720", ["152", "151", "155"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Ota-onalik huquqidan qachon mahrum qilinadi?", "lang": "uz_latn", "expect": [["104720", ["79", "80"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Ajrashgandan keyin familiyani qaytarish mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["46", "220"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Homilador xotin bilan ajrashish mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["39"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Sobiq xotinim aliment talab qilyapti, majburmanmi?", "lang": "uz_latn", "expect": [["104720", ["118", "117", "119"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Qari ota-onaga farzandlar aliment to'lashi shartmi?", "lang": "uz_latn", "expect": [["104720", ["109", "110"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Eri urib turadi, himoya orderi qanday olinadi?", "lang": "uz_latn", "expect": [["4494709", ["23", "25", "26"]], ["97664", ["59.2"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Nikohdan oldin tibbiy ko'rik majburiymi?", "lang": "uz_latn", "expect": [["104720", ["17"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Turmush o'rtog'im rozi bo'lmasa ajrasha olamanmi?", "lang": "uz_latn", "expect": [["104720", ["40", "41", "43"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "alimet qancha tolanadi bitta bolaga", "lang": "uz_latn", "expect": [["104720", ["99", "98"]]], "domain": "family", "typo": true, "split": "test"}
+{"q": "ajrashsak mol mulk qanday bolinadi", "lang": "uz_latn", "expect": [["104720", ["27", "28"]]], "domain": "family", "typo": true, "split": "dev"}
+{"q": "Алимент миқдори қанча?", "lang": "uz_cyrl", "expect": [["104720", ["99", "98", "101"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Никоҳдан ажралиш учун ФҲДЁга бориш керакми?", "lang": "uz_cyrl", "expect": [["104720", ["42", "218", "43", "219"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Боланинг исмини ўзгартириш мумкинми?", "lang": "uz_cyrl", "expect": [["104720", ["70", "226"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Размер алиментов на одного ребенка", "lang": "ru", "expect": [["104720", ["99", "98"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Расторжение брака через ЗАГС", "lang": "ru", "expect": [["104720", ["42", "43", "218"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Как установить отцовство через суд?", "lang": "ru", "expect": [["104720", ["62"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Раздел совместно нажитого имущества супругов", "lang": "ru", "expect": [["104720", ["27", "28", "23"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "С какого возраста можно вступить в брак?", "lang": "ru", "expect": [["104720", ["15"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "Бывший муж не платит алименты, какая ответственность?", "lang": "ru", "expect": [["104720", ["142", "139", "116"]], ["111453", ["122"]], ["97664", ["47.4"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Лишение родительских прав основания", "lang": "ru", "expect": [["104720", ["79"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "What is the child support amount for two children?", "lang": "en", "expect": [["104720", ["99"]]], "domain": "family", "typo": false, "split": "test"}
+{"q": "How to get divorced in Uzbekistan?", "lang": "en", "expect": [["104720", ["38", "40", "42", "43"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Meros qachon ochiladi?", "lang": "uz_latn", "expect": [["180552", ["1116"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Vasiyatnoma notarial tasdiqlanishi kerakmi?", "lang": "uz_latn", "expect": [["180552", ["1124", "1125"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "Vasiyatnoma bo'lmasa meros kimlarga o'tadi?", "lang": "uz_latn", "expect": [["180552", ["1135", "1134"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Merosni qabul qilish muddati qancha?", "lang": "uz_latn", "expect": [["180552", ["1145", "1146"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Majburiy ulushga kimlar haqli?", "lang": "uz_latn", "expect": [["180552", ["1142"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "Merosdan voz kechsa bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["1147"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Otamdan qolgan uyni aka-ukalar qanday bo'lamiz?", "lang": "uz_latn", "expect": [["180552", ["1135", "1150", "1134"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Vasiyatnomani bekor qilish yoki o'zgartirish mumkinmi?", "lang": "uz_latn", "expect": [["180552", ["1127"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "merosga qanday kirishadi notariusga qachon borish kerak", "lang": "uz_latn", "expect": [["180552", ["1145", "1146"]], ["54458", ["49"]]], "domain": "inheritance", "typo": true, "split": "dev"}
+{"q": "Мерос қачон очилади?", "lang": "uz_cyrl", "expect": [["180552", ["1116"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Меросхўрларнинг биринчи навбати кимлар?", "lang": "uz_cyrl", "expect": [["180552", ["1135"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "Срок принятия наследства", "lang": "ru", "expect": [["180552", ["1145", "1146"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Наследники первой очереди по закону", "lang": "ru", "expect": [["180552", ["1135"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Обязательная доля в наследстве кому положена?", "lang": "ru", "expect": [["180552", ["1142"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "Who inherits if there is no will?", "lang": "en", "expect": [["180552", ["1135", "1134"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Do'stimga qarz berdim, tilxat yozish shartmi?", "lang": "uz_latn", "expect": [["180552", ["733", "732"]], ["111189", ["108"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Qarzni qaytarmasa necha yil ichida sudga murojaat qilsam bo'ladi?", "lang": "uz_latn", "expect": [["111189", ["150", "153", "154"]], ["180552", ["737"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Neustoyka nima va qachon to'lanadi?", "lang": "uz_latn", "expect": [["111189", ["260", "261", "263"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Qarzdor pulni qaytarmayapti, raspiska bor", "lang": "uz_latn", "expect": [["180552", ["735", "736", "737"]], ["3517337", ["170", "171"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Ma'naviy zararni qanday undirish mumkin?", "lang": "uz_latn", "expect": [["180552", ["1022", "1021"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Shartnomani bir tomonlama bekor qilish mumkinmi?", "lang": "uz_latn", "expect": [["111189", ["382", "384"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Ishonchnoma necha yilga beriladi?", "lang": "uz_latn", "expect": [["111189", ["139", "135"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Hadya qilingan uyni qaytarib olish mumkinmi?", "lang": "uz_latn", "expect": [["180552", ["507", "506"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Remont qilgan usta sifatsiz ishladi, pulimni qaytarish mumkinmi?", "lang": "uz_latn", "expect": [["180552", ["650", "665", "647"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Xato bilan boshqa kartaga pul o'tkazib yubordim", "lang": "uz_latn", "expect": [["180552", ["1023", "1025", "1026"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Kafil qarzdor o'rniga to'lashi shartmi?", "lang": "uz_latn", "expect": [["111189", ["292"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Garovga qo'yilgan uyni bank sotishi mumkinmi?", "lang": "uz_latn", "expect": [["111189", ["279", "280", "281"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Shartnoma og'zaki tuzilsa haqiqiy bo'ladimi?", "lang": "uz_latn", "expect": [["111189", ["366", "107"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Qo'shnimning iti o'g'limni tishladi, zararni kim to'laydi?", "lang": "uz_latn", "expect": [["180552", ["1002"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "davo muddati otib ketgan bolsa nima boladi", "lang": "uz_latn", "expect": [["111189", ["150", "161", "153"]]], "domain": "civil", "typo": true, "split": "dev"}
+{"q": "Қарз шартномаси оғзаки тузилса бўладими?", "lang": "uz_cyrl", "expect": [["180552", ["733"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Неустойка нима ва қандай ҳисобланади?", "lang": "uz_cyrl", "expect": [["111189", ["260", "261", "263"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Форма договора займа между гражданами", "lang": "ru", "expect": [["180552", ["733"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Какой срок исковой давности?", "lang": "ru", "expect": [["111189", ["150", "149"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Как взыскать долг по расписке?", "lang": "ru", "expect": [["180552", ["735", "737", "733"]], ["3517337", ["170", "171"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Компенсация морального вреда", "lang": "ru", "expect": [["180552", ["1022", "1021"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Ошибочно перевел деньги на чужую карту, как вернуть?", "lang": "ru", "expect": [["180552", ["1023", "1025"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Срок действия доверенности", "lang": "ru", "expect": [["111189", ["139"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Can I cancel a contract unilaterally?", "lang": "en", "expect": [["111189", ["382", "384"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Is a verbal loan agreement valid?", "lang": "en", "expect": [["180552", ["733"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Turar joydan majburan ko'chirish mumkinmi?", "lang": "uz_latn", "expect": [["106136", ["70", "71", "74"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "Kvartirani ijaraga berish shartnomasi yozma bo'lishi kerakmi?", "lang": "uz_latn", "expect": [["180552", ["603"]], ["106136", ["33"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Ijarachi pul to'lamayapti, uni chiqarib yuborsam bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["615", "551"]], ["106136", ["69"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Kvartirada pereplanirovka qilish uchun ruxsat kerakmi?", "lang": "uz_latn", "expect": [["106136", ["65"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "Kommunal to'lovlarni to'lamasa nima bo'ladi?", "lang": "uz_latn", "expect": [["106136", ["133", "134", "135"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Uyni xususiylashtirish qanday amalga oshiriladi?", "lang": "uz_latn", "expect": [["98430", ["*"]], ["106136", ["22"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Doimiy propiska qilish uchun nima kerak?", "lang": "uz_latn", "expect": [["7623461", ["6", "20", "22"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "Ko'p kvartirali uyni kim boshqaradi?", "lang": "uz_latn", "expect": [["4586282", ["*"]], ["106136", ["124", "128"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Ko'chmas mulkni davlat ro'yxatidan o'tkazish majburiymi?", "lang": "uz_latn", "expect": [["6297080", ["6", "10", "11"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Uyim buziladigan bo'lsa qanday kompensatsiya beriladi?", "lang": "uz_latn", "expect": [["6087433", ["*"]], ["106136", ["30", "27", "28"]], ["8261557", ["*"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "kvartra ijarasi shartnomasini muddatidan oldin bekor qilish", "lang": "uz_latn", "expect": [["180552", ["615", "551", "552"]]], "domain": "housing", "typo": true, "split": "dev"}
+{"q": "Уй-жой мулкдорининг оила аъзолари қандай ҳуқуққа эга?", "lang": "uz_cyrl", "expect": [["106136", ["32"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Выселение из жилого помещения без предоставления другого жилья", "lang": "ru", "expect": [["106136", ["74", "70"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "Договор найма жилого помещения форма", "lang": "ru", "expect": [["180552", ["603", "600"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Как прописаться в квартире?", "lang": "ru", "expect": [["7623461", ["6", "20", "22"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Can my landlord evict me without a court order?", "lang": "en", "expect": [["106136", ["70", "74"]], ["6445145", ["47"]]], "domain": "housing", "typo": false, "split": "test"}
+{"q": "Sotib olgan telefonim buzuq chiqdi, do'konga qaytarsam bo'ladimi?", "lang": "uz_latn", "expect": [["4704", ["13", "14", "17"]], ["180552", ["434", "433", "435", "408"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Sifatli kiyimni 10 kun ichida almashtirsa bo'ladimi?", "lang": "uz_latn", "expect": [["4704", ["18"]], ["180552", ["433"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Kafolat muddati ichida buzilgan tovar bepul tuzatilishi kerakmi?", "lang": "uz_latn", "expect": [["4704", ["15", "11"]], ["180552", ["403", "404"]]], "domain": "consumer", "typo": false, "split": "test"}
+{"q": "Internet do'kondan buyurtma qildim, tovar kelmadi", "lang": "uz_latn", "expect": [["4704", ["28.1", "12.1"]], ["6213382", ["*"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Do'kon chek bermadi, qayerga shikoyat qilsa bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["164"]], ["4704", ["23"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Iste'molchining asosiy huquqlari qanday?", "lang": "uz_latn", "expect": [["4704", ["4"]]], "domain": "consumer", "typo": false, "split": "test"}
+{"q": "nuqsonli tovar uchun pulni qaytarishmayapti", "lang": "uz_latn", "expect": [["4704", ["17", "13"]]], "domain": "consumer", "typo": true, "split": "dev"}
+{"q": "Истеъмолчига нуқсонли товар сотилса нима қилиш керак?", "lang": "uz_cyrl", "expect": [["4704", ["13", "14", "17"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Вернуть некачественный товар в магазин", "lang": "ru", "expect": [["4704", ["13", "17"]], ["180552", ["434"]]], "domain": "consumer", "typo": false, "split": "test"}
+{"q": "Обмен товара надлежащего качества", "lang": "ru", "expect": [["4704", ["18"]], ["180552", ["433"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "I bought a defective phone. Can I get a refund?", "lang": "en", "expect": [["4704", ["13", "17"]], ["180552", ["434"]]], "domain": "consumer", "typo": false, "split": "dev"}
+{"q": "Mast holda mashina haydaganlik uchun jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["131"]], ["111453", ["261.1"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Tezlikni oshirgani uchun jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["128.3"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Qizil chiroqda o'tib ketsam nima bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["128.4"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Rulda telefonda gaplashsa jarima bormi?", "lang": "uz_latn", "expect": [["97664", ["128.1"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Haydovchilik guvohnomasiz mashina haydash", "lang": "uz_latn", "expect": [["97664", ["135"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Sug'urta polisisiz mashina haydasa jarima", "lang": "uz_latn", "expect": [["97664", ["135.1"]], ["1342474", ["7"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Noto'g'ri joyda to'xtab qo'ysam jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["128.6"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Avariya joyidan ketib qolsa javobgarlik", "lang": "uz_latn", "expect": [["97664", ["137"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Tonirovka uchun jarima bormi?", "lang": "uz_latn", "expect": [["97664", ["126"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Jarima ballari qanday hisoblanadi?", "lang": "uz_latn", "expect": [["97664", ["34.1"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Piyodalar o'tish joyida o'tkazib yubormasa jarima", "lang": "uz_latn", "expect": [["97664", ["128.5", "138"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Haydovchilik guvohnomasidan mahrum qilinsa qachon qaytariladi?", "lang": "uz_latn", "expect": [["6764454", ["46"]], ["97664", ["35"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "tezlikni oshirsa shtraf qancha", "lang": "uz_latn", "expect": [["97664", ["128.3"]]], "domain": "traffic", "typo": true, "split": "test"}
+{"q": "mast xolda mashina xaydasa nima boladi", "lang": "uz_latn", "expect": [["97664", ["131"]], ["111453", ["261.1"]]], "domain": "traffic", "typo": true, "split": "dev"}
+{"q": "Маст ҳолда транспорт бошқарганлик учун жавобгарлик", "lang": "uz_cyrl", "expect": [["97664", ["131"]], ["111453", ["261.1"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Светофорнинг тақиқловчи ишорасида ўтиш", "lang": "uz_cyrl", "expect": [["97664", ["128.4"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Штраф за превышение скорости", "lang": "ru", "expect": [["97664", ["128.3"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Лишение прав за пьяное вождение", "lang": "ru", "expect": [["97664", ["131"]], ["111453", ["261.1"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Штраф за разговор по телефону за рулем", "lang": "ru", "expect": [["97664", ["128.1"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Скрылся с места ДТП, какое наказание?", "lang": "ru", "expect": [["97664", ["137"]], ["111453", ["266"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "What is the fine for drunk driving?", "lang": "en", "expect": [["97664", ["131"]], ["111453", ["261.1"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Penalty for running a red light", "lang": "en", "expect": [["97664", ["128.4"]]], "domain": "traffic", "typo": false, "split": "test"}
+{"q": "Mayda bezorilik uchun javobgarlik", "lang": "uz_latn", "expect": [["97664", ["183"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Jamoat joyida spirtli ichimlik ichish jarimasi", "lang": "uz_latn", "expect": [["97664", ["187"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Jamoat joyida chekish taqiqlanganmi?", "lang": "uz_latn", "expect": [["97664", ["56.1"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "Qo'shnilar tunda baland musiqa qo'yadi, nima qilish mumkin?", "lang": "uz_latn", "expect": [["97664", ["192"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Haqorat qilganlik uchun javobgarlik", "lang": "uz_latn", "expect": [["97664", ["41"]], ["111453", ["140"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Tuhmat uchun jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["40"]], ["111453", ["139"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "Ma'muriy jarima ustidan qancha muddatda shikoyat qilish mumkin?", "lang": "uz_latn", "expect": [["97664", ["316", "314", "315"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Ma'muriy qamoq necha kungacha bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["29"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Ko'chaga axlat tashlaganlik uchun jarima", "lang": "uz_latn", "expect": [["97664", ["91.1"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "To'y o'tkazish tartibi buzilsa javobgarlik bormi?", "lang": "uz_latn", "expect": [["97664", ["192.1"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Pasport muddati o'tib ketgan bo'lsa jarima bormi?", "lang": "uz_latn", "expect": [["97664", ["223"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Oilaviy zo'ravonlik uchun ma'muriy javobgarlik", "lang": "uz_latn", "expect": [["97664", ["59.2"]], ["111453", ["126.1"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "mayda bezorilik uchun necha sutka beriladi", "lang": "uz_latn", "expect": [["97664", ["183", "29"]]], "domain": "admin", "typo": true, "split": "dev"}
+{"q": "Жамоат жойларида алкоголь истеъмол қилиш учун жарима", "lang": "uz_cyrl", "expect": [["97664", ["187"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Штраф за мелкое хулиганство", "lang": "ru", "expect": [["97664", ["183"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "Как обжаловать административный штраф?", "lang": "ru", "expect": [["97664", ["314", "315", "316"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Штраф за курение в общественных местах", "lang": "ru", "expect": [["97664", ["56.1"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Ответственность за оскорбление", "lang": "ru", "expect": [["97664", ["41"]], ["111453", ["140"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "How can I appeal an administrative fine?", "lang": "en", "expect": [["97664", ["314", "315", "316"]]], "domain": "admin", "typo": false, "split": "dev"}
+{"q": "Firibgarlik uchun qanday jazo bor?", "lang": "uz_latn", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "O'g'rilik jinoyati uchun javobgarlik", "lang": "uz_latn", "expect": [["111453", ["169"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Soliq to'lashdan bo'yin tovlash jinoyati", "lang": "uz_latn", "expect": [["111453", ["184"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Pora bergan odam ham javob beradimi?", "lang": "uz_latn", "expect": [["111453", ["211", "210"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Telefonimni ko'chada tortib ketishdi", "lang": "uz_latn", "expect": [["111453", ["166"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Badanga yengil shikast yetkazish uchun jazo", "lang": "uz_latn", "expect": [["111453", ["109"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Qasddan odam o'ldirish jazosi", "lang": "uz_latn", "expect": [["111453", ["97"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Jinoiy javobgarlik necha yoshdan boshlanadi?", "lang": "uz_latn", "expect": [["111453", ["17"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Zaruriy mudofaa chegarasi qanday?", "lang": "uz_latn", "expect": [["111453", ["37"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Akkauntimni buzib kirishdi, bu jinoyatmi?", "lang": "uz_latn", "expect": [["111453", ["278.2", "278.3"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Tovlamachilik qilib pul talab qilishyapti", "lang": "uz_latn", "expect": [["111453", ["165"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Giyohvand moddani saqlaganlik uchun jazo", "lang": "uz_latn", "expect": [["111453", ["276", "273"]], ["97664", ["56"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Jazoni o'tashdan muddatidan oldin shartli ozod qilish", "lang": "uz_latn", "expect": [["111453", ["73"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Shaxsiy rasmlarimni internetga tarqatishdi", "lang": "uz_latn", "expect": [["111453", ["141.1"]], ["97664", ["46.1"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "firibgar pulimni aldab oldi qayerga murojat qilay", "lang": "uz_latn", "expect": [["111453", ["168"]], ["111460", ["55"]]], "domain": "criminal", "typo": true, "split": "dev"}
+{"q": "ogrilik uchun necha yil beriladi", "lang": "uz_latn", "expect": [["111453", ["169"]]], "domain": "criminal", "typo": true, "split": "dev"}
+{"q": "Фирибгарлик учун жавобгарлик", "lang": "uz_cyrl", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Пора олганлик учун жазо", "lang": "uz_cyrl", "expect": [["111453", ["210"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Наказание за мошенничество", "lang": "ru", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Ответственность за кражу", "lang": "ru", "expect": [["111453", ["169"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Какое наказание за взятку?", "lang": "ru", "expect": [["111453", ["210", "211"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Права задержанного подозреваемого", "lang": "ru", "expect": [["111460", ["48", "221", "226"]], ["6445145", ["27", "28"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Срок задержания подозреваемого", "lang": "ru", "expect": [["111460", ["226"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Условно-досрочное освобождение", "lang": "ru", "expect": [["111453", ["73"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "What is the punishment for fraud in Uzbekistan?", "lang": "en", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Is hacking someone's account a crime?", "lang": "en", "expect": [["111453", ["278.2", "278.3"]]], "domain": "criminal", "typo": false, "split": "test"}
+{"q": "Sudga da'vo arizasi berishda davlat boji", "lang": "uz_latn", "expect": [["4680944", ["19", "6", "annex"]], ["3517337", ["128", "174"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Da'vo arizasida nimalar yozilishi kerak?", "lang": "uz_latn", "expect": [["3517337", ["189", "188", "191"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Sud qaroridan norozi bo'lsam qancha muddatda shikoyat qilaman?", "lang": "uz_latn", "expect": [["3517337", ["385.1", "383", "385"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "Sud buyrug'i nima?", "lang": "uz_latn", "expect": [["3517337", ["170", "171"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Sud qarorini qarzdor bajarmayapti, MIBga qanday murojaat qilinadi?", "lang": "uz_latn", "expect": [["26477", ["7", "23", "27"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Qarzdorni chet elga chiqishini cheklash mumkinmi?", "lang": "uz_latn", "expect": [["26477", ["42.1"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "Bepul advokat olish uchun kimlar haqli?", "lang": "uz_latn", "expect": [["6502543", ["9", "10", "11"]], ["6445145", ["29"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Mediatsiya orqali nizoni hal qilish", "lang": "uz_latn", "expect": [["3805227", ["*"]], ["3517337", ["166"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Kassatsiya shikoyati qachon beriladi?", "lang": "uz_latn", "expect": [["3517337", ["405.1", "403", "405"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "Sud xarajatlarini kim to'laydi?", "lang": "uz_latn", "expect": [["3517337", ["138", "127"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Notarius notarial harakatni rad etsa nima qilaman?", "lang": "uz_latn", "expect": [["54458", ["38", "39"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Ajrashish uchun davlat boji qancha?", "lang": "uz_latn", "expect": [["4680944", ["annex", "19"]], ["104720", ["45"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "sudga ariza qanday yoziladi namuna", "lang": "uz_latn", "expect": [["3517337", ["188", "189", "191"]]], "domain": "procedure", "typo": true, "split": "dev"}
+{"q": "Апелляция шикояти бериш муддати", "lang": "uz_cyrl", "expect": [["3517337", ["385.1", "385"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Как подать исковое заявление в суд?", "lang": "ru", "expect": [["3517337", ["188", "189", "191"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "Госпошлина за подачу иска в суд", "lang": "ru", "expect": [["4680944", ["19", "6", "annex"]], ["3517337", ["128"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Срок подачи апелляционной жалобы", "lang": "ru", "expect": [["3517337", ["385.1", "385"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Бесплатная юридическая помощь за счет государства", "lang": "ru", "expect": [["6502543", ["9", "10", "11"]]], "domain": "procedure", "typo": false, "split": "test"}
+{"q": "How much is the court fee for a divorce?", "lang": "en", "expect": [["4680944", ["annex", "19"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Jismoniy shaxslardan olinadigan daromad solig'i stavkasi qancha?", "lang": "uz_latn", "expect": [["4674902", ["381"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Uy uchun mol-mulk solig'i qancha?", "lang": "uz_latn", "expect": [["4674902", ["422", "421"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Yer solig'ini kim to'laydi va stavkasi qancha?", "lang": "uz_latn", "expect": [["4674902", ["437", "436"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "O'zini o'zi band qilgan shaxslar soliq to'laydimi?", "lang": "uz_latn", "expect": [["4674902", ["465", "378"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Soliqni kechiktirib to'lasa penya qancha?", "lang": "uz_latn", "expect": [["4674902", ["110"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Ortiqcha to'langan soliqni qaytarib olish mumkinmi?", "lang": "uz_latn", "expect": [["4674902", ["103", "104"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Daromad to'g'risidagi deklaratsiyani qachon topshirish kerak?", "lang": "uz_latn", "expect": [["4674902", ["397", "396"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Aylanmadan olinadigan soliq stavkasi", "lang": "uz_latn", "expect": [["4674902", ["467", "461"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Soliq organining qaroridan shikoyat qilish tartibi", "lang": "uz_latn", "expect": [["4674902", ["231", "230", "236"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Kvartirani ijaraga bersam soliq to'laymanmi?", "lang": "uz_latn", "expect": [["4674902", ["375", "393"]], ["97664", ["159.1"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "qqs stavkasi necha foiz", "lang": "uz_latn", "expect": [["4674902", ["258"]]], "domain": "tax", "typo": true, "split": "test"}
+{"q": "Мол-мулк солиғи ставкалари", "lang": "uz_cyrl", "expect": [["4674902", ["422", "415"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Ставка налога на доходы физических лиц", "lang": "ru", "expect": [["4674902", ["381"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Налог на имущество физических лиц", "lang": "ru", "expect": [["4674902", ["422", "421", "423"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Пеня за просрочку уплаты налога", "lang": "ru", "expect": [["4674902", ["110"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "Налог с оборота ставка", "lang": "ru", "expect": [["4674902", ["467", "461"]]], "domain": "tax", "typo": false, "split": "dev"}
+{"q": "What is the personal income tax rate in Uzbekistan?", "lang": "en", "expect": [["4674902", ["381"]], ["practical-facts", ["income_tax"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Yakka tartibdagi tadbirkor sifatida ro'yxatdan o'tish", "lang": "uz_latn", "expect": [["2006789", ["13"]], ["111189", ["24"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "MChJ ochish uchun qanday hujjatlar kerak?", "lang": "uz_latn", "expect": [["8151376", ["11", "12", "14"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "MChJ dan ishtirokchi qanday chiqadi?", "lang": "uz_latn", "expect": [["8151376", ["21", "23"]]], "domain": "business", "typo": false, "split": "test"}
+{"q": "Qaysi faoliyat turlari uchun litsenziya kerak?", "lang": "uz_latn", "expect": [["5511879", ["13", "annex"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Litsenziyaning amal qilish muddati", "lang": "uz_latn", "expect": [["5511879", ["16"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Tadbirkorlarni tekshirish tartibi qanday?", "lang": "uz_latn", "expect": [["28144", ["*"]], ["2006789", ["34", "39"]]], "domain": "business", "typo": false, "split": "test"}
+{"q": "Bankrotlik to'g'risida ariza berish", "lang": "uz_latn", "expect": [["5957612", ["*"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Reklama to'g'risidagi qonun", "lang": "uz_latn", "expect": [["6052631", ["*"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Oilaviy tadbirkorlik nima?", "lang": "uz_latn", "expect": [["2004956", ["*"]]], "domain": "business", "typo": false, "split": "test"}
+{"q": "Регистрация индивидуального предпринимателя", "lang": "ru", "expect": [["2006789", ["13"]], ["111189", ["24"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Выход участника из ООО", "lang": "ru", "expect": [["8151376", ["21", "23"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Какие виды деятельности лицензируются?", "lang": "ru", "expect": [["5511879", ["13", "annex"]]], "domain": "business", "typo": false, "split": "test"}
+{"q": "How do I register an LLC in Uzbekistan?", "lang": "en", "expect": [["8151376", ["11", "12"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Pensiyaga necha yoshda chiqiladi?", "lang": "uz_latn", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Pensiya miqdori qanday hisoblanadi?", "lang": "uz_latn", "expect": [["112314", ["25", "26", "29", "31"]]], "domain": "social", "typo": false, "split": "test"}
+{"q": "Pensiya olish uchun qancha ish staji kerak?", "lang": "uz_latn", "expect": [["112314", ["17", "7", "8"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Boquvchisini yo'qotganlik pensiyasi kimlarga beriladi?", "lang": "uz_latn", "expect": [["112314", ["19", "20"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Nogironlik pensiyasi qanday tayinlanadi?", "lang": "uz_latn", "expect": [["112314", ["16", "15"]]], "domain": "social", "typo": false, "split": "test"}
+{"q": "Ishsizlik nafaqasi qancha va qanday olinadi?", "lang": "uz_latn", "expect": [["5055690", ["51", "52", "44"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Pensiya tayinlashni rad etishsa shikoyat qilish", "lang": "uz_latn", "expect": [["112314", ["48"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "pensiyaga chiqish uchun qanaqa hujjatlar kerak", "lang": "uz_latn", "expect": [["112314", ["43", "43.1"]]], "domain": "social", "typo": true, "split": "test"}
+{"q": "Пенсия ёши неча ёш?", "lang": "uz_cyrl", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Пенсионный возраст в Узбекистане", "lang": "ru", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Пособие по безработице размер", "lang": "ru", "expect": [["5055690", ["52", "51"]]], "domain": "social", "typo": false, "split": "test"}
+{"q": "Как оформить пенсию по потере кормильца?", "lang": "ru", "expect": [["112314", ["19", "43"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "What is the retirement age in Uzbekistan?", "lang": "en", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev"}
+{"q": "Shaxsiy hayot daxlsizligi huquqi", "lang": "uz_latn", "expect": [["6445145", ["31"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Shaxsga doir ma'lumotlarga ishlov berish uchun rozilik kerakmi?", "lang": "uz_latn", "expect": [["4396419", ["21", "18"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Davlat organiga yozgan murojaatimga necha kunda javob berilishi kerak?", "lang": "uz_latn", "expect": [["3336169", ["28"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Hokimiyatga ariza berdim, javob bermayapti", "lang": "uz_latn", "expect": [["3336169", ["28", "33", "38"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Virtual qabulxonaga murojaat qanday ko'rib chiqiladi?", "lang": "uz_latn", "expect": [["3336169", ["13", "10"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Fuqarolik olish uchun qanday shartlar bor?", "lang": "uz_latn", "expect": [["4761984", ["19", "13"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Chet el fuqarosi O'zbekistonda qanday huquqlarga ega?", "lang": "uz_latn", "expect": [["5443899", ["*"]], ["6445145", ["24"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Harbiy xizmatga chaqiruvdan kechiktirish kimlarga beriladi?", "lang": "uz_latn", "expect": [["78717", ["21", "22"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Muqobil xizmat nima?", "lang": "uz_latn", "expect": [["78717", ["37", "38"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Malakali yuridik yordam olish huquqi Konstitutsiyada bormi?", "lang": "uz_latn", "expect": [["6445145", ["29"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Bilim olish huquqi", "lang": "uz_latn", "expect": [["6445145", ["50"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "murojaatga javob muddati qancha kun", "lang": "uz_latn", "expect": [["3336169", ["28"]]], "domain": "rights", "typo": true, "split": "dev"}
+{"q": "Шахсга доир маълумотларни тарқатиш мумкинми?", "lang": "uz_cyrl", "expect": [["4396419", ["14", "21", "18", "27.1"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Срок рассмотрения обращения в государственный орган", "lang": "ru", "expect": [["3336169", ["28"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Согласие на обработку персональных данных", "lang": "ru", "expect": [["4396419", ["21"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Как получить гражданство Узбекистана?", "lang": "ru", "expect": [["4761984", ["19", "13", "21"]]], "domain": "rights", "typo": false, "split": "test"}
+{"q": "Отсрочка от армии", "lang": "ru", "expect": [["78717", ["21", "22"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Can I refuse to give my personal data?", "lang": "en", "expect": [["4396419", ["21", "30"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Kreditni muddatidan oldin yopsam jarima bormi?", "lang": "uz_latn", "expect": [["1004687", ["16"]], ["180552", ["746.1"]]], "domain": "finance", "typo": false, "split": "test"}
+{"q": "Bankdagi omonatlarim kafolatlanganmi?", "lang": "uz_latn", "expect": [["7389404", ["*"]], ["180552", ["759"]]], "domain": "finance", "typo": false, "split": "dev"}
+{"q": "OSAGO polisi nima va majburiymi?", "lang": "uz_latn", "expect": [["1342474", ["7", "9", "15"]]], "domain": "finance", "typo": false, "split": "dev"}
+{"q": "Avariyada sug'urta kompaniyasi to'lashdan bosh tortdi", "lang": "uz_latn", "expect": [["1342474", ["19", "20"]], ["180552", ["955"]]], "domain": "finance", "typo": false, "split": "test"}
+{"q": "Досрочное погашение потребительского кредита", "lang": "ru", "expect": [["1004687", ["16"]], ["180552", ["746.1"]]], "domain": "finance", "typo": false, "split": "dev"}
+{"q": "Гарантии вкладов в банках", "lang": "ru", "expect": [["7389404", ["*"]], ["180552", ["759", "765"]]], "domain": "finance", "typo": false, "split": "dev"}
+{"q": "Йиллик меҳнат таътили неча кун?", "lang": "uz_cyrl", "expect": [["6257288", ["217", "216"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Ойлик маошни кечиктирса иш берувчи жавоб берадими?", "lang": "uz_cyrl", "expect": [["6257288", ["333", "253"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Синов муддати қанча бўлади?", "lang": "uz_cyrl", "expect": [["6257288", ["130", "129"]]], "domain": "labour", "typo": false, "split": "dev"}
+{"q": "Ҳомиладор аёлни ишдан бўшатиш мумкинми?", "lang": "uz_cyrl", "expect": [["6257288", ["408", "392", "163"]]], "domain": "labour", "typo": false, "split": "test"}
+{"q": "Никоҳ ёши неча ёш?", "lang": "uz_cyrl", "expect": [["104720", ["15"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Ота-оналик ҳуқуқидан маҳрум қилиш асослари", "lang": "uz_cyrl", "expect": [["104720", ["79"]]], "domain": "family", "typo": false, "split": "dev"}
+{"q": "Васиятнома қандай тузилади?", "lang": "uz_cyrl", "expect": [["180552", ["1124", "1125"]]], "domain": "inheritance", "typo": false, "split": "test"}
+{"q": "Меросни қабул қилиш муддати", "lang": "uz_cyrl", "expect": [["180552", ["1145", "1146"]]], "domain": "inheritance", "typo": false, "split": "dev"}
+{"q": "Даъво муддати неча йил?", "lang": "uz_cyrl", "expect": [["111189", ["150"]]], "domain": "civil", "typo": false, "split": "dev"}
+{"q": "Маънавий зарарни қоплаш", "lang": "uz_cyrl", "expect": [["180552", ["1022", "1021"]]], "domain": "civil", "typo": false, "split": "test"}
+{"q": "Турар жойдан кўчириш асослари", "lang": "uz_cyrl", "expect": [["106136", ["70", "74"]]], "domain": "housing", "typo": false, "split": "dev"}
+{"q": "Тезликни ошириб юборганлик учун жарима", "lang": "uz_cyrl", "expect": [["97664", ["128.3"]]], "domain": "traffic", "typo": false, "split": "dev"}
+{"q": "Майда безорилик учун жавобгарлик", "lang": "uz_cyrl", "expect": [["97664", ["183"]]], "domain": "admin", "typo": false, "split": "test"}
+{"q": "Ўғрилик учун жазо", "lang": "uz_cyrl", "expect": [["111453", ["169"]]], "domain": "criminal", "typo": false, "split": "dev"}
+{"q": "Суд қароридан норози бўлсам нима қиламан?", "lang": "uz_cyrl", "expect": [["3517337", ["383", "385", "385.1"]]], "domain": "procedure", "typo": false, "split": "dev"}
+{"q": "Жисмоний шахслардан олинадиган даромад солиғи ставкаси", "lang": "uz_cyrl", "expect": [["4674902", ["381"]]], "domain": "tax", "typo": false, "split": "test"}
+{"q": "Якка тартибдаги тадбиркор бўлиш учун нима қилиш керак?", "lang": "uz_cyrl", "expect": [["2006789", ["13"]], ["111189", ["24"]]], "domain": "business", "typo": false, "split": "dev"}
+{"q": "Мурожаатларни кўриб чиқиш муддати", "lang": "uz_cyrl", "expect": [["3336169", ["28"]]], "domain": "rights", "typo": false, "split": "dev"}
+{"q": "Ишсизлик нафақаси миқдори", "lang": "uz_cyrl", "expect": [["5055690", ["52", "51"]]], "domain": "social", "typo": false, "split": "test"}
+{"q": "Истеъмол кредитини муддатидан олдин қайтариш", "lang": "uz_cyrl", "expect": [["1004687", ["16"]]], "domain": "finance", "typo": false, "split": "dev"}
+{"q": "ish berivchi oylikni bermayapti nima qilay", "lang": "uz_latn", "expect": [["6257288", ["333", "253", "546"]]], "domain": "labour", "typo": true, "split": "dev"}
+{"q": "tatil necha kun beriladi yiliga", "lang": "uz_latn", "expect": [["6257288", ["217", "216"]]], "domain": "labour", "typo": true, "split": "test"}
+{"q": "sinof muddati qancha", "lang": "uz_latn", "expect": [["6257288", ["130", "129"]]], "domain": "labour", "typo": true, "split": "dev"}
+{"q": "homilador ayolni ishdan xaydash mumkinmi", "lang": "uz_latn", "expect": [["6257288", ["408", "392", "163"]]], "domain": "labour", "typo": true, "split": "dev"}
+{"q": "nikox yoshi necha", "lang": "uz_latn", "expect": [["104720", ["15"]]], "domain": "family", "typo": true, "split": "test"}
+{"q": "bolani otasi alimentni tolamayapti", "lang": "uz_latn", "expect": [["104720", ["139", "142", "136"]], ["111453", ["122"]]], "domain": "family", "typo": true, "split": "dev"}
+{"q": "vasiyatnoma qanday yoziladi", "lang": "uz_latn", "expect": [["180552", ["1124", "1125"]]], "domain": "inheritance", "typo": true, "split": "dev"}
+{"q": "qarz bergan pulimni qaytarmayapti tilxat bor", "lang": "uz_latn", "expect": [["180552", ["735", "736", "737"]], ["3517337", ["170"]]], "domain": "civil", "typo": true, "split": "test"}
+{"q": "kvartiradan haydab chiqarishmoqchi", "lang": "uz_latn", "expect": [["106136", ["70", "74"]]], "domain": "housing", "typo": true, "split": "dev"}
+{"q": "telefon buzilib qoldi magazin almashtirib bermayapti", "lang": "uz_latn", "expect": [["4704", ["13", "14"]]], "domain": "consumer", "typo": true, "split": "dev"}
+{"q": "svetoforda qizilga otib ketdim jarima", "lang": "uz_latn", "expect": [["97664", ["128.4"]]], "domain": "traffic", "typo": true, "split": "test"}
+{"q": "chekish uchun shtraf", "lang": "uz_latn", "expect": [["97664", ["56.1"]]], "domain": "admin", "typo": true, "split": "dev"}
+{"q": "firibgarlik jazosi qancha yil", "lang": "uz_latn", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": true, "split": "dev"}
+{"q": "apelyatsiya muddati necha kun", "lang": "uz_latn", "expect": [["3517337", ["385.1", "385"]]], "domain": "procedure", "typo": true, "split": "test"}
+{"q": "darmod soligi necha foiz", "lang": "uz_latn", "expect": [["4674902", ["381"]]], "domain": "tax", "typo": true, "split": "dev"}
+{"q": "ip ochish uchun nima kerak", "lang": "uz_latn", "expect": [["2006789", ["13"]], ["111189", ["24"]]], "domain": "business", "typo": true, "split": "dev"}
+{"q": "pensiyaga chiqish yoshi ayollar uchun", "lang": "uz_latn", "expect": [["112314", ["7"]]], "domain": "social", "typo": true, "split": "test"}
+{"q": "davlat organi javob bermayapti murojatimga", "lang": "uz_latn", "expect": [["3336169", ["28", "33"]]], "domain": "rights", "typo": true, "split": "dev"}
+{"q": "kredidni oldin yopsam boladimi", "lang": "uz_latn", "expect": [["1004687", ["16"]]], "domain": "finance", "typo": true, "split": "dev"}
+{"q": "ishsizlik nafaqasini qanday olish mumkin", "lang": "uz_latn", "expect": [["5055690", ["51", "44", "52"]]], "domain": "social", "typo": true, "split": "test"}
+{"q": "BHM qancha hozir?", "lang": "uz_latn", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "Eng kam ish haqi qancha?", "lang": "uz_latn", "expect": [["practical-facts", ["mhtekm"]], ["6257288", ["245"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "Какая сейчас БРВ?", "lang": "ru", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "test"}
+{"q": "Минимальная зарплата в Узбекистане сейчас", "lang": "ru", "expect": [["practical-facts", ["mhtekm"]], ["6257288", ["245"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "2025-yilda bazaviy hisoblash miqdori qancha edi?", "lang": "uz_latn", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "Markaziy bankning qayta moliyalash stavkasi qancha?", "lang": "uz_latn", "expect": [["practical-facts", ["cbu_rate"]]], "domain": "figures", "typo": false, "split": "test"}
+{"q": "Ставка рефинансирования ЦБ Узбекистана", "lang": "ru", "expect": [["practical-facts", ["cbu_rate"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "What is the minimum wage in Uzbekistan?", "lang": "en", "expect": [["practical-facts", ["mhtekm"]], ["6257288", ["245"]]], "domain": "figures", "typo": false, "split": "dev"}
+{"q": "Ishxonam meni sabab ko'rsatmasdan bo'shatdi", "lang": "uz_latn", "expect": [["6257288", ["161", "174", "165"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Direktor arizamni qabul qilmayapti, ishdan ketolmayapman", "lang": "uz_latn", "expect": [["6257288", ["160"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ishga kirganimga 2 oy bo'ldi, shartnoma tuzishmadi", "lang": "uz_latn", "expect": [["6257288", ["106", "107", "108"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Sinov muddatini uzaytirsa bo'ladimi?", "lang": "uz_latn", "expect": [["6257288", ["130"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ishdan haydashdan oldin necha oy oldin aytishlari kerak?", "lang": "uz_latn", "expect": [["6257288", ["165"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ish haqimni naqd emas kartaga to'lashadi, bu to'g'rimi?", "lang": "uz_latn", "expect": [["6257288", ["256"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kasaba uyushmasi roziligisiz ishdan bo'shatish mumkinmi?", "lang": "uz_latn", "expect": [["6257288", ["164"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ish beruvchi ta'tilga chiqarmayapti 2 yildan beri", "lang": "uz_latn", "expect": [["6257288", ["214", "230", "228"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kunduzgi o'qishda o'qiyman, ishda imtiyoz bormi?", "lang": "uz_latn", "expect": [["6257288", ["383", "385", "386"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Haftada necha kun dam olish kuni bo'lishi kerak?", "lang": "uz_latn", "expect": [["6257288", ["207"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "ish joyida jarohat oldim kim tolaydi", "lang": "uz_latn", "expect": [["6257288", ["321", "322", "324"]]], "domain": "labour", "typo": true, "split": "dev", "batch": "dev2"}
+{"q": "ishdan ketsam pulimni qachon berishadi", "lang": "uz_latn", "expect": [["6257288", ["254", "172"]]], "domain": "labour", "typo": true, "split": "dev", "batch": "dev2"}
+{"q": "dekret puli qancha beriladi", "lang": "uz_latn", "expect": [["6257288", ["404"]]], "domain": "labour", "typo": true, "split": "dev", "batch": "dev2"}
+{"q": "Иш берувчи меҳнат шартномасини ўзгартирди, розилигим йўқ эди", "lang": "uz_cyrl", "expect": [["6257288", ["137", "135", "150"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ишдан бўшатиш нафақаси қанча бўлади?", "lang": "uz_cyrl", "expect": [["6257288", ["173"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Работодатель не платит за переработку", "lang": "ru", "expect": [["6257288", ["262", "189"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Могут ли уволить беременную по сокращению?", "lang": "ru", "expect": [["6257288", ["408", "392"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Когда выплачивают отпускные?", "lang": "ru", "expect": [["6257288", ["233"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Can I be fired for being late?", "lang": "en", "expect": [["6257288", ["161", "162", "312"]]], "domain": "labour", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Turmush o'rtog'im bilan ajrashmoqchimiz, farzandimiz yo'q", "lang": "uz_latn", "expect": [["104720", ["42", "218", "38"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Eri chet elda, ajrashish mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["40", "41", "43", "38"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Bola tug'ilganini qancha muddatda ro'yxatdan o'tkazish kerak?", "lang": "uz_latn", "expect": [["104720", ["205"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Aliment qarzi bo'lsa chet elga chiqib ketsa bo'ladimi?", "lang": "uz_latn", "expect": [["104720", ["145"]], ["26477", ["42.1"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Nikoh qayd etilmagan bo'lsa bola otasidan aliment olsa bo'ladimi?", "lang": "uz_latn", "expect": [["104720", ["64", "62", "99"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kelinning uydagi mol-mulkka huquqi bormi?", "lang": "uz_latn", "expect": [["104720", ["23", "25"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "aliment necha yoshgacha tolanadi", "lang": "uz_latn", "expect": [["104720", ["96", "99", "100"]]], "domain": "family", "typo": true, "split": "dev", "batch": "dev2"}
+{"q": "Ота-она ажрашса бола кимда қолади?", "lang": "uz_cyrl", "expect": [["104720", ["76", "65", "88"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Алименты на ребенка если отец безработный", "lang": "ru", "expect": [["104720", ["99", "104", "102"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Как сменить фамилию после развода?", "lang": "ru", "expect": [["104720", ["46", "220"]]], "domain": "family", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Otam vafot etdi, uy uning nomida, nima qilishimiz kerak?", "lang": "uz_latn", "expect": [["180552", ["1145", "1146", "1135", "1116"]]], "domain": "inheritance", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Meros bo'yicha nizo sudda qanday hal qilinadi?", "lang": "uz_latn", "expect": [["180552", ["1150", "1135"]], ["3517337", ["188"]]], "domain": "inheritance", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Наследует ли жена квартиру мужа?", "lang": "ru", "expect": [["180552", ["1143", "1135"]]], "domain": "inheritance", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Akam pulimni qaytarmayapti, qarz berganimga guvoh bor", "lang": "uz_latn", "expect": [["180552", ["733", "735", "737"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Shartnomada belgilangan neustoykani kamaytirish mumkinmi?", "lang": "uz_latn", "expect": [["111189", ["326", "260", "263"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Mashinamni qo'shnim urib ketdi, zararni qanday undiraman?", "lang": "uz_latn", "expect": [["180552", ["999", "985", "1003"]], ["1342474", ["19"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kvartira sotib oldim, keyin kamchilik chiqdi", "lang": "uz_latn", "expect": [["180552", ["487", "408", "409"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Bitimni haqiqiy emas deb topish uchun qancha vaqt bor?", "lang": "uz_latn", "expect": [["111189", ["151", "114", "116"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Договор займа под проценты между физлицами", "lang": "ru", "expect": [["180552", ["734", "732"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Как вернуть деньги за некачественный ремонт?", "lang": "ru", "expect": [["180552", ["650", "665"]]], "domain": "civil", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ijaradagi kvartirada ta'mirlashni kim qiladi?", "lang": "uz_latn", "expect": [["180552", ["610"]], ["106136", ["62"]]], "domain": "housing", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kommunal xizmatlar haqini to'lamaganim uchun gazni o'chirib qo'yishdi", "lang": "uz_latn", "expect": [["106136", ["133", "134", "135"]]], "domain": "housing", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Qarindoshlarimni kvartiraga ro'yxatga qo'yish mumkinmi?", "lang": "uz_latn", "expect": [["7623461", ["6", "20"]], ["106136", ["51"]]], "domain": "housing", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Как выселить бывшего мужа из квартиры?", "lang": "ru", "expect": [["106136", ["32", "54", "70"]]], "domain": "housing", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Sotuvchi kafolat talonini bermadi", "lang": "uz_latn", "expect": [["4704", ["11", "6"]], ["180552", ["403"]]], "domain": "consumer", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Restoranda ovqatdan zaharlandim", "lang": "uz_latn", "expect": [["4704", ["12", "20", "22"]]], "domain": "consumer", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Продали просроченный товар, куда жаловаться?", "lang": "ru", "expect": [["4704", ["12", "23", "13"]], ["97664", ["164"]]], "domain": "consumer", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Jarima ballari to'lib qolsa nima bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["34.1"]]], "domain": "traffic", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Mashinani boshqa odamga mast holda boshqartirib qo'ysam", "lang": "uz_latn", "expect": [["97664", ["140"]], ["111453", ["261"]]], "domain": "traffic", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kamera yozgan jarimani qanday to'layman?", "lang": "uz_latn", "expect": [["97664", ["17.1", "309.1"]]], "domain": "traffic", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "haydovchilik guvohnomamni olib qoyishdi qachon qaytaradi", "lang": "uz_latn", "expect": [["6764454", ["46"]], ["97664", ["35"]]], "domain": "traffic", "typo": true, "split": "dev", "batch": "dev2"}
+{"q": "Штраф за езду без страховки ОСАГО", "lang": "ru", "expect": [["97664", ["135.1"]], ["1342474", ["7"]]], "domain": "traffic", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Tunda qo'shni to'y qilib baland musiqa qo'ydi", "lang": "uz_latn", "expect": [["97664", ["192", "192.1"]]], "domain": "admin", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ko'chada pichoq olib yurish mumkinmi?", "lang": "uz_latn", "expect": [["97664", ["185.2"]]], "domain": "admin", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Штраф за мусор на улице", "lang": "ru", "expect": [["97664", ["91.1"]]], "domain": "admin", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Biror kishi meni o'ldiraman deb qo'rqityapti", "lang": "uz_latn", "expect": [["111453", ["112"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Internetda pul ishlash deb aldab ketishdi", "lang": "uz_latn", "expect": [["111453", ["168"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Bolani o'g'irlab ketishsa qanday jinoyat?", "lang": "uz_latn", "expect": [["111453", ["137", "138"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Kalla urib burnimni sindirdi", "lang": "uz_latn", "expect": [["111453", ["105", "109"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Кто-то взломал мой телеграм аккаунт", "lang": "ru", "expect": [["111453", ["278.2", "278.3"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Меня задержали без адвоката, это законно?", "lang": "ru", "expect": [["111460", ["51", "48", "24"]], ["6445145", ["29"]]], "domain": "criminal", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Sudga shikoyatni elektron shaklda berish mumkinmi?", "lang": "uz_latn", "expect": [["3517337", ["188", "385"]]], "domain": "procedure", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Sud qarori qachon kuchga kiradi?", "lang": "uz_latn", "expect": [["3517337", ["264"]]], "domain": "procedure", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Davlat bojini to'lay olmasam sud bo'lib to'lashga ruxsat beradimi?", "lang": "uz_latn", "expect": [["3517337", ["133"]], ["4680944", ["17"]]], "domain": "procedure", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Как получить исполнительный лист?", "lang": "ru", "expect": [["26477", ["7", "8"]]], "domain": "procedure", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Yakka tartibdagi tadbirkor qanday soliqlarni to'laydi?", "lang": "uz_latn", "expect": [["4674902", ["31", "461", "465"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Uy sotganda soliq to'lanadimi?", "lang": "uz_latn", "expect": [["4674902", ["375", "378"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Soliq qarzim bor deb bank hisobimni bloklashdi", "lang": "uz_latn", "expect": [["4674902", ["112", "117", "121"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Налоговый вычет за обучение ребенка", "lang": "ru", "expect": [["4674902", ["380", "378"]]], "domain": "tax", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Biznesimni tugatmoqchiman, nima qilish kerak?", "lang": "uz_latn", "expect": [["111189", ["53", "55"]], ["2006789", ["49"]], ["5957612", ["*"]]], "domain": "business", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Davlat xaridlarida qatnashish tartibi", "lang": "uz_latn", "expect": [["5382974", ["*"]]], "domain": "business", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ayollar pensiyaga necha yoshda chiqadi?", "lang": "uz_latn", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Chet elda ishlagan yillarim stajga qo'shiladimi?", "lang": "uz_latn", "expect": [["112314", ["40", "36", "37"]]], "domain": "social", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Пенсия по инвалидности 2 группы", "lang": "ru", "expect": [["112314", ["16", "15"]]], "domain": "social", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Prezident virtual qabulxonasiga qanday yozaman?", "lang": "uz_latn", "expect": [["3336169", ["13", "10", "21"]]], "domain": "rights", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Fuqarolikdan chiqish tartibi", "lang": "uz_latn", "expect": [["4761984", ["24", "39"]]], "domain": "rights", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Chaqiruv qog'ozi keldi, o'qiyapman, armiyaga borishim shartmi?", "lang": "uz_latn", "expect": [["78717", ["21", "22"]]], "domain": "rights", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Can a foreigner buy property in Uzbekistan?", "lang": "en", "expect": [["5443899", ["14"]], ["152653", ["18"]]], "domain": "rights", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Bank kreditni muddatidan oldin to'lashni talab qilyapti", "lang": "uz_latn", "expect": [["180552", ["746.1"]], ["1004687", ["17"]]], "domain": "finance", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Mikroqarz olish shartlari qanday?", "lang": "uz_latn", "expect": [["5972411", ["*"]], ["1004687", ["10"]]], "domain": "finance", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Hozir eng kam oylik qancha?", "lang": "uz_latn", "expect": [["practical-facts", ["mhtekm"]], ["6257288", ["245"]]], "domain": "figures", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Pensiya bazaviy miqdori 2026-yilda", "lang": "uz_latn", "expect": [["practical-facts", ["pension_base"]]], "domain": "figures", "typo": false, "split": "dev", "batch": "dev2"}
+{"q": "Ish beruvchi meni ogohlantirmasdan ishdan bo'shatib yubordi", "lang": "uz_latn", "expect": [["6257288", ["165", "161", "174"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Oylik maoshim o'z vaqtida berilmasa kompensatsiya talab qilsam bo'ladimi?", "lang": "uz_latn", "expect": [["6257288", ["333"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Yangi ishga kirdim, birinchi yili ta'til beriladimi?", "lang": "uz_latn", "expect": [["6257288", ["227", "228"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Bayram kuni ishlaganim uchun qancha to'lanadi?", "lang": "uz_latn", "expect": [["6257288", ["263"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Ish beruvchi meni boshqa shaharga ishlashga majburlayapti", "lang": "uz_latn", "expect": [["6257288", ["138", "140", "146"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Xodimni ishdan chetlashtirish qachon mumkin?", "lang": "uz_latn", "expect": [["6257288", ["151"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Oylik necha kunda bir marta berilishi kerak", "lang": "uz_latn", "expect": [["6257288", ["253"]]], "domain": "labour", "typo": true, "split": "holdout"}
+{"q": "Сколько длится декретный отпуск?", "lang": "ru", "expect": [["6257288", ["404"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Можно ли работать по совместительству?", "lang": "ru", "expect": [["6257288", ["432", "433"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Can my employer cut my salary without my consent?", "lang": "en", "expect": [["6257288", ["247", "137", "135"]]], "domain": "labour", "typo": false, "split": "holdout"}
+{"q": "Ajrashgandan keyin bolalar kim bilan qoladi?", "lang": "uz_latn", "expect": [["104720", ["76", "65", "88"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Bolaning otasi aliment to'lamasa jinoiy javobgarlik bormi?", "lang": "uz_latn", "expect": [["111453", ["122"]], ["104720", ["142", "116"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Nikoh shartnomasini bekor qilsa bo'ladimi?", "lang": "uz_latn", "expect": [["104720", ["32"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Farzandlikka olish sir saqlanadimi?", "lang": "uz_latn", "expect": [["104720", ["153"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Никоҳдан ажралгандан кейин алимент қанча?", "lang": "uz_cyrl", "expect": [["104720", ["99", "118", "119"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Брачный договор можно ли заключить после свадьбы?", "lang": "ru", "expect": [["104720", ["30", "29"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Can grandparents see their grandchildren after a divorce?", "lang": "en", "expect": [["104720", ["77"]]], "domain": "family", "typo": false, "split": "holdout"}
+{"q": "Merosdan voz kechish qanday rasmiylashtiriladi?", "lang": "uz_latn", "expect": [["180552", ["1147"]]], "domain": "inheritance", "typo": false, "split": "holdout"}
+{"q": "Vasiyatnomada nomi yo'q farzand meros ola oladimi?", "lang": "uz_latn", "expect": [["180552", ["1142", "1141"]]], "domain": "inheritance", "typo": false, "split": "holdout"}
+{"q": "Как отказаться от наследства?", "lang": "ru", "expect": [["180552", ["1147"]]], "domain": "inheritance", "typo": false, "split": "holdout"}
+{"q": "Qarz shartnomasi bo'yicha foiz olish mumkinmi?", "lang": "uz_latn", "expect": [["180552", ["734"]]], "domain": "civil", "typo": false, "split": "holdout"}
+{"q": "Kafolat muddati tugagan bo'lsa ham sotuvchi javob beradimi?", "lang": "uz_latn", "expect": [["180552", ["404", "403", "409"]], ["4704", ["11"]]], "domain": "consumer", "typo": false, "split": "holdout"}
+{"q": "Kredit shartnomasini bank bir tomonlama o'zgartira oladimi?", "lang": "uz_latn", "expect": [["1004687", ["12"]], ["111189", ["382"]]], "domain": "finance", "typo": false, "split": "holdout"}
+{"q": "Договор дарения квартиры нужно ли нотариально удостоверять?", "lang": "ru", "expect": [["180552", ["504"]]], "domain": "civil", "typo": false, "split": "holdout"}
+{"q": "Залог автомобиля по кредиту", "lang": "ru", "expect": [["111189", ["264", "271"]], ["59914", ["*"]]], "domain": "civil", "typo": false, "split": "holdout"}
+{"q": "Ijaraga olgan kvartiramni boshqaga ijaraga bersam bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["613"]], ["106136", ["57"]]], "domain": "housing", "typo": false, "split": "holdout"}
+{"q": "Uy egasi ijara haqini oshirib yubordi", "lang": "uz_latn", "expect": [["180552", ["611", "577", "535"]], ["106136", ["34"]]], "domain": "housing", "typo": false, "split": "holdout"}
+{"q": "Kvartirani almashtirish uchun nima qilish kerak?", "lang": "uz_latn", "expect": [["106136", ["106", "111", "112"]]], "domain": "housing", "typo": false, "split": "holdout"}
+{"q": "Как приватизировать квартиру?", "lang": "ru", "expect": [["98430", ["*"]], ["106136", ["22"]]], "domain": "housing", "typo": false, "split": "holdout"}
+{"q": "Internetdan sotib olgan kiyimim to'g'ri kelmadi, qaytarsam bo'ladimi?", "lang": "uz_latn", "expect": [["4704", ["18", "28.1"]]], "domain": "consumer", "typo": false, "split": "holdout"}
+{"q": "Магазин отказывается менять бракованный телефон", "lang": "ru", "expect": [["4704", ["13", "14"]]], "domain": "consumer", "typo": false, "split": "holdout"}
+{"q": "Haydovchi piyodani urib ketsa qanday javobgarlik bor?", "lang": "uz_latn", "expect": [["111453", ["266"]], ["97664", ["133"]]], "domain": "traffic", "typo": false, "split": "holdout"}
+{"q": "Xavfsizlik kamarini taqmaganlik uchun jarima", "lang": "uz_latn", "expect": [["97664", ["125", "128.8"]]], "domain": "traffic", "typo": false, "split": "holdout"}
+{"q": "Quvib o'tish qoidasini buzsam nima bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["128.9"]]], "domain": "traffic", "typo": false, "split": "holdout"}
+{"q": "Штраф за тонировку стекол", "lang": "ru", "expect": [["97664", ["126"]]], "domain": "traffic", "typo": false, "split": "holdout"}
+{"q": "Is speeding fine calculated in BHM?", "lang": "en", "expect": [["97664", ["128.3"]]], "domain": "traffic", "typo": false, "split": "holdout"}
+{"q": "Jamoat joyida so'kinsa jarima bormi?", "lang": "uz_latn", "expect": [["97664", ["183"]]], "domain": "admin", "typo": false, "split": "holdout"}
+{"q": "Militsiya xodimining talabini bajarmaslik uchun javobgarlik", "lang": "uz_latn", "expect": [["97664", ["194"]]], "domain": "admin", "typo": false, "split": "holdout"}
+{"q": "Qimor o'ynash uchun jarima", "lang": "uz_latn", "expect": [["97664", ["191"]], ["111453", ["278"]]], "domain": "admin", "typo": false, "split": "holdout"}
+{"q": "Штраф за распитие алкоголя на улице", "lang": "ru", "expect": [["97664", ["187"]]], "domain": "admin", "typo": false, "split": "holdout"}
+{"q": "Tuhmat qilgan odamni qanday javobgarlikka tortish mumkin?", "lang": "uz_latn", "expect": [["97664", ["40"]], ["111453", ["139"]]], "domain": "criminal", "typo": false, "split": "holdout"}
+{"q": "Qurol bilan bosqinchilik jazosi", "lang": "uz_latn", "expect": [["111453", ["164"]]], "domain": "criminal", "typo": false, "split": "holdout"}
+{"q": "Odam savdosi jinoyati uchun jazo", "lang": "uz_latn", "expect": [["111453", ["135"]]], "domain": "criminal", "typo": false, "split": "holdout"}
+{"q": "Шантаж и вымогательство денег, какая статья?", "lang": "ru", "expect": [["111453", ["165"]]], "domain": "criminal", "typo": false, "split": "holdout"}
+{"q": "Jinoyat ishida advokat majburiymi?", "lang": "uz_latn", "expect": [["111460", ["51", "49", "50"]]], "domain": "criminal", "typo": false, "split": "holdout"}
+{"q": "Sud qarorini qanday qilib majburan ijro ettirish mumkin?", "lang": "uz_latn", "expect": [["26477", ["7", "23"]]], "domain": "procedure", "typo": false, "split": "holdout"}
+{"q": "Sudga borish uchun advokatga pulim yo'q", "lang": "uz_latn", "expect": [["6502543", ["9", "10", "11"]]], "domain": "procedure", "typo": false, "split": "holdout"}
+{"q": "Mediator orqali kelishuv qanday tuziladi?", "lang": "uz_latn", "expect": [["3805227", ["*"]], ["3517337", ["166"]]], "domain": "procedure", "typo": false, "split": "holdout"}
+{"q": "Срок подачи кассационной жалобы", "lang": "ru", "expect": [["3517337", ["405.1", "405"]]], "domain": "procedure", "typo": false, "split": "holdout"}
+{"q": "Yer solig'i qachon to'lanadi?", "lang": "uz_latn", "expect": [["4674902", ["440", "437"]]], "domain": "tax", "typo": false, "split": "holdout"}
+{"q": "Soliq tekshiruvi qancha davom etadi?", "lang": "uz_latn", "expect": [["4674902", ["141", "142"]]], "domain": "tax", "typo": false, "split": "holdout"}
+{"q": "Налог с аренды квартиры для физлица", "lang": "ru", "expect": [["4674902", ["375", "393"]], ["97664", ["159.1"]]], "domain": "tax", "typo": false, "split": "holdout"}
+{"q": "Litsenziya olish uchun qayerga murojaat qilinadi?", "lang": "uz_latn", "expect": [["5511879", ["13", "14", "17"]]], "domain": "business", "typo": false, "split": "holdout"}
+{"q": "Kichik biznesni tekshirishlarga moratoriy bormi?", "lang": "uz_latn", "expect": [["28144", ["*"]], ["2006789", ["34", "39"]]], "domain": "business", "typo": false, "split": "holdout"}
+{"q": "Pensiya qayta hisoblanadimi ishlashni davom ettirsam?", "lang": "uz_latn", "expect": [["112314", ["49", "51"]]], "domain": "social", "typo": false, "split": "holdout"}
+{"q": "Nogironligi bo'lgan shaxs uchun qisqartirilgan ish vaqti", "lang": "uz_latn", "expect": [["6257288", ["427"]]], "domain": "social", "typo": false, "split": "holdout"}
+{"q": "Davlat organi ma'lumot berishdan bosh tortdi", "lang": "uz_latn", "expect": [["1319", ["*"]], ["2381133", ["*"]], ["6445145", ["33"]]], "domain": "rights", "typo": false, "split": "holdout"}
+{"q": "Ikki fuqarolikka ruxsat bormi?", "lang": "uz_latn", "expect": [["4761984", ["12", "4", "25"]]], "domain": "rights", "typo": false, "split": "holdout"}
+{"q": "Harbiy xizmatdan bo'yin tovlash uchun jazo", "lang": "uz_latn", "expect": [["111453", ["225"]]], "domain": "rights", "typo": false, "split": "holdout"}
+{"q": "Bankdagi pulim hisobidan bank siri kimlarga ochiladi?", "lang": "uz_latn", "expect": [["41760", ["*"]], ["180552", ["786"]]], "domain": "finance", "typo": false, "split": "holdout"}
+{"q": "Hozirgi BHM bilan 10 BHM jarima qancha bo'ladi?", "lang": "uz_latn", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "holdout"}
+{"q": "Ishdan bo'shatilganimda mehnat daftarchamni bermayapti", "lang": "uz_latn", "expect": [["6257288", ["171", "125"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "smenada 12 soat ishlatishyapti qonuniymi", "lang": "uz_latn", "expect": [["6257288", ["185", "182", "192"]]], "domain": "labour", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Может ли отец взять отпуск по уходу за ребенком?", "lang": "ru", "expect": [["6257288", ["405"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "How much notice must my employer give before dismissing me?", "lang": "en", "expect": [["6257288", ["165"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Иш берувчи ишдан бўшатишдан олдин неча кун олдин огоҳлантириши керак?", "lang": "uz_cyrl", "expect": [["6257288", ["165"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Kasal bo'lib qolsam ish haqim to'lanadimi?", "lang": "uz_latn", "expect": [["7886679", ["7", "16"]], ["6257288", ["291"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Можно ли уволить за прогул?", "lang": "ru", "expect": [["6257288", ["161"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Dam olish kuni ishlaganim uchun qancha haq to'lanadi?", "lang": "uz_latn", "expect": [["6257288", ["263"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Is there a minimum wage in Uzbekistan?", "lang": "en", "expect": [["6257288", ["245"]], ["practical-facts", ["mhtekm"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "bayram kuni ishga chaqirishsa nima qilish kk", "lang": "uz_latn", "expect": [["6257288", ["209", "210", "212", "263"]]], "domain": "labour", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Ish beruvchi tungi smenada homilador ayolni ishlatishi mumkinmi?", "lang": "uz_latn", "expect": [["6257288", ["396"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Ishdan ketganimda foydalanmagan ta'tilim uchun pul beriladimi?", "lang": "uz_latn", "expect": [["6257288", ["172", "235", "234"]]], "domain": "labour", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "ishdan boshatishdi sababsiz qanday tiklansam boladi", "lang": "uz_latn", "expect": [["6257288", ["560", "161", "564"]]], "domain": "labour", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "tatilga chiqmoqchiman rahbar ruxsat bermayapti", "lang": "uz_latn", "expect": [["6257288", ["228", "217", "214"]]], "domain": "labour", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Nikoh shartnomasini qachon tuzish mumkin?", "lang": "uz_latn", "expect": [["104720", ["30", "29"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Можно ли получать алименты от бывшего мужа на себя?", "lang": "ru", "expect": [["104720", ["118", "119"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Farzandlikka olish uchun kim bo'la oladi?", "lang": "uz_latn", "expect": [["104720", ["152", "151"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Ота-оналик ҳуқуқидан маҳрум қилиш асослари қандай?", "lang": "uz_cyrl", "expect": [["104720", ["79"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the legal marriage age in Uzbekistan?", "lang": "en", "expect": [["104720", ["15"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "aliment to'lamay qochib yurgan erimni qanday qidirtirsam bo'ladi", "lang": "uz_latn", "expect": [["26477", ["42"]], ["104720", ["142"]]], "domain": "family", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Erim ajrashishga rozi emas, nima qilaman?", "lang": "uz_latn", "expect": [["104720", ["40", "41", "38"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Сколько процентов алименты на одного ребенка", "lang": "ru", "expect": [["104720", ["99"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Homiladorlik paytida erim ajrashmoqchi, bu mumkinmi?", "lang": "uz_latn", "expect": [["104720", ["39"]]], "domain": "family", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Vasiyatnoma qanday shaklda tuziladi?", "lang": "uz_latn", "expect": [["180552", ["1124", "1125"]]], "domain": "inheritance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Кто наследует, если нет детей, супруга и родителей?", "lang": "ru", "expect": [["180552", ["1136", "1137"]]], "domain": "inheritance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Can I refuse an inheritance?", "lang": "en", "expect": [["180552", ["1147", "1148"]]], "domain": "inheritance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Vasiyatnomani o'zgartirsa bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["1127"]]], "domain": "inheritance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Mashinamni sotdim, xaridor pulini to'lamayapti", "lang": "uz_latn", "expect": [["180552", ["419", "420", "421"]]], "domain": "civil", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Как оформить доверенность на продажу машины?", "lang": "ru", "expect": [["111189", ["135", "134"]]], "domain": "civil", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Qarzga pul berdim, tilxat bor, qaytarmayapti", "lang": "uz_latn", "expect": [["180552", ["735", "733", "732"]]], "domain": "civil", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the limitation period for claiming a debt?", "lang": "en", "expect": [["111189", ["150"]]], "domain": "civil", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Сосед затопил квартиру, как взыскать ущерб?", "lang": "ru", "expect": [["180552", ["985", "1003"]]], "domain": "civil", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Kafolat muddatida telefon buzildi, do'kon tuzatib bermayapti", "lang": "uz_latn", "expect": [["4704", ["13", "11", "14"]]], "domain": "consumer", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Магазин отказывается вернуть деньги за бракованную обувь", "lang": "ru", "expect": [["4704", ["13", "14"]]], "domain": "consumer", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Can a shop refuse to exchange an item I bought yesterday?", "lang": "en", "expect": [["4704", ["18"]]], "domain": "consumer", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "muddati otgan mahsulot sotishdi", "lang": "uz_latn", "expect": [["4704", ["12", "20"]], ["180552", ["405"]]], "domain": "consumer", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Kommunal to'lovlarni kim va qachon to'lashi kerak?", "lang": "uz_latn", "expect": [["106136", ["133", "134"]]], "domain": "housing", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Xonadonda devorni buzib qayta qurish uchun ruxsat kerakmi?", "lang": "uz_latn", "expect": [["106136", ["65"]]], "domain": "housing", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Как временно зарегистрироваться по месту пребывания?", "lang": "ru", "expect": [["7623461", ["6", "7"]]], "domain": "housing", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Ijaradagi kvartiradan chiqib ketmoqchiman, egasini qachon ogohlantirishim kerak?", "lang": "uz_latn", "expect": [["180552", ["615"]]], "domain": "housing", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Jamoat joyida spirtli ichimlik ichsam jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["187"]]], "domain": "admin", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Какой штраф за мелкое хулиганство?", "lang": "ru", "expect": [["97664", ["183"]]], "domain": "admin", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the fine for smoking in public places?", "lang": "en", "expect": [["97664", ["56.1"]]], "domain": "admin", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "To'yni belgilangan tartibdan ortiq o'tkazsa qanday javobgarlik bor?", "lang": "uz_latn", "expect": [["97664", ["192.1"]]], "domain": "admin", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Qizil chiroqda o'tib ketsam jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["128.4"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Ҳайдовчилик гувоҳномасисиз машина ҳайдасам нима бўлади?", "lang": "uz_cyrl", "expect": [["97664", ["135"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Telefonda gaplashib mashina haydasam jarima bormi?", "lang": "uz_latn", "expect": [["97664", ["128.1"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Штраф за вождение в нетрезвом виде", "lang": "ru", "expect": [["97664", ["131"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the penalty for road rage in Uzbekistan?", "lang": "en", "expect": [["97664", ["128.10"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "mast odamga rulni berib qo'ysam nima bo'ladi", "lang": "uz_latn", "expect": [["97664", ["140"]]], "domain": "traffic", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Ichkilikka tekshiruvdan bosh tortsam nima bo'ladi?", "lang": "uz_latn", "expect": [["97664", ["136", "292"]]], "domain": "traffic", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Какое наказание за дачу взятки?", "lang": "ru", "expect": [["111453", ["211"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Pora olgan amaldorga qanday jazo beriladi?", "lang": "uz_latn", "expect": [["111453", ["210"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the punishment for theft?", "lang": "en", "expect": [["111453", ["169"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Ushlab turilganda advokat chaqirishga haqqim bormi?", "lang": "uz_latn", "expect": [["111460", ["48"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Сколько часов могут задерживать без решения суда?", "lang": "ru", "expect": [["111460", ["226"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "giyohvand modda saqlagani uchun jazo qanaqa", "lang": "uz_latn", "expect": [["111453", ["276", "273"]]], "domain": "criminal", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Ўзини ҳимоя қилиб ҳужумчини жароҳатласам жавобгар бўламанми?", "lang": "uz_cyrl", "expect": [["111453", ["37"]]], "domain": "criminal", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Sud qaroriga qancha muddatda apellyatsiya beriladi?", "lang": "uz_latn", "expect": [["3517337", ["385.1"]]], "domain": "procedure", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "В какой суд подавать иск — по месту жительства ответчика?", "lang": "ru", "expect": [["3517337", ["33", "34"]]], "domain": "procedure", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Sud ijrochisi mashinamni xatlab qo'ydi", "lang": "uz_latn", "expect": [["26477", ["53"]]], "domain": "procedure", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "How long does a court take to decide a civil case?", "lang": "en", "expect": [["3517337", ["207"]]], "domain": "procedure", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Kassatsiya shikoyati qachongacha beriladi?", "lang": "uz_latn", "expect": [["3517337", ["405.1"]]], "domain": "procedure", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Daromad solig'i stavkasi necha foiz?", "lang": "uz_latn", "expect": [["4674902", ["381"]], ["practical-facts", ["income_tax"]]], "domain": "tax", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "When is the deadline for the annual income declaration?", "lang": "en", "expect": [["4674902", ["397"]]], "domain": "tax", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "soliq penyasi qanday hisoblanadi", "lang": "uz_latn", "expect": [["4674902", ["110"]], ["practical-facts", ["tax_penalty"]]], "domain": "tax", "typo": true, "split": "holdout2", "batch": "h2"}
+{"q": "Права налогоплательщика при проверке", "lang": "ru", "expect": [["4674902", ["21"]]], "domain": "tax", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Boquvchisini yo'qotganlik pensiyasi uchun qancha staj kerak?", "lang": "uz_latn", "expect": [["112314", ["21"]]], "domain": "social", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Во сколько лет выходят на пенсию женщины?", "lang": "ru", "expect": [["112314", ["7"]]], "domain": "social", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "How is the pension amount calculated?", "lang": "en", "expect": [["112314", ["25", "26"]]], "domain": "social", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Staj yetmasa pensiya beriladimi?", "lang": "uz_latn", "expect": [["112314", ["8", "18", "29"]]], "domain": "social", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Davlat organiga yozgan arizamga bir oydan beri javob yo'q", "lang": "uz_latn", "expect": [["3336169", ["28"]]], "domain": "rights", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Могут ли обрабатывать мои персональные данные без согласия?", "lang": "ru", "expect": [["4396419", ["21"]]], "domain": "rights", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "MCHJ ishtirokchilari kimlar bo'lishi mumkin?", "lang": "uz_latn", "expect": [["8151376", ["8"]]], "domain": "business", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Kreditni muddatidan oldin yopsam bank jarima olishi mumkinmi?", "lang": "uz_latn", "expect": [["1004687", ["16"]]], "domain": "finance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "После ДТП куда обращаться за выплатой по ОСАГО?", "lang": "ru", "expect": [["1342474", ["19", "20"]]], "domain": "finance", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Fuqarolikka qabul qilish uchun O'zbekistonda necha yil yashash kerak?", "lang": "uz_latn", "expect": [["4761984", ["19"]]], "domain": "migration", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Сколько дней дается на регистрацию по месту жительства после переезда?", "lang": "ru", "expect": [["7623461", ["7"]]], "domain": "migration", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Harbiy xizmatdan kechiktirish kimlarga beriladi?", "lang": "uz_latn", "expect": [["78717", ["21"]]], "domain": "public", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Сколько длится срочная военная служба?", "lang": "ru", "expect": [["78717", ["5"]]], "domain": "public", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Eng kam ish haqi hozir qancha?", "lang": "uz_latn", "expect": [["practical-facts", ["mhtekm"]]], "domain": "figures", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Какая сейчас ставка рефинансирования ЦБ?", "lang": "ru", "expect": [["practical-facts", ["cbu_rate"]]], "domain": "figures", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "What is the current base calculation amount?", "lang": "en", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "holdout2", "batch": "h2"}
+{"q": "Пенсия ҳисоблаш учун базавий миқдор қанча?", "lang": "uz_cyrl", "expect": [["practical-facts", ["pension_base"]]], "domain": "figures", "typo": false, "split": "holdout2", "batch": "h2"}
