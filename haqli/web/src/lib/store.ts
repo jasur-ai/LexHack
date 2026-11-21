@@ -54,7 +54,7 @@ interface AppState {
   servicesCategory: string;
   activeMode: UserRole;
   recognitionOpen: boolean;
-  recognitionInitialMode: "document" | "receipt" | "id_mrz" | "voice" | "verify";
+  recognitionInitialMode: "document" | "receipt" | "id_mrz" | "verify";
   prefill: RecognitionPrefill | null;
   toasts: ToastItem[];
   aiPanelOpen: boolean;
@@ -70,7 +70,7 @@ interface AppState {
   setActiveTab: (tab: NavTab) => void;
   setServicesCategory: (category: string) => void;
   setActiveMode: (mode: UserRole) => void;
-  openRecognition: (mode?: "document" | "receipt" | "id_mrz" | "voice" | "verify") => void;
+  openRecognition: (mode?: "document" | "receipt" | "id_mrz" | "verify") => void;
   closeRecognition: () => void;
   setPrefill: (prefill: RecognitionPrefill | null) => void;
   pushToast: (message: string, tone?: ToastItem["tone"]) => void;

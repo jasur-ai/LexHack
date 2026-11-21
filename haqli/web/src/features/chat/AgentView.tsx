@@ -349,7 +349,6 @@ export function AgentView({
   const lang = useAppStore((s) => s.lang);
   const user = useAppStore((s) => s.user);
   const setActiveTab = useAppStore((s) => s.setActiveTab);
-  const openRecognition = useAppStore((s) => s.openRecognition);
   const setNavHidden = useAppStore((s) => s.setNavHidden);
 
   const [input, setInput] = useState("");
@@ -885,7 +884,34 @@ export function AgentView({
           />
           <button
             type="button"
-            onClick={() => openRecognition("voice")}
+            onClick={() => {
+              const win = window as unknown as {
+                SpeechRecognition?: new () => {
+                  lang: string;
+                  onresult: (ev: { results: Array<Array<{ transcript: string }>> }) => void;
+                  start: () => void;
+                };
+                webkitSpeechRecognition?: new () => {
+                  lang: string;
+                  onresult: (ev: { results: Array<Array<{ transcript: string }>> }) => void;
+                  start: () => void;
+                };
+              };
+              const SpeechRec = win.SpeechRecognition || win.webkitSpeechRecognition;
+              if (SpeechRec) {
+                try {
+                  const rec = new SpeechRec();
+                  rec.lang = "uz-UZ";
+                  rec.onresult = (ev) => {
+                    const text = ev.results?.[0]?.[0]?.transcript;
+                    if (text) setInput((prev) => (prev ? prev + " " + text : text));
+                  };
+                  rec.start();
+                } catch {
+                  // ignore
+                }
+              }
+            }}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer"
             aria-label="Voice input"
           >

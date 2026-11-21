@@ -1,14 +1,13 @@
-import { Camera, Mic, QrCode, Receipt, ScanLine } from "lucide-react";
+import { Camera, QrCode, Receipt, ScanLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { haptics } from "../../tma/sdk";
 
-export type RecTabMode = "document" | "receipt" | "id_mrz" | "voice" | "verify";
+export type RecTabMode = "document" | "receipt" | "id_mrz" | "verify";
 
 const TABS: Array<{ id: RecTabMode; Icon: typeof Camera; labelKey: string }> = [
   { id: "document", Icon: Camera, labelKey: "recognition.modes.document" },
   { id: "receipt", Icon: Receipt, labelKey: "recognition.modes.receipt" },
   { id: "id_mrz", Icon: ScanLine, labelKey: "recognition.modes.id_mrz" },
-  { id: "voice", Icon: Mic, labelKey: "recognition.modes.voice" },
   { id: "verify", Icon: QrCode, labelKey: "recognition.modes.verify" },
 ];
 
@@ -26,7 +25,7 @@ export function ModeTabs({
       role="tablist"
       aria-label={t("recognition.title")}
       style={{ backgroundColor: "var(--surface-2)" }}
-      className="grid grid-cols-5 gap-1 rounded-2xl p-1"
+      className="grid grid-cols-4 gap-1 rounded-2xl p-1"
     >
       {TABS.map(({ id, Icon, labelKey }) => {
         const isSelected = active === id;

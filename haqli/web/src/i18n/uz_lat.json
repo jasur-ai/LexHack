@@ -128,12 +128,11 @@
     "publicSignBtn": "Telegram orqali tasdiqlash"
   },
   "recognition": {
-    "title": "Hujjat va Ovoz Tanib olish",
+    "title": "Hujjat Tanib olish",
     "modes": {
       "document": "Hujjat",
       "receipt": "Chek",
       "id_mrz": "Pasport (MRZ)",
-      "voice": "Ovoz",
       "verify": "PDF Tekshir"
     },
     "uploadHint": "Rasm (JPG/PNG/WebP) yoki PDF tanlang, yoki matn kiriting",

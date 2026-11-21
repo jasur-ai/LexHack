@@ -13,7 +13,6 @@ import { QrScanner } from "./QrScanner";
 import { ReviewScreen } from "./ReviewScreen";
 import { mapRouteHintToPrefill } from "./routes";
 import { useRecognitionJob } from "./useRecognitionJob";
-import { VoiceCapture } from "./VoiceCapture";
 
 const DISPLAY_STAGES = ["quality", "preprocess", "recognize", "classify", "parse", "validate"] as const;
 
@@ -82,7 +81,7 @@ export function RecognitionSheet() {
 
   const handleManualEscape = () => {
     job.reset();
-    setActiveTab(mode === "id_mrz" || mode === "voice" ? "tilxat" : "himoya");
+    setActiveTab(mode === "id_mrz" ? "tilxat" : "himoya");
     handleClose();
   };
 
@@ -133,11 +132,6 @@ export function RecognitionSheet() {
 
                 {mode === "verify" ? (
                   <QrScanner />
-                ) : mode === "voice" ? (
-                  <VoiceCapture
-                    onSubmitAudio={(file) => job.startJob({ kind: "voice", file, langHint })}
-                    onSubmitText={(text) => job.startJob({ kind: "voice", text, langHint })}
-                  />
                 ) : (
                   <CameraCapture
                     mode={mode}

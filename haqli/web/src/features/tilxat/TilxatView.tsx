@@ -334,10 +334,6 @@ export function TilxatView() {
           <span className="text-xs font-bold" style={{ color: "var(--primary)" }}>
             {t("tilxat.voiceParseHint")}
           </span>
-          <Button size="sm" variant="ghost" onClick={() => openRecognition("voice")}>
-            <Sparkles className="h-3.5 w-3.5" />
-            {t("recognition.modes.voice")}
-          </Button>
         </div>
         <div className="flex gap-2">
           <input

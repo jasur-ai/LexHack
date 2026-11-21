@@ -128,12 +128,11 @@
     "publicSignBtn": "Подтвердить через Telegram"
   },
   "recognition": {
-    "title": "Распознавание документов и голоса",
+    "title": "Распознавание документов",
     "modes": {
       "document": "Документ",
       "receipt": "Чек",
       "id_mrz": "Паспорт (MRZ)",
-      "voice": "Голос",
       "verify": "Проверить PDF"
     },
     "uploadHint": "Выберите фото (JPG/PNG/WebP) или PDF, либо вставьте текст",
