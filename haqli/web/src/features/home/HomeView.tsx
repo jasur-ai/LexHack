@@ -140,8 +140,8 @@ export function HomeView() {
       bgGradient: "from-[#1e1b4b] via-[#3730a3] to-[#0284c7]",
       actionText: "Haqly AI bilan suhbatlashish",
       onAction: () => {
+        haptics.impact("medium");
         setAiPanelOpen(true);
-        setActiveTab("agent");
       },
       renderRight: () => (
         <div className="flex flex-col items-center justify-center relative z-10 p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shrink-0">
@@ -523,7 +523,6 @@ export function HomeView() {
             onClick={() => {
               haptics.impact("medium");
               setAiPanelOpen(true);
-              setActiveTab("agent");
             }}
             role="button"
             tabIndex={0}
