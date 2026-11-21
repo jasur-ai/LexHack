@@ -122,7 +122,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profileTab, setProfileTab] = useState<"history" | "settings">("history");
   const [profileName, setProfileName] = useState(user?.fullName || "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
@@ -245,69 +244,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { id: "tilxat", num: "3", label: "Tilxat & Qarz Shartnomasi", badge: "10 BHM", Icon: FileCheck2 },
     { id: "scanner", num: "4", label: "Shartnoma Skaneri", badge: "7 tuzoq", Icon: ScanLine },
     { id: "radar", num: "5", label: "Qonun Radari", badge: "Alert", Icon: Radar },
-  ];
-
-  const demoProfileActions = [
-    {
-      id: "act-1",
-      moduleId: "jarima" as NavTab,
-      moduleNum: "1",
-      moduleName: "Jarima bekor qilish",
-      title: "Radar xatosi bo'yicha YHXX Shikoyat arizasi",
-      detail: "01 A 777 AA • Tezlik 74 km/soat (Belgilangan 60 km/soat) • Metrologiya muddati o'tgan",
-      statusText: "Tasdiqlangan • my.gov.uz ga topshirilgan",
-      docHash: "SHA-256: 4a9f82...c110",
-      date: "21.11.2026",
-      Icon: Car,
-    },
-    {
-      id: "act-2",
-      moduleId: "himoya" as NavTab,
-      moduleNum: "2",
-      moduleName: "Himoya & Talabnoma",
-      title: "Ish haqi kechikishi bo'yicha Rasmiy Talabnoma",
-      detail: "12 500 000 so'm asosiy qarz + 1% kunlik penya (MK 333-modda)",
-      statusText: "Tasdiqlangan • Ish beruvchiga yuborilgan",
-      docHash: "SHA-256: 7e14c3...a901",
-      date: "18.11.2026",
-      Icon: ShieldCheck,
-    },
-    {
-      id: "act-3",
-      moduleId: "tilxat" as NavTab,
-      moduleNum: "3",
-      moduleName: "Tilxat & Qarz",
-      title: "Qarz Tilxati va To'lov Jadvali",
-      detail: "15 000 000 so'm (40 BHM) • Jamshid O. bilan • Telegram QR tasdiqli",
-      statusText: "QR Imzolangan • Qonuniy kuchga ega",
-      docHash: "SHA-256: 9b2d01...f440",
-      date: "15.11.2026",
-      Icon: FileCheck2,
-    },
-    {
-      id: "act-4",
-      moduleId: "scanner" as NavTab,
-      moduleNum: "4",
-      moduleName: "Shartnoma Skaneri",
-      title: "Kvartira ijara shartnomasi auditi (9 sahifa)",
-      detail: "7 ta noqonuniy bir tomonlama jarima bandlari fosh etildi va xavfsiz tahrirlandi",
-      statusText: "Xavfsiz tahrir tasdiqlangan",
-      docHash: "SHA-256: 3c8e55...d115",
-      date: "10.11.2026",
-      Icon: ScanLine,
-    },
-    {
-      id: "act-5",
-      moduleId: "radar" as NavTab,
-      moduleNum: "5",
-      moduleName: "Qonun Radari",
-      title: "PF-115: Yangi BHM (375 000 so'm) stavkalari",
-      detail: "Fuqaro hisob-kitoblariga kiritilgan normativ bildirishnoma",
-      statusText: "Monitoringda • Saqlangan",
-      docHash: "LEX.UZ-2026",
-      date: "01.11.2026",
-      Icon: Radar,
-    },
   ];
 
   const renderSidebar = (onItemClick?: () => void) => (
@@ -521,7 +457,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => {
                 haptics.selection();
-                setProfileTab("history");
                 setProfileOpen(true);
                 onItemClick?.();
               }}
@@ -889,186 +824,106 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* User Profile / Login Sheet */}
+      {/* User Profile Sheet (Faqat Ism-Familiya, Manzil va Ma'lumotlar) */}
       <Sheet
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
-        title="Foydalanuvchi Profili & Faoliyat"
+        title="Foydalanuvchi Profili"
       >
         <div className="space-y-4">
-          {/* User Profile Header */}
-          <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="h-12 w-12 rounded-full bg-[#0074ff] text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
-              {userInitials(user?.fullName || "Azizbek Karimov")}
+          {/* 1. Ism va Familiya Card */}
+          <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-blue-50/70 border border-blue-100">
+            <div className="h-13 w-13 rounded-2xl bg-[#0074ff] text-white flex items-center justify-center font-black text-lg shadow-sm shrink-0">
+              {userInitials(profileName || user?.fullName || "Azizbek Karimov")}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-slate-800 truncate">
-                {user?.fullName || "Azizbek Karimov"}
+              <span className="text-[10.5px] font-bold uppercase tracking-wider text-blue-600 bg-white px-2 py-0.5 rounded-md inline-block mb-1">
+                Fuqaro
+              </span>
+              <div className="text-base font-extrabold text-slate-900 truncate">
+                {profileName || user?.fullName || "Azizbek Karimov"}
               </div>
               <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
                 <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-                <span>{user?.username ? `@${user.username}` : "@demo_fuqaro"} • Tasdiqlangan Fuqaro</span>
+                <span>OneID / my.gov.uz orqali tasdiqlangan</span>
               </div>
             </div>
           </div>
 
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-100 text-center">
-              <div className="text-xs font-bold text-blue-900">5 ta</div>
-              <div className="text-[10px] text-blue-700 font-medium">Barcha amallar</div>
-            </div>
-            <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100 text-center">
-              <div className="text-xs font-bold text-emerald-900">4 ta</div>
-              <div className="text-[10px] text-emerald-700 font-medium">Tasdiqlangan</div>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-100/70 border border-slate-200 text-center">
-              <div className="text-xs font-bold text-slate-900">100%</div>
-              <div className="text-[10px] text-slate-600 font-medium">SHA-256 Muhr</div>
-            </div>
-          </div>
-
-          {/* Tab Switcher */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setProfileTab("history")}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer ${
-                profileTab === "history"
-                  ? "bg-white text-[#0074ff] shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Tasdiqlangan amallar ({demoProfileActions.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setProfileTab("settings")}
-              className={`flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer ${
-                profileTab === "settings"
-                  ? "bg-white text-[#0074ff] shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Profil sozlamalari
-            </button>
-          </div>
-
-          {profileTab === "history" ? (
-            <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-0.5">
-              <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-1">
-                Modullar bo'yicha oldingi jarayonlar
-              </div>
-              {demoProfileActions.map((item) => (
-                <div
-                  key={item.id}
-                  className="p-3 rounded-xl border border-slate-200/90 bg-white hover:border-blue-200 hover:shadow-xs transition-all space-y-2"
+          {/* Ism va familiyani tahrirlash */}
+          <form onSubmit={handleSaveProfile} className="space-y-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Ism va Familiya (Arizalar va hujjatlar uchun)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="Masalan: Azizbek Karimov"
+                  className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0074ff] focus:ring-2 focus:ring-blue-100 bg-white"
+                />
+                <Button
+                  variant="primary"
+                  loading={savingProfile}
+                  type="submit"
+                  className="shrink-0"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-[#0074ff] bg-blue-50 px-2 py-0.5 rounded-md">
-                        {item.moduleNum}-Modul
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-600">
-                        {item.moduleName}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {item.date}
-                    </span>
-                  </div>
-
-                  <div className="flex items-start gap-2.5">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#0074ff] mt-0.5">
-                      <item.Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-slate-800 leading-snug">
-                        {item.title}
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        {item.detail}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
-                    <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-                      <span>{item.statusText}</span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        haptics.selection();
-                        setActiveTab(item.moduleId);
-                        setProfileOpen(false);
-                      }}
-                      className="flex items-center gap-1 text-[11px] font-bold text-[#0074ff] hover:text-[#0063db] hover:underline cursor-pointer"
-                    >
-                      <span>Modulga o'tish</span>
-                      <ArrowRight className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <form onSubmit={handleSaveProfile} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Ism va Familiyangiz (Arizalar va hujjatlar uchun)
-                  </label>
-                  <input
-                    type="text"
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    placeholder="Masalan: Azizbek Karimov"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0074ff] focus:ring-2 focus:ring-blue-100"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="primary"
-                    fullWidth
-                    loading={savingProfile}
-                    type="submit"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    Saqlash
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    onClick={handleSetDemoProfile}
-                    loading={savingProfile}
-                  >
-                    Demo Profil
-                  </Button>
-                </div>
-              </form>
-
-              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-600 space-y-1">
-                <div className="font-semibold text-blue-900 flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-[#0074ff]" />
-                  Xavfsiz va Huquqiy Kafolat
-                </div>
-                <p className="text-[11px] leading-relaxed text-slate-600">
-                  Haqly.uz barcha yaratilgan arizalar, jarima shikoyatlari va qarz tilxatlarini
-                  qurilmangizda xavfsiz saqlaydi va SHA-256 raqamli muhr bilan tasdiqlaydi.
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>ID: {user?.id ? user.id.slice(0, 10) + "..." : "Demo-Session"}</span>
-                <span>O'zR Qonunchiligi 2026</span>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Saqlash</span>
+                </Button>
               </div>
             </div>
-          )}
+          </form>
+
+          {/* 2. Manzili (Address Card) */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <div className="h-6 w-6 rounded-lg bg-blue-100 text-[#0074ff] flex items-center justify-center shrink-0">
+                <MapPin className="h-3.5 w-3.5" />
+              </div>
+              <span>Doimiy Yashash Manzili:</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-700 font-medium pl-8 leading-relaxed">
+              Toshkent shahri, Chilonzor tumani, Bunyodkor shox ko'chasi, 42-uy, 15-xonadon
+            </p>
+          </div>
+
+          {/* 3. Ma'lumotlari (Personal Info Details Card) */}
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+            <div className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <User className="h-4 w-4 text-[#0074ff]" />
+              <span>Shaxsiy Ma'lumotlari</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase block">JSHSHIR (PINFL)</span>
+                <span className="font-bold text-slate-800 font-mono text-sm">31204986540019</span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase block">Pasport / ID Karta</span>
+                <span className="font-bold text-slate-800 font-mono text-sm">AD 2984105</span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase block">Telefon raqam</span>
+                <span className="font-bold text-slate-800 font-mono text-sm">+998 (90) 123-45-67</span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[10px] text-slate-400 font-semibold uppercase block">Fuqarolik</span>
+                <span className="font-bold text-emerald-600 text-sm">O'zbekiston Respublikasi</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Status: Faol fuqaro</span>
+              <span>OneID sinxron</span>
+            </div>
+          </div>
         </div>
       </Sheet>
       {/* Xizmatlar uchun to'lov Sheet */}
