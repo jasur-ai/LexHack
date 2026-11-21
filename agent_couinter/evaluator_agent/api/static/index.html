@@ -1,1072 +1,2134 @@
 <!DOCTYPE html>
-<html lang="uz" data-theme="dark">
+<html lang="uz" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LEX AUDITOR // Red-Team &amp; Legal Fact-Verification Engine</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Newsreader:opsz,wght@6..72,600;6..72,700&display=swap" rel="stylesheet">
+  <title>LEXHACK SAMS — Counter Agent &amp; Backend Developer Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* =====================================================================
-       LEX AUDITOR // FORENSIC LEGAL RED-TEAM PALETTE
-       Light: Calm Architectural Stone-Gray (Zero bright white glare)
-       Dark:  Midnight Graphite Slate (Zero pitch black)
-       ===================================================================== */
-    :root, [data-theme="light"] {
-      --bg: #bec5cc;
-      --surface: #cad0d6;
-      --card: #d5dade;
-      --card-hi: #dce0e4;
-      --card-soft: #c1c8cf;
-      --input: #cfd5db;
-      --border: #a3adb8;
-      --border-strong: #8b96a3;
-      --text: #121a24;
-      --text-2: #2a3747;
-      --muted: #4b596a;
-
-      --navy: #1b365d;
-      --navy-hi: #234678;
-      --navy-ink: #f1f5f9;
-      --brass: #8c651c;
-      --brass-soft: rgba(140, 101, 28, 0.14);
-
-      --pass: #166c4e;
-      --pass-soft: rgba(22, 108, 78, 0.14);
-      --warn: #a6620c;
-      --warn-soft: rgba(166, 98, 12, 0.15);
-      --fail: #a82639;
-      --fail-soft: rgba(168, 38, 57, 0.14);
-      --shadow: 0 2px 10px rgba(15, 24, 36, 0.09);
+    :root[data-theme="light"] {
+      --bg-app: #f6f7f9;
+      --bg-stage: #fbfbfc;
+      --bg-panel: #ffffff;
+      --bg-subtle: #f1f4f9;
+      --bg-hover: #e4e9f2;
+      --bg-active: #e8f0fe;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-main: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --primary: #1668f9;
+      --primary-hover: #0d55d9;
+      --primary-soft: rgba(22, 104, 249, 0.10);
+      --orange: #ea580c;
+      --orange-soft: rgba(234, 88, 12, 0.12);
+      --purple: #6d28d9;
+      --purple-soft: rgba(109, 40, 217, 0.12);
+      --green: #15803d;
+      --green-soft: rgba(21, 128, 61, 0.12);
+      --amber: #b45309;
+      --amber-soft: rgba(180, 83, 9, 0.12);
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.11);
+      --shadow-sm: 0 1px 4px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.07);
+      --shadow-lg: 0 18px 42px rgba(15, 23, 42, 0.10);
     }
 
-    [data-theme="dark"] {
-      --bg: #13171f;
-      --surface: #191e28;
-      --card: #212734;
-      --card-hi: #283040;
-      --card-soft: #1b202b;
-      --input: #232a38;
-      --border: #313b4d;
-      --border-strong: #455269;
-      --text: #e5e9f0;
-      --text-2: #bac4d4;
-      --muted: #8492a8;
-
-      --navy: #2f548a;
-      --navy-hi: #3b67a6;
-      --navy-ink: #f3f6fb;
-      --brass: #cfa54d;
-      --brass-soft: rgba(207, 165, 77, 0.16);
-
-      --pass: #2ea87b;
-      --pass-soft: rgba(46, 168, 123, 0.15);
-      --warn: #e09a38;
-      --warn-soft: rgba(224, 154, 56, 0.16);
-      --fail: #e2556a;
-      --fail-soft: rgba(226, 85, 106, 0.16);
-      --shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    :root[data-theme="dark"] {
+      --bg-app: #0d1117;
+      --bg-stage: #111722;
+      --bg-panel: #171f2e;
+      --bg-subtle: #1f293d;
+      --bg-hover: #28354e;
+      --bg-active: rgba(59, 130, 246, 0.18);
+      --border: #263248;
+      --border-strong: #374766;
+      --text-main: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #8899b3;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-soft: rgba(59, 130, 246, 0.16);
+      --orange: #f97316;
+      --orange-soft: rgba(249, 115, 22, 0.16);
+      --purple: #a78bfa;
+      --purple-soft: rgba(167, 139, 250, 0.16);
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.16);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.16);
+      --danger: #f87171;
+      --danger-soft: rgba(248, 113, 113, 0.16);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 22px 50px rgba(0, 0, 0, 0.65);
     }
 
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg); color: var(--text);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       -webkit-font-smoothing: antialiased;
     }
-    .mono { font-family: "JetBrains Mono", Consolas, monospace; }
-    .serif { font-family: "Newsreader", Georgia, serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .svg-icon {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      flex-shrink: 0;
+    }
+    .svg-icon.sm { width: 14px; height: 14px; }
 
-    svg.ico {
-      width: 16px; height: 16px; stroke: currentColor; fill: none;
-      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-      flex-shrink: 0; vertical-align: middle;
+    /* ================= ULTRA-CLEAN TOP BAR ================= */
+    .sams-topbar {
+      height: 48px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      flex-shrink: 0;
     }
-    svg.ico-sm { width: 13px; height: 13px; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .mac-dots { display: flex; gap: 6px; align-items: center; }
+    .mac-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mac-dot.red { background: #ff5f57; }
+    .mac-dot.yellow { background: #febc2e; }
+    .mac-dot.green { background: #28c840; }
 
-    .app {
-      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-    }
-
-    /* =====================================================================
-       TOP RED-TEAM COMMAND HEADER
-       ===================================================================== */
-    .header {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 10px 18px; display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap; flex-shrink: 0;
-    }
-    .brand-group { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
-    .shield-mark {
-      width: 34px; height: 34px; border-radius: 9px;
-      background: var(--fail-soft); color: var(--fail);
-      border: 1px solid rgba(226, 85, 106, 0.4);
-      display: inline-flex; align-items: center; justify-content: center;
-    }
     .brand-title {
-      font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 0.92rem;
-      letter-spacing: 0.03em; display: flex; align-items: center; gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .brand-flags { display: flex; gap: 5px; flex-wrap: wrap; }
-    .flag-chip {
-      font-family: "JetBrains Mono", monospace; font-size: 0.65rem; font-weight: 700;
-      padding: 2px 7px; border-radius: 5px; letter-spacing: 0.04em;
-      background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    .brand-sub {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-muted);
     }
-    .flag-chip.red { background: var(--fail-soft); color: var(--fail); border-color: transparent; }
-    .flag-chip.brass { background: var(--brass-soft); color: var(--brass); border-color: transparent; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .target-select {
+      height: 30px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 0 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      outline: none;
+    }
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
 
-    .header-right { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-
-    .phase-pill {
-      display: inline-flex; align-items: center; gap: 7px;
-      font-family: "JetBrains Mono", monospace; font-size: 0.72rem; font-weight: 700;
-      padding: 5px 11px; border-radius: 999px;
-      background: var(--card); border: 1px solid var(--border); color: var(--text-2);
-    }
-    .phase-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pass); }
-    .phase-pill.busy { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
-    .phase-pill.busy .phase-dot { background: var(--warn); animation: pulseDot 1.1s infinite; }
-    @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.4); } }
-
-    .target-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.74rem; font-weight: 600; padding: 5px 10px; border-radius: 8px;
-      background: var(--card); border: 1px solid var(--border); color: var(--text-2); cursor: pointer;
-    }
-    .target-pill:hover { border-color: var(--brass); }
-
-    /* Tactile Spring-Physics Theme Switch */
-    .theme-switch {
-      position: relative; display: inline-grid; grid-template-columns: 1fr 1fr; align-items: center;
-      background: var(--card-soft); border: 1px solid var(--border);
-      border-radius: 999px; padding: 3px; width: 68px; height: 30px; cursor: pointer;
-    }
-    .theme-thumb {
-      position: absolute; top: 3px; left: 3px; width: 29px; height: 22px;
-      border-radius: 999px; background: var(--navy);
-      transition: transform 320ms cubic-bezier(0.34, 1.45, 0.64, 1);
-    }
-    [data-theme="dark"] .theme-thumb { transform: translateX(31px); }
-    .theme-opt { position: relative; z-index: 1; display: inline-flex; justify-content: center; color: var(--muted); }
-    [data-theme="light"] .theme-opt.l, [data-theme="dark"] .theme-opt.d { color: var(--navy-ink); }
-
-    /* =====================================================================
-       ANALYTICS KPI STRIP + CONTROL BAR
-       ===================================================================== */
-    .control-strip {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 10px 18px; display: flex; flex-direction: column; gap: 9px; flex-shrink: 0;
-    }
-    .kpi-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 9px;
-    }
-    .kpi-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .kpi-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
-    .kpi-val { font-family: "JetBrains Mono", monospace; font-size: 1.15rem; font-weight: 700; margin-top: 2px; }
-    .kpi-sub { font-size: 0.7rem; color: var(--muted); }
-
-    .toolbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
-    }
-    .btn-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: inherit; font-size: 0.78rem; font-weight: 600;
-      padding: 7px 12px; border-radius: 8px; cursor: pointer;
-      border: 1px solid var(--border); background: var(--card); color: var(--text);
-      transition: 140ms ease;
-    }
-    .btn:hover { border-color: var(--border-strong); background: var(--card-hi); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-primary { background: var(--navy); color: var(--navy-ink); border-color: transparent; }
-    .btn-primary:hover { background: var(--navy-hi); }
-    .btn-red { background: var(--fail); color: #fff; border-color: transparent; }
-    .btn-red:hover { filter: brightness(1.08); }
-    .btn-brass { background: var(--brass-soft); color: var(--brass); border-color: rgba(207,165,77,0.35); }
-    .btn-brass:hover { background: var(--brass); color: #fff; }
-
-    .filters-row {
-      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-    }
-    .f-input, .f-select {
-      background: var(--input); border: 1px solid var(--border); color: var(--text);
-      font-family: inherit; font-size: 0.76rem; padding: 6px 9px; border-radius: 7px;
-    }
-    .f-input { min-width: 190px; }
-
-    /* =====================================================================
-       3-COLUMN SPLIT-VIEW FORENSIC WORKSPACE
-       ===================================================================== */
-    .grid-3 {
-      flex: 1; min-height: 0;
-      display: grid;
-      grid-template-columns: 310px minmax(380px, 1.35fr) minmax(330px, 1fr);
+    /* ================= MAIN SHELL ================= */
+    .sams-body {
+      flex: 1;
+      display: flex;
       overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Left Sidebar with 5 Dedicated Sections (Bo'limlar) */
+    .sams-sidebar {
+      width: 210px;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .nav-group { display: flex; flex-direction: column; gap: 4px; }
+    .nav-lbl {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 6px 10px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.14s ease;
+    }
+    .nav-item-left { display: flex; align-items: center; gap: 9px; }
+    .nav-item:hover { background: var(--bg-subtle); color: var(--text-main); }
+    .nav-item.active {
+      background: var(--bg-active);
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .nav-count {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 99px;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+    }
+    .nav-item.active .nav-count { background: var(--primary); color: #fff; }
+
+    /* Center Stage: Only ONE Page (Bo'lim) visible at a time */
+    .sams-stage {
+      flex: 1;
+      background: var(--bg-stage);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .page-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .page-view.active {
+      display: flex;
+    }
+
+    /* ================= BO'LIM 1: 3D STUDIO (PURE & SPACIOUS) ================= */
+    .studio-header {
+      padding: 22px 30px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .studio-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+    .studio-header p { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+    .isometric-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 0 20px 76px;
+      min-height: 0;
+      user-select: none;
+    }
+    .iso-svg-wrap {
+      width: 100%;
+      max-width: 810px;
+      height: 100%;
+      max-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .iso-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 26px 40px rgba(15, 23, 42, 0.08));
+    }
+
+    .crew-character { cursor: grab; transition: filter 0.2s ease; }
+    .crew-character:active { cursor: grabbing; }
+    .crew-character:hover { filter: drop-shadow(0 8px 18px rgba(22, 104, 249, 0.3)); }
+    .drop-ring { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+    .crew-character.selected-agent .drop-ring { opacity: 1; }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes floatWork {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-9px) scale(1.04); }
+    }
+    @keyframes radarPulse {
+      0% { transform: scale(0.85); opacity: 0.9; }
+      100% { transform: scale(1.45); opacity: 0; }
+    }
+    @keyframes beamFlow { to { stroke-dashoffset: -48; } }
+    .idle-float-1 { animation: floatSlow 3.4s ease-in-out infinite; }
+    .idle-float-2 { animation: floatSlow 3.9s ease-in-out 0.7s infinite; }
+    .idle-float-3 { animation: floatSlow 3.6s ease-in-out 1.3s infinite; }
+    .idle-float-4 { animation: floatSlow 4.2s ease-in-out 1.9s infinite; }
+    .crew-working .char-body-inner { animation: floatWork 0.65s ease-in-out infinite !important; }
+    .crew-working { filter: drop-shadow(0 0 20px rgba(22, 104, 249, 0.65)) !important; }
+    .active-radar-ring {
+      opacity: 0;
+      transform-origin: center;
+      pointer-events: none;
+    }
+    .crew-working .active-radar-ring {
+      opacity: 1;
+      animation: radarPulse 1.1s ease-out infinite;
+    }
+    .energy-beam {
+      stroke-dasharray: 8 6;
+      animation: beamFlow 0.9s linear infinite;
+      opacity: 0.45;
+      transition: opacity 0.2s ease, stroke-width 0.2s ease;
+    }
+    .energy-beam.active { opacity: 1; stroke-width: 4.2; }
+
+    /* ENTERPRISE ARCHITECTURE PIPELINE STAGE (NO CARTOON BLOBS) */
+    .arch-stage {
+      flex: 1;
+      margin: 14px 30px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    .arch-canvas {
+      position: relative;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(22, 104, 249, 0.06), transparent 45%),
+        radial-gradient(circle at 80% 80%, rgba(21, 128, 61, 0.05), transparent 45%),
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px),
+        var(--bg-panel);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px, 100% 100%;
+      border: 1px solid var(--border);
+      padding: 22px 24px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .arch-nodes-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      position: relative;
+      z-index: 2;
     }
     @media (max-width: 1120px) {
-      .grid-3 { grid-template-columns: 270px 1fr; overflow-y: auto; }
-      .col-right { grid-column: 1 / -1; border-top: 1px solid var(--border); }
+      .arch-nodes-row { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 760px) {
-      .grid-3 { grid-template-columns: 1fr; overflow-y: auto; }
+    .arch-node-card {
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border);
+      border-radius: 13px;
+      padding: 15px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      box-shadow: var(--shadow-sm);
+      position: relative;
     }
-
-    .col {
-      display: flex; flex-direction: column; min-height: 0; overflow: hidden;
-      border-right: 1px solid var(--border); background: var(--bg);
+    .arch-node-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
-    .col:last-child { border-right: none; }
-    .col-head {
-      padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0;
-      font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+    .arch-node-card.crew-working {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-md);
     }
-    .col-body { flex: 1; overflow-y: auto; padding: 12px; }
-
-    /* Left Column: Queue & Feed */
-    .sub-tabs { display: flex; gap: 4px; }
-    .sub-tab {
-      border: 1px solid var(--border); background: var(--card); color: var(--muted);
-      font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer;
+    .arch-node-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
-    .sub-tab.active { background: var(--navy); color: var(--navy-ink); border-color: transparent; }
-
-    .feed-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px 11px; margin-bottom: 8px; cursor: pointer;
-      transition: 140ms ease; border-left: 3px solid var(--border-strong);
+    .arch-node-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
-    .feed-card:hover { background: var(--card-hi); }
-    .feed-card.selected { border-color: var(--brass); background: var(--card-hi); }
-    .feed-card.FAIL { border-left-color: var(--fail); }
-    .feed-card.PARTIAL { border-left-color: var(--warn); }
-    .feed-card.PASS { border-left-color: var(--pass); }
-
-    .fc-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 5px; }
-    .verdict-badge {
-      font-family: "JetBrains Mono", monospace; font-size: 0.67rem; font-weight: 700;
-      padding: 2px 7px; border-radius: 5px; letter-spacing: 0.03em;
+    .arch-node-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .verdict-badge.PASS { background: var(--pass-soft); color: var(--pass); }
-    .verdict-badge.PARTIAL { background: var(--warn-soft); color: var(--warn); }
-    .verdict-badge.FAIL { background: var(--fail-soft); color: var(--fail); }
-    .score-chip { font-family: "JetBrains Mono", monospace; font-size: 0.75rem; font-weight: 700; }
-    .fc-q {
-      font-size: 0.8rem; font-weight: 600; line-height: 1.38; color: var(--text);
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    .arch-node-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.48;
     }
-    .fc-meta {
-      margin-top: 6px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center;
-      font-size: 0.67rem; color: var(--muted);
+    .arch-node-metric {
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
     }
-    .err-chip {
-      font-family: "JetBrains Mono", monospace; font-size: 0.63rem; font-weight: 700;
-      padding: 2px 6px; border-radius: 4px; background: var(--fail-soft); color: var(--fail);
+    .arch-bus-svg {
+      width: 100%;
+      height: 54px;
+      display: block;
+      margin-top: 10px;
     }
-    .cat-chip {
-      font-family: "JetBrains Mono", monospace; font-size: 0.63rem; font-weight: 600;
-      padding: 2px 6px; border-radius: 4px; background: var(--card-soft); color: var(--muted);
+    .arch-console {
+      border-radius: 13px;
+      background: var(--bg-panel);
       border: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .arch-console-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      max-height: 135px;
+      overflow-y: auto;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
     }
 
-    /* Center Column: Probe Composer + Interrogation Diff Inspector */
-    .probe-box {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 12px; margin-bottom: 12px;
+    /* ULTRA-READABLE LEGAL DOCUMENT TYPOGRAPHY */
+    .readable-doc {
+      font-size: 14px;
+      line-height: 1.78;
+      color: var(--text-main);
     }
-    .probe-row { display: grid; grid-template-columns: 1.2fr 0.7fr auto; gap: 8px; margin-bottom: 8px; }
-    @media (max-width: 640px) { .probe-row { grid-template-columns: 1fr; } }
-    .probe-textarea {
-      width: 100%; min-height: 76px; resize: vertical;
-      background: var(--input); border: 1px solid var(--border); color: var(--text);
-      border-radius: 9px; padding: 9px 11px; font-family: inherit; font-size: 0.86rem; line-height: 1.5;
+    .readable-doc h3, .readable-doc h4 {
+      margin: 14px 0 6px;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
     }
-    .probe-footer {
-      margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    .readable-doc p { margin: 0 0 10px; }
+    .readable-doc ul, .readable-doc ol {
+      margin: 6px 0 12px 20px;
+      padding: 0;
     }
-
-    .progress-bar-wrap {
-      display: none; margin-bottom: 12px; background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 12px;
+    .readable-doc li { margin-bottom: 6px; }
+    .readable-doc a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px dashed var(--primary);
     }
-    .progress-bar-wrap.active { display: block; }
-    .prog-track { height: 5px; background: var(--card-soft); border-radius: 99px; overflow: hidden; margin-top: 6px; }
-    .prog-fill { height: 100%; width: 0%; background: var(--brass); transition: width 240ms ease; }
-
-    .dossier-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 14px; margin-bottom: 11px;
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
-    .dossier-card h4 {
-      margin: 0 0 8px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.06em; color: var(--muted); display: flex; align-items: center; justify-content: space-between;
-    }
-    .dossier-text { font-size: 0.87rem; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
-    .flagged-box {
-      margin-top: 10px; background: var(--fail-soft); border: 1px solid rgba(226,85,106,0.35);
-      border-radius: 9px; padding: 9px 11px; font-size: 0.79rem; color: var(--fail);
-    }
-    .flagged-box div { margin-bottom: 4px; }
-    .benchmark-box {
-      background: var(--pass-soft); border: 1px solid rgba(46,168,123,0.35);
-      border-radius: 9px; padding: 10px 12px; font-size: 0.84rem; line-height: 1.6;
+    @media (max-width: 980px) {
+      .compare-grid { grid-template-columns: 1fr; }
     }
 
-    /* Right Column: Rubric Bars, Lex.uz Claims & Root Cause */
-    .rubric-row { margin-bottom: 8px; }
-    .rubric-top { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; margin-bottom: 3px; }
-    .rubric-track { height: 6px; border-radius: 99px; background: var(--card-soft); overflow: hidden; }
-    .rubric-fill { height: 100%; border-radius: 99px; background: var(--navy); transition: width 300ms ease; }
-    .rubric-fill.high { background: var(--pass); }
-    .rubric-fill.mid { background: var(--warn); }
-    .rubric-fill.low { background: var(--fail); }
+    /* Live 4-Stage Pipeline Bar & Result Banner inside 3D Studio */
+    .studio-live-hud {
+      margin: 10px 30px 0;
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      z-index: 20;
+    }
+    .stage-steps {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stage-pill {
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .stage-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .stage-pill.done {
+      background: var(--green-soft);
+      color: var(--green);
+      border-color: var(--green);
+    }
 
-    .claim-card {
-      background: var(--card-soft); border: 1px solid var(--border); border-radius: 9px;
-      padding: 9px 11px; margin-bottom: 8px; font-size: 0.79rem;
+    .studio-prompt-dock {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(600px, 90%);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      padding: 6px 8px 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 25;
     }
-    .claim-card a { color: var(--brass); text-decoration: none; font-weight: 600; }
-    .claim-card a:hover { text-decoration: underline; }
-    .rc-card {
-      background: var(--warn-soft); border: 1px solid rgba(224,154,56,0.35);
-      border-radius: 9px; padding: 9px 11px; margin-bottom: 8px; font-size: 0.79rem;
+    .prompt-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
     }
-    .rc-comp { font-family: "JetBrains Mono", monospace; font-size: 0.72rem; font-weight: 700; color: var(--warn); }
+    .prompt-send-btn {
+      height: 34px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-    /* Modal for Settings & Heatmap */
-    .modal-bg {
-      display: none; position: fixed; inset: 0; background: rgba(10, 14, 22, 0.55);
-      z-index: 60; align-items: center; justify-content: center; padding: 16px;
+    /* ================= CLEAN INNER PAGES (BO'LIM 2..5) ================= */
+    .page-container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
-    .modal-bg.open { display: flex; }
-    .modal {
-      width: 100%; max-width: 620px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 18px; box-shadow: var(--shadow); max-height: 85vh; overflow-y: auto;
+    .page-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
-    .modal h3 { margin: 0 0 12px; font-size: 0.98rem; display: flex; justify-content: space-between; align-items: center; }
-    .hm-row {
-      display: grid; grid-template-columns: 145px 1fr 75px 65px; gap: 10px; align-items: center;
-      font-size: 0.78rem; padding: 6px 0; border-bottom: 1px solid var(--border);
+    .page-hdr h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .page-hdr p { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
+
+    /* Button-Toggled Sub-Views inside a Page (Only 1 visible at a time!) */
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sub-tab-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.14s ease;
+    }
+    .sub-tab-btn:hover { background: var(--bg-subtle); }
+    .sub-tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .sub-pane { display: none; flex-direction: column; gap: 12px; }
+    .sub-pane.active { display: flex; }
+
+    .input, .select, .textarea {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-family: inherit;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .textarea { min-height: 80px; resize: vertical; line-height: 1.45; }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:hover { background: var(--bg-hover); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+    .badge-pass { background: var(--green-soft); color: var(--green); }
+    .badge-warn { background: var(--amber-soft); color: var(--amber); }
+    .badge-fail { background: var(--danger-soft); color: var(--danger); }
+    .badge-info { background: var(--primary-soft); color: var(--primary); }
+
+    .hl-ok { background: var(--green-soft); color: var(--green); padding: 1px 6px; border-radius: 4px; font-weight: 700; }
+    .hl-bad { background: var(--danger-soft); color: var(--danger); padding: 1px 6px; border-radius: 4px; font-weight: 700; text-decoration: underline wavy var(--danger); }
+
+    .row-item {
+      padding: 11px 13px;
+      border-radius: 9px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.13s ease;
+    }
+    .row-item:hover {
+      border-color: var(--primary);
+      background: var(--bg-active);
+    }
+
+    /* ================= BOTTOM CREW BAR ================= */
+    .sams-bottom-dock {
+      height: 54px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .dock-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 12px;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .dock-item:hover { background: var(--bg-subtle); }
+    .dock-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dock-name { font-size: 12px; font-weight: 800; }
+    .dock-meta { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--text-muted); font-weight: 600; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    .status-dot.working { background: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- TOP RED-TEAM COMMAND BANNER -->
-    <header class="header">
-      <div class="brand-group">
-        <span class="shield-mark">
-          <svg class="ico" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-        </span>
-        <div>
-          <div class="brand-title">LEX AUDITOR // RED-TEAM &amp; FACT-VERIFICATION ENGINE</div>
-          <div class="brand-flags" style="margin-top:3px;">
-            <span class="flag-chip red">ADVERSARIAL MODE</span>
-            <span class="flag-chip brass">ZERO-TRUST VERIFICATION</span>
-            <span class="flag-chip">REGRESSION GUARD</span>
-          </div>
-        </div>
-      </div>
 
-      <div class="header-right">
-        <div class="phase-pill" id="phasePill">
-          <span class="phase-dot"></span>
-          <span id="phaseLabel">IDLE · READY</span>
-        </div>
-        <button class="target-pill" id="targetPill" onclick="openModal('settingsModal')" title="Target Agent Endpoint & Timeout Settings">
-          <span class="phase-dot" id="targetDot"></span>
-          <span id="targetLabel">Target: checking...</span>
+  <!-- ================= CLEAN TOP BAR ================= -->
+  <header class="sams-topbar">
+    <div class="topbar-left">
+      <div class="mac-dots">
+        <span class="mac-dot red"></span>
+        <span class="mac-dot yellow"></span>
+        <span class="mac-dot green"></span>
+      </div>
+      <div class="brand-title">
+        <span>SAMS</span>
+        <span class="brand-sub">Counter Agent &amp; Legal Verification Backend</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <select class="target-select" id="targetModeSelect">
+        <option value="">Target: Live Legal Agent (:8000)</option>
+        <option value="http://127.0.0.1:8099">Target: O'qitilmagan Agent v1 (Simulyator)</option>
+      </select>
+      <button class="icon-btn" onclick="toggleTheme()" title="Mavzu">
+        <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN SHELL ================= -->
+  <div class="sams-body">
+
+    <!-- LEFT SIDEBAR: 5 SEPARATE DEDICATED SECTIONS (BO'LIMLAR) -->
+    <aside class="sams-sidebar">
+      <div class="nav-group">
+        <div class="nav-lbl">Bo'limlar</div>
+
+        <button class="nav-item active" id="nav-studio" onclick="switchPage('studio')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>1. Arxitektura &amp; Audit</span>
+          </span>
         </button>
-        <button class="btn" onclick="openModal('analyticsModal')" title="Heatmap & Error Breakdown">
-          <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
-          <span>Heatmap</span>
+
+        <button class="nav-item" id="nav-audit" onclick="switchPage('audit')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>2. Audit Hisoboti</span>
+          </span>
+          <span class="nav-count" id="navScoreBadge">--</span>
         </button>
-        <div class="theme-switch" onclick="toggleTheme()" title="Yorug' / Tungi rejim">
-          <span class="theme-thumb"></span>
-          <span class="theme-opt l"><svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/></svg></span>
-          <span class="theme-opt d"><svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
-        </div>
+
+        <button class="nav-item" id="nav-traps" onclick="switchPage('traps')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>3. Blind Testlar Banki</span>
+          </span>
+          <span class="nav-count" id="navTrapCount">100+</span>
+        </button>
+
+        <button class="nav-item" id="nav-gen10" onclick="switchPage('gen10')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>4. 10 ta Test &amp; Prompt</span>
+          </span>
+          <span class="nav-count">10</span>
+        </button>
+
+        <button class="nav-item" id="nav-train" onclick="switchPage('train')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>5. Baza &amp; O'qitish</span>
+          </span>
+          <span class="nav-count" id="navCorpusBadge">15k+</span>
+        </button>
+
+        <button class="nav-item" id="nav-services" onclick="switchPage('services')">
+          <span class="nav-item-left">
+            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            <span>6. Haqli &amp; Portlar</span>
+          </span>
+          <span class="nav-count">3</span>
+        </button>
       </div>
-    </header>
+    </aside>
 
-    <!-- ANALYTICS KPI STRIP & ONE-CLICK CONTROL CENTER -->
-    <section class="control-strip">
-      <div class="kpi-row">
-        <div class="kpi-card">
+    <!-- CENTER STAGE: ONLY 1 PAGE VISIBLE AT A TIME -->
+    <main class="sams-stage">
+
+      <!-- ================================================================== -->
+      <!-- BO'LIM 1: ENTERPRISE ARXITEKTURA & JONLI AUDIT PIPELINE            -->
+      <!-- ================================================================== -->
+      <section class="page-view active" id="page-studio">
+        <div class="studio-header">
           <div>
-            <div class="kpi-label">O'rtacha Ball</div>
-            <div class="kpi-val" id="kpiAvg">— / 100</div>
+            <h1>Zero-Trust Legal Verification Architecture</h1>
+            <p>Real vaqtli audit arxitekturasi: <strong>01. Haqli (:8002)</strong> → <strong>02. Legal Agent (:8000)</strong> → <strong>03. Counter Agent (:8001)</strong> ⇄ <strong>04. Lex.uz &amp; data.egov.uz</strong></p>
           </div>
-          <div class="kpi-sub" id="kpiTotal">0 tekshiruv</div>
-        </div>
-        <div class="kpi-card">
-          <div>
-            <div class="kpi-label">Pass Rate</div>
-            <div class="kpi-val" id="kpiPassRate" style="color:var(--pass);">0%</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <select class="select" id="patrolCountSelect" style="width:155px; padding:6px 10px; font-size:12px;" title="Yashirin (Blind) Avto-Patrul savollar soni">
+              <option value="3" selected>Blind Patrul: 3 savol</option>
+              <option value="5">Blind Patrul: 5 savol</option>
+              <option value="10">Blind Patrul: 10 savol</option>
+              <option value="20">Blind Patrul: 20 savol</option>
+            </select>
+            <button class="btn btn-primary" id="autoPatrolBtn" onclick="toggleAutoPatrol()">▶ Blind Patrulni Boshlash</button>
+            <button class="btn" onclick="switchPage('audit')">Oxirgi Hisobot</button>
           </div>
-          <div class="kpi-sub mono" id="kpiSplit">P:0 · W:0 · F:0</div>
-        </div>
-        <div class="kpi-card">
-          <div>
-            <div class="kpi-label">Golden Failures</div>
-            <div class="kpi-val" id="kpiGolden" style="color:var(--fail);">0</div>
-          </div>
-          <div class="kpi-sub">golden_failures.jsonl</div>
-        </div>
-        <div class="kpi-card">
-          <div>
-            <div class="kpi-label">Top Xato Kodi</div>
-            <div class="kpi-val mono" id="kpiTopErr" style="font-size:0.78rem;color:var(--warn);">NONE</div>
-          </div>
-          <div class="kpi-sub" id="kpiTopErrCnt">0 marta</div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="btn-group">
-          <button class="btn btn-primary" id="btnRunSingle" onclick="runSingleAudit()" title="Ctrl+Enter">
-            <svg class="ico ico-sm" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-            <span>Run Audit</span>
-          </button>
-          <button class="btn btn-brass" onclick="generateTrap()" title="Shortcut: G">
-            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
-            <span>Generate Trap [G]</span>
-          </button>
-          <select class="f-select" id="batchCount" title="Batch Audit Suite soni">
-            <option value="5">Batch: 5 test</option>
-            <option value="10" selected>Batch: 10 test</option>
-            <option value="25">Batch: 25 test</option>
-            <option value="50">Batch: 50 test</option>
-          </select>
-          <button class="btn" id="btnRunBatch" onclick="runBatchAudit()">
-            <svg class="ico ico-sm" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-            <span>Run Batch</span>
-          </button>
-          <button class="btn" id="btnRunReg" onclick="runRegression()" title="Shortcut: R">
-            <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            <span>Run Regression [R]</span>
-          </button>
-          <button class="btn" id="btnPause" onclick="togglePause()" disabled>Pause</button>
-          <button class="btn btn-red" id="btnStop" onclick="stopAudit()" disabled>Stop</button>
         </div>
 
-        <div class="btn-group">
-          <button class="btn" onclick="window.open('/api/export/json')">JSON</button>
-          <button class="btn" onclick="window.open('/api/export/markdown')">MD</button>
-          <button class="btn" onclick="window.open('/api/export/csv')">CSV</button>
-          <button class="btn" onclick="resetFilters()">Reset Filters</button>
+        <!-- Live 4-Stage Pipeline Telemetry Bar -->
+        <div class="studio-live-hud" style="flex-direction:column; align-items:stretch; gap:8px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div class="stage-steps">
+              <span class="stage-pill" id="stStep1">1. Legal Agent So'rog'i (:8000)</span>
+              <span class="stage-pill" id="stStep2">2. Modda &amp; Da'vo Ajratish</span>
+              <span class="stage-pill" id="stStep3">3. Lex.uz &amp; data.egov.uz Tekshiruv</span>
+              <span class="stage-pill" id="stStep4">4. Hukm &amp; Ball</span>
+            </div>
+            <div id="studioVerdictQuickBar" style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700;">
+              <span style="color:var(--text-muted);" id="studioLiveStatusLabel">Tizim tayyor — pastga huquqiy savol yozing yoki Blind Patrulni ishga tushiring</span>
+              <button class="btn btn-primary" id="studioOpenReportBtn" style="display:none; padding:5px 12px; font-size:11.5px;" onclick="switchPage('audit')">To'liq Hisobotni Ochish →</button>
+            </div>
+          </div>
+          <!-- Live Patrol Results Strip -->
+          <div id="studioPatrolResultsStrip" style="display:none; align-items:center; gap:6px; flex-wrap:wrap; padding-top:6px; border-top:1px solid var(--border); font-size:11.5px;"></div>
         </div>
-      </div>
 
-      <div class="filters-row">
-        <input class="f-input" id="fSearch" placeholder="Qidiruv [/]..." oninput="loadAudits()" />
-        <select class="f-select" id="fVerdict" onchange="loadAudits()">
-          <option value="">Status: Barchasi</option>
-          <option value="FAIL">FAIL</option>
-          <option value="PARTIAL">PARTIAL</option>
-          <option value="PASS">PASS</option>
-        </select>
-        <select class="f-select" id="fCategory" onchange="loadAudits()">
-          <option value="">Toifa: 7 ta barchasi</option>
-          <option value="DIRECT_NORM_PRECISION">DIRECT_NORM_PRECISION</option>
-          <option value="MULTI_HOP_CHAIN">MULTI_HOP_CHAIN</option>
-          <option value="NORM_CONFLICT_HIERARCHY">NORM_CONFLICT_HIERARCHY</option>
-          <option value="TEMPORAL_REPEAL_TRAP">TEMPORAL_REPEAL_TRAP</option>
-          <option value="CROSS_LINGUAL_DRIFT_TRAP">CROSS_LINGUAL_DRIFT_TRAP</option>
-          <option value="FABRICATED_CITATION_TRAP">FABRICATED_CITATION_TRAP</option>
-          <option value="COMPLEX_PRACTICAL_CASE">COMPLEX_PRACTICAL_CASE</option>
-        </select>
-        <select class="f-select" id="fError" onchange="loadAudits()">
-          <option value="">Xato kodi: Barchasi</option>
-          <option value="FABRICATED_CITATION">FABRICATED_CITATION</option>
-          <option value="REPEALED_OR_OUTDATED_NORM">REPEALED_OR_OUTDATED_NORM</option>
-          <option value="MISSED_EXCEPTION_OR_CONDITION">MISSED_EXCEPTION_OR_CONDITION</option>
-          <option value="HIERARCHY_OR_CONFLICT_ERROR">HIERARCHY_OR_CONFLICT_ERROR</option>
-          <option value="TRANSLATION_OR_TERM_DRIFT">TRANSLATION_OR_TERM_DRIFT</option>
-          <option value="INCOMPLETE_MULTI_HOP">INCOMPLETE_MULTI_HOP</option>
-          <option value="FALSE_PREMISE_COMPLIANCE">FALSE_PREMISE_COMPLIANCE</option>
-          <option value="UNGROUNDED_CLAIM">UNGROUNDED_CLAIM</option>
-        </select>
-        <select class="f-select" id="fLang" onchange="loadAudits()">
-          <option value="">Til: Barchasi</option>
-          <option value="uz_latn">UZ-Latn</option>
-          <option value="uz_cyrl">UZ-Cyrl</option>
-          <option value="ru">RU</option>
-          <option value="en">EN</option>
-        </select>
-      </div>
-    </section>
+        <!-- ENTERPRISE ARCHITECTURE PIPELINE CANVAS -->
+        <div class="arch-stage">
+          <div class="arch-canvas">
+            <div class="arch-nodes-row">
+              <!-- NODE 01: HAQLI -->
+              <div class="arch-node-card" id="char-haqli" onclick="switchPage('services')">
+                <div class="arch-node-top">
+                  <span class="arch-node-tag">NODE 01 · PORT :8002</span>
+                  <span class="badge badge-info" id="svgBadge-haqli">Tayyor</span>
+                </div>
+                <div class="arch-node-title">
+                  <svg class="svg-icon" style="color:#ea580c;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span>Haqli Intake</span>
+                </div>
+                <div class="arch-node-desc">
+                  Fuqaro murojaatlari, qarz tilxati (FK 733), pasport OCR va shartnoma xavf tahlili kirish nuqtasi.
+                </div>
+                <div class="arch-node-metric">
+                  <span>Kirish oqimi</span>
+                  <span class="mono" style="color:#ea580c;">REST / JSON</span>
+                </div>
+              </div>
 
-    <!-- 3-COLUMN SPLIT-VIEW FORENSIC WORKSPACE -->
-    <div class="grid-3">
-      <!-- LEFT COLUMN: TEST QUEUE & FAILURE FEED -->
-      <section class="col">
-        <div class="col-head">
-          <span>Test Queue &amp; Failure Feed</span>
+              <!-- NODE 02: LEGAL AGENT -->
+              <div class="arch-node-card" id="char-agent" onclick="switchPage('traps')">
+                <div class="arch-node-top">
+                  <span class="arch-node-tag">NODE 02 · PORT :8000</span>
+                  <span class="badge badge-info" id="svgBadge-agent">Tekshiriluvchi</span>
+                </div>
+                <div class="arch-node-title">
+                  <svg class="svg-icon" style="color:#7c3aed;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                  <span>Legal Agent (RAG)</span>
+                </div>
+                <div class="arch-node-desc">
+                  O'zbekiston qonunchiligi bo'yicha javob sintez qiluvchi asosiy AI agent (BM25 + Qdrant + LLM).
+                </div>
+                <div class="arch-node-metric">
+                  <span>Yashirin test rejimi</span>
+                  <span class="mono" style="color:#7c3aed;">Blind Query</span>
+                </div>
+              </div>
+
+              <!-- NODE 03: COUNTER AGENT -->
+              <div class="arch-node-card" id="char-counter" onclick="switchPage('audit')">
+                <div class="arch-node-top">
+                  <span class="arch-node-tag">NODE 03 · PORT :8001</span>
+                  <span class="badge badge-pass" id="svgBadge-counter">Zero-Trust</span>
+                </div>
+                <div class="arch-node-title">
+                  <svg class="svg-icon" style="color:#15803d;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  <span>Counter Agent</span>
+                </div>
+                <div class="arch-node-desc">
+                  Har bir modda, stavka va muddatni mustaqil tekshiruvchi 4-bosqichli Red-Team &amp; Fakt-Auditor.
+                </div>
+                <div class="arch-node-metric">
+                  <span>Baholash mezonlari</span>
+                  <span class="mono" style="color:#15803d;">0–100 Rubrika</span>
+                </div>
+              </div>
+
+              <!-- NODE 04: LEX.UZ & DATA.EGOV.UZ -->
+              <div class="arch-node-card" id="char-vault" onclick="switchPage('train')">
+                <div class="arch-node-top">
+                  <span class="arch-node-tag">NODE 04 · GROUND TRUTH</span>
+                  <span class="badge badge-info" id="svgBadge-vault">15k+ Modda</span>
+                </div>
+                <div class="arch-node-title">
+                  <svg class="svg-icon" style="color:#1668f9;" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                  <span>Lex.uz &amp; data.egov.uz</span>
+                </div>
+                <div class="arch-node-desc">
+                  31 ta rasmiy Kodeks/Qonun, 15,000+ modda, PF-6247 ochiq ma'lumotlar va BHM/MHTEKM oltin bazasi.
+                </div>
+                <div class="arch-node-metric">
+                  <span>Tekshiruv tezligi</span>
+                  <span class="mono" style="color:#1668f9;">4-Tier Verify</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CLEAN ENTERPRISE TELEMETRY DATA BUS SVG -->
+            <svg class="arch-bus-svg" viewBox="0 0 1000 54" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+              <path id="beamHaqliToAgent" class="energy-beam" d="M 125,8 L 125,28 L 375,28 L 375,8" fill="none" stroke="#ea580c" stroke-width="2.5"/>
+              <path id="beamAgentToCounter" class="energy-beam" d="M 375,8 L 375,38 L 625,38 L 625,8" fill="none" stroke="#7c3aed" stroke-width="2.5"/>
+              <path id="beamCounterToVault" class="energy-beam" d="M 625,8 L 625,48 L 875,48 L 875,8" fill="none" stroke="#15803d" stroke-width="2.5"/>
+
+              <circle r="4" fill="#ea580c"><animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#beamHaqliToAgent"/></animateMotion></circle>
+              <circle r="4.5" fill="#7c3aed"><animateMotion dur="1.9s" repeatCount="indefinite"><mpath href="#beamAgentToCounter"/></animateMotion></circle>
+              <circle r="4.5" fill="#15803d"><animateMotion dur="1.7s" repeatCount="indefinite"><mpath href="#beamCounterToVault"/></animateMotion></circle>
+            </svg>
+          </div>
+
+          <!-- LIVE AUDIT EXECUTION CONSOLE -->
+          <div class="arch-console">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:800;">
+                <svg class="svg-icon sm" style="color:var(--primary);" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                <span>Jonli Audit Jarayoni Jurnali (Real-Time Execution Trace)</span>
+              </div>
+              <span class="mono" style="font-size:11px; color:var(--text-muted);">Zero-Leakage Blind Protocol · :8000 ↔ :8001</span>
+            </div>
+            <div class="arch-console-log" id="archConsoleLog">
+              <div>[TAYYOR] Counter Agent 15,000+ Lex.uz moddalari, data.egov.uz (PF-6247, O'RQ-369/395/792) va 100+ yashirin (Blind) testlar bilan ishga shay.</div>
+            </div>
+          </div>
+
+          <!-- CLEAN INLINE QUERY INPUT BAR -->
+          <div class="card" style="flex-direction:row; align-items:center; padding:10px 14px; gap:10px;">
+            <input
+              type="text"
+              id="studioPromptInput"
+              class="prompt-input"
+              style="font-size:13.5px;"
+              placeholder="Istalgan huquqiy savolni yozing (masalan: Oila kodeksi 99-modda bo'yicha aliment eng kam miqdori qancha?)..."
+              onkeydown="if(event.key==='Enter') runStudioPipeline()"
+            />
+            <button class="btn btn-primary" style="padding:9px 18px;" onclick="runStudioPipeline()">
+              <span>Tekshirish (Audit)</span>
+              <svg class="svg-icon sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- BO'LIM 2: AUDIT NATIJASI (ULTRA-READABLE EXECUTIVE & DEV REPORT)   -->
+      <!-- ================================================================== -->
+      <section class="page-view" id="page-audit">
+        <div class="page-container" style="max-width:1180px;">
+          <div class="page-hdr">
+            <div>
+              <h2>2. Counter Agent Audit Hisoboti</h2>
+              <p>Legal Agent (:8000) javobining 4-bosqichli Lex.uz &amp; data.egov.uz tekshiruvi va o'qishga qulay yuridik tahlili.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" onclick="switchPage('studio')">← Arxitekturaga Qaytish</button>
+              <button class="btn btn-primary" onclick="switchPage('traps')">Boshqa Yashirin Test Tanlash</button>
+            </div>
+          </div>
+
+          <div id="verdictEmptyMsg" class="card" style="text-align:center; padding:44px 20px; color:var(--text-muted);">
+            <div style="font-size:14px; font-weight:600;">Hali birorta huquqiy savol tekshirilmadi.</div>
+            <div style="margin-top:12px;">
+              <button class="btn btn-primary" onclick="runQuickDemoTrap()">Oila kodeksi 99-modda (MHTEKM vs BHM) misolida sinab ko'rish</button>
+            </div>
+          </div>
+
+          <div id="verdictActiveBox" style="display:none; flex-direction:column; gap:16px;">
+            <!-- EXECUTIVE VERDICT HEADER CARD -->
+            <div class="card" style="padding:20px 22px; gap:14px;">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+                <div style="flex:1;">
+                  <div id="verdictTagsRow" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;"></div>
+                  <div style="font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:4px;">Tekshirilgan Huquqiy Savol:</div>
+                  <div id="activePromptText" style="font-size:15.5px; font-weight:800; line-height:1.5; color:var(--text-main);"></div>
+                </div>
+                <div style="text-align:right; flex-shrink:0; padding:10px 16px; border-radius:12px; background:var(--bg-subtle); border:1px solid var(--border);">
+                  <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Ishonchlilik Bali</div>
+                  <div class="mono" style="font-size:34px; font-weight:800; line-height:1.15;" id="scoreNumber">0/100</div>
+                  <div class="mono" style="font-size:11px; color:var(--text-muted); margin-top:2px;" id="auditMetaTiming">—</div>
+                </div>
+              </div>
+
+              <!-- 5-Criteria Progress Bars -->
+              <div id="rubricBreakdownBar" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px;"></div>
+
+              <!-- Plain Uzbek Executive Conclusion -->
+              <div style="padding:12px 15px; border-radius:10px; background:var(--bg-subtle); border-left:4px solid var(--primary); font-size:13.5px; line-height:1.6; color:var(--text-main);">
+                <strong>Xulosa:</strong> <span id="judgeSummaryText"></span>
+              </div>
+            </div>
+
+            <!-- 4 Clear Toggle Buttons -->
+            <div class="sub-tabs">
+              <button class="sub-tab-btn active" id="vBtnCompare" onclick="switchVerdictPane('compare')">1. Qiyosiy Tahlil (Xatolar vs Lex.uz)</button>
+              <button class="sub-tab-btn" id="vBtnResponse" onclick="switchVerdictPane('response')">2. Agent To'liq Javobi (O'qishga Qulay)</button>
+              <button class="sub-tab-btn" id="vBtnClaims" onclick="switchVerdictPane('claims')">3. Modda Dalillari (<span id="claimsCountBadge">0</span>)</button>
+              <button class="sub-tab-btn" id="vBtnFix" onclick="switchVerdictPane('fix')">4. Texnik Yechim (Dev)</button>
+            </div>
+
+            <!-- SUB-PANE 1: SIDE-BY-SIDE READABLE COMPARISON -->
+            <div class="sub-pane active" id="vPaneCompare">
+              <div class="compare-grid">
+                <div class="card" style="padding:18px 20px;">
+                  <div style="font-weight:800; font-size:12.5px; color:var(--text-main); text-transform:uppercase; letter-spacing:0.04em; padding-bottom:8px; border-bottom:1px solid var(--border);">
+                    Legal Agent (:8000) Diagnostikasi
+                  </div>
+                  <div id="flaggedErrorsBox" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+
+                <div class="card" style="padding:18px 20px;">
+                  <div style="font-weight:800; font-size:12.5px; color:var(--green); text-transform:uppercase; letter-spacing:0.04em; padding-bottom:8px; border-bottom:1px solid var(--border);">
+                    Counter Agent — Rasmiy Lex.uz &amp; data.egov.uz Normasi
+                  </div>
+                  <div id="goldBenchmarkBox" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SUB-PANE 2: ULTRA-READABLE FORMATTED AGENT RESPONSE -->
+            <div class="card sub-pane" id="vPaneResponse" style="padding:22px 26px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--border); margin-bottom:6px;">
+                <strong style="font-size:13.5px;">Legal Agent (:8000) To'liq Javobi</strong>
+                <div style="display:flex; gap:10px; font-size:11.5px;">
+                  <span class="hl-ok">Yashil = Lex.uz tasdiqlagan modda</span>
+                  <span class="hl-bad">Qizil = Xato / Tasdiqlanmagan</span>
+                </div>
+              </div>
+              <div id="activeResponseBox" class="readable-doc"></div>
+            </div>
+
+            <!-- SUB-PANE 3: STRUCTURED CLAIMS TABLE -->
+            <div class="card sub-pane" id="vPaneClaims" style="padding:20px 22px;">
+              <div id="claimsListContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+
+            <!-- SUB-PANE 4: ROOT-CAUSE DEV FIXES -->
+            <div class="card sub-pane" id="vPaneFix" style="padding:20px 22px;">
+              <div id="fixRecommendationText" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- BO'LIM 3: 24 TUZOQ BANKI (DEDICATED PAGE)                          -->
+      <!-- ================================================================== -->
+      <section class="page-view" id="page-traps">
+        <div class="page-container">
+          <div class="page-hdr">
+            <div>
+              <h2>3. 24 Red-Team Tuzoq Banki</h2>
+              <p>O'qitilmagan Legal Agentni sinash uchun istalgan tuzoq ustiga bosing.</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <select id="filterCategory" class="select" style="width:190px;" onchange="loadTrapBank()">
+                <option value="">Barcha 7 toifa</option>
+                <option value="DIRECT_NORM_PRECISION">1. Aniq stavka/muddat</option>
+                <option value="TEMPORAL_REPEAL_TRAP">2. Eskirgan qonun</option>
+                <option value="FABRICATED_CITATION_TRAP">3. Soxta modda</option>
+                <option value="NORM_CONFLICT_HIERARCHY">4. Kolliziya (O'RQ-682)</option>
+                <option value="CROSS_LINGUAL_DRIFT_TRAP">5. UZ vs RU tafovut</option>
+                <option value="MULTI_HOP_CHAIN">6. Ko'p bosqichli</option>
+                <option value="COMPLEX_PRACTICAL_CASE">7. Amaliy kazus</option>
+              </select>
+              <select id="filterLang" class="select" style="width:140px;" onchange="loadTrapBank()">
+                <option value="">Barcha tillar</option>
+                <option value="uz_latn">O'zbek (Lotin)</option>
+                <option value="uz_cyrl">Ўзбек (Кирилл)</option>
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="trapListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </section>
+
+      <!-- ================================================================== -->
+      <!-- BO'LIM 4: 10 TA TEST SAVOL & MASTER PROMPT GENERATOR               -->
+      <!-- ================================================================== -->
+      <section class="page-view" id="page-gen10">
+        <div class="page-container">
+          <div class="page-hdr">
+            <div>
+              <h2>4. Random 10 ta Test Savol &amp; Boshqa AI Uchun Master-Prompt</h2>
+              <p>Boshqa AI da 10 ta murakkab huquqiy test savoli tuzish uchun tayyor prompt yoki shu yerning o'zida 10 ta random savolni sinash.</p>
+            </div>
+            <button class="btn btn-primary" onclick="loadRandom10AndPrompt()">Yangi Random 10 Savol &amp; Prompt Tuzish</button>
+          </div>
+
           <div class="sub-tabs">
-            <button class="sub-tab active" id="tabFeed" onclick="switchLeftTab('feed')">Audits</button>
-            <button class="sub-tab" id="tabBank" onclick="switchLeftTab('bank')">Trap Bank</button>
-            <button class="sub-tab" id="tabGolden" onclick="switchLeftTab('golden')">Golden</button>
-          </div>
-        </div>
-        <div class="col-body" id="leftList"></div>
-      </section>
-
-      <!-- CENTER COLUMN: INTERROGATION & DIFF INSPECTOR -->
-      <section class="col">
-        <div class="col-head">
-          <span>Interrogation &amp; Diff Inspector</span>
-          <span class="mono" id="selectedAuditId">NO CASE SELECTED</span>
-        </div>
-        <div class="col-body">
-          <!-- Active Probe Composer -->
-          <div class="probe-box">
-            <div class="probe-row">
-              <select class="f-select" id="pCategory">
-                <option value="DIRECT_NORM_PRECISION">1. DIRECT_NORM_PRECISION</option>
-                <option value="MULTI_HOP_CHAIN">2. MULTI_HOP_CHAIN</option>
-                <option value="NORM_CONFLICT_HIERARCHY">3. NORM_CONFLICT_HIERARCHY</option>
-                <option value="TEMPORAL_REPEAL_TRAP">4. TEMPORAL_REPEAL_TRAP</option>
-                <option value="CROSS_LINGUAL_DRIFT_TRAP">5. CROSS_LINGUAL_DRIFT_TRAP</option>
-                <option value="FABRICATED_CITATION_TRAP">6. FABRICATED_CITATION_TRAP</option>
-                <option value="COMPLEX_PRACTICAL_CASE">7. COMPLEX_PRACTICAL_CASE</option>
-              </select>
-              <select class="f-select" id="pLang">
-                <option value="uz_latn">UZ-Latn</option>
-                <option value="uz_cyrl">UZ-Cyrl</option>
-                <option value="ru">RU</option>
-                <option value="en">EN</option>
-              </select>
-              <label style="display:flex;align-items:center;gap:5px;font-size:0.74rem;font-weight:600;color:var(--fail);cursor:pointer;">
-                <input type="checkbox" id="pFalsePremise" /> Fake/Hoax Trap
-              </label>
-            </div>
-            <textarea class="probe-textarea" id="pQuestion" placeholder="Auditor savoli yoki tuzoq kazusini kiriting (yoki 'Generate Trap [G]' tugmasini bosing)..."></textarea>
-            <div class="probe-footer">
-              <span class="mono" id="pTrapHint" style="font-size:0.71rem;color:var(--muted);">Ctrl+Enter — darhol Target Agent ni sinovdan o'tkazish</span>
-              <button class="btn btn-primary" onclick="runSingleAudit()">Interrogate &amp; Verify</button>
-            </div>
+            <button class="sub-tab-btn active" id="g10TabPrompt" onclick="switchGen10Tab('prompt')">1. Boshqa AI Uchun Master-Prompt (Nusxalash)</button>
+            <button class="sub-tab-btn" id="g10TabList" onclick="switchGen10Tab('list')">2. Tayyor Random 10 ta Savol (1-Klikda Sinash)</button>
+            <button class="sub-tab-btn" id="g10TabPaste" onclick="switchGen10Tab('paste')">3. Boshqa AI Tuzgan 10 ta Savolni Paste Qilib Sinash</button>
           </div>
 
-          <!-- Batch Progress Bar -->
-          <div class="progress-bar-wrap" id="batchProgress">
-            <div style="display:flex;justify-content:space-between;font-size:0.76rem;font-weight:700;">
-              <span id="progText">Batch Audit ishlamoqda...</span>
-              <span class="mono" id="progCount">0 / 0</span>
+          <!-- Sub-Pane 1: Copyable Master Prompt for Another AI -->
+          <div class="card sub-pane active" id="g10PanePrompt">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:12.5px; font-weight:700; color:var(--text-secondary);">
+                Quyidagi promptni nusxalab boshqa AI ga (ChatGPT / Claude / Gemini) tashlang — u 10 ta kuchli huquqiy test savoli tuzib beradi:
+              </div>
+              <button class="btn btn-primary" id="copyMasterPromptBtn" onclick="copyMasterPrompt()">Master-Promptni Nusxalash (Copy)</button>
             </div>
-            <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+            <textarea id="masterPromptBox" class="textarea mono" style="min-height:310px; font-size:11.5px; line-height:1.55;" readonly></textarea>
           </div>
 
-          <!-- Forensic Comparison Output -->
-          <div id="centerInspector">
-            <div class="dossier-card" style="color:var(--muted);font-size:0.84rem;">
-              Chap ro'yxatdan tekshiruvni tanlang yoki yuqoridan <strong>Generate Trap [G]</strong> → <strong>Run Audit</strong> tugmasini bosib asosiy huquqiy agent (`agent/`) ni shafqatsiz sinovdan o'tkazing.
+          <!-- Sub-Pane 2: 10 Random Test Questions Generated Here -->
+          <div class="card sub-pane" id="g10PaneList">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:12.5px; font-weight:700;">Counter Agent tanlagan 10 ta tasodifiy murakkab savol:</div>
+              <button class="btn btn-primary" onclick="runAll10RandomQuestions()">Barcha 10 ta Savolni Legal Agent (:8000) da Sinash</button>
             </div>
+            <div id="random10ListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+          </div>
+
+          <!-- Sub-Pane 3: Paste 10 Questions from Another AI & Run Batch -->
+          <div class="card sub-pane" id="g10PanePaste">
+            <div style="font-size:12.5px; font-weight:700;">
+              Boshqa AI tuzib bergan 10 ta savolni (JSON massiv yoki har bir qatorda bittadan savol) shu yerga Paste qiling:
+            </div>
+            <textarea id="pastedQuestionsInput" class="textarea mono" style="min-height:150px;" placeholder='JSON massiv [{"question": "..."}, ...] yoki har bir qatorda bittadan savol yozing...'></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span id="batch10ProgressStatus" class="mono" style="font-size:12px; font-weight:700; color:var(--primary);">Tayyor</span>
+              <button class="btn btn-primary" onclick="runPasted10Questions()">Paste Qilingan Savollarni Legal Agent (:8000) da Tekshirish</button>
+            </div>
+            <div id="batch10ResultsBox" style="display:flex; flex-direction:column; gap:8px;"></div>
           </div>
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: EVIDENCE & LEX.UZ VERIFICATION DRAWER -->
-      <section class="col col-right">
-        <div class="col-head">
-          <span>Evidence &amp; Lex.uz Verification Drawer</span>
-          <span class="mono" id="rightScoreBadge">— / 100</span>
-        </div>
-        <div class="col-body" id="rightDrawer">
-          <div class="dossier-card" style="color:var(--muted);font-size:0.82rem;">
-            Bu panelda 5 mezonli ball taqsimoti (25+25+25+15+10), xato kodlari, mustaqil Lex.uz dalillari va <code>agent/</code> ni tuzatish tashxisi chiqadi.
+      <!-- ================================================================== -->
+      <!-- BO'LIM 4: BAZA & COUNTER AGENTNI O'QITISH (DEDICATED PAGE)         -->
+      <!-- ================================================================== -->
+      <section class="page-view" id="page-train">
+        <div class="page-container">
+          <div class="page-hdr">
+            <div>
+              <h2>4. Counter Agent Qonunchilik Bazasi &amp; O'qitish</h2>
+              <p>26+ Kodeks oltin normalari va lokal BM25 korpusidan Counter Agent xotirasini boyitish.</p>
+            </div>
+            <button class="btn btn-primary" onclick="runAutoTrainCorpus()">1-Klikda Lokal Korpusdan O'qitish (Auto-Train)</button>
+          </div>
+
+          <div id="trainStatusMsg" style="font-size:12.5px; font-weight:700; color:var(--green);"></div>
+
+          <div class="sub-tabs">
+            <button class="sub-tab-btn active" id="trTabList" onclick="switchTrainTab('list')">1. O'qitilgan Moddalar (<span id="corpusTotalBadge">50+</span>)</button>
+            <button class="sub-tab-btn" id="trTabLex" onclick="switchTrainTab('lex')">2. Lex.uz ID Orqali O'qitish</button>
+            <button class="sub-tab-btn" id="trTabCustom" onclick="switchTrainTab('custom')">3. Qo'lda Modda Qo'shish</button>
+          </div>
+
+          <div class="card sub-pane active" id="trPaneList">
+            <input id="corpusSearchInput" class="input" placeholder="Kodeks nomi yoki modda raqami bo'yicha qidirish..." oninput="searchCorpusArticles()" />
+            <div id="corpusTableContainer" style="display:flex; flex-direction:column; gap:8px; max-height:430px; overflow-y:auto;"></div>
+          </div>
+
+          <div class="card sub-pane" id="trPaneLex">
+            <div style="font-weight:700; font-size:13px;">Lex.uz Hujjat ID orqali Jonli Yuklab O'qitish</div>
+            <div style="display:flex; gap:8px;">
+              <input id="trainLexDocId" class="input mono" placeholder="Lex.uz ID (masalan: 6445147 — Konstitutsiya, 6257288 — Mehnat kodeksi)" />
+              <input id="trainLexTitle" class="input" placeholder="Hujjat nomi (ixtiyoriy)" />
+              <button class="btn btn-primary" style="flex-shrink:0;" onclick="trainFromLiveLex()">Yuklab O'qitish</button>
+            </div>
+          </div>
+
+          <div class="card sub-pane" id="trPaneCustom">
+            <div style="display:grid; grid-template-columns:1.4fr 0.8fr 1fr; gap:8px;">
+              <input id="trainCodeName" class="input" placeholder="Kodeks nomi (Mehnat kodeksi)" />
+              <input id="trainArticleNo" class="input mono" placeholder="Modda (217)" />
+              <input id="trainDocId" class="input mono" placeholder="Lex.uz ID (6257288)" />
+            </div>
+            <textarea id="trainSummaryUz" class="textarea" placeholder="Moddaning rasmiy mazmuni..."></textarea>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px;">
+              <input type="checkbox" id="trainBulkMode" /> Ko'p moddali matnni avtomatik moddalarga bo'lib o'qitish
+            </label>
+            <button class="btn btn-primary" onclick="trainCustomArticle()">Counter Agent Xotirasiga Saqlash</button>
           </div>
         </div>
       </section>
-    </div>
+
+      <!-- ================================================================== -->
+      <!-- BO'LIM 5: HAQLI & 3 SERVIS PORTLARI (DEDICATED PAGE)               -->
+      <!-- ================================================================== -->
+      <section class="page-view" id="page-services">
+        <div class="page-container">
+          <div class="page-hdr">
+            <div>
+              <h2>5. Haqli Tilxat Sinovi &amp; 3 Backend Servis Holati</h2>
+              <p>Haqli (:8002), Legal Agent (:8000) va Counter Agent (:8001) portlari hamda Tilxat tekshiruvi.</p>
+            </div>
+            <button class="btn" onclick="loadCrewServices()">Holatni Yangilash</button>
+          </div>
+
+          <div id="servicesGridBox" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;"></div>
+
+          <div class="card">
+            <div style="font-weight:800; font-size:14px;">Haqli Qarz Tilxati Tekshiruvi (FK 733 va 326-moddalar)</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px;">
+              <input id="tilxatLender" class="input" value="Karimov Azizbek" placeholder="Qarz beruvchi" />
+              <input id="tilxatBorrower" class="input" value="Alimov Javohir" placeholder="Qarz oluvchi" />
+              <input id="tilxatAmount" class="input mono" value="15 000 000" placeholder="Summa (so'm)" />
+              <input id="tilxatPenalty" class="input mono" value="5.0" placeholder="Kunlik penya %" />
+            </div>
+            <button class="btn btn-primary" style="align-self:flex-start;" onclick="generateAndAuditTilxat()">Tilxatni Counter Agentda Tekshirish</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
   </div>
 
-  <!-- TARGET SETTINGS MODAL -->
-  <div class="modal-bg" id="settingsModal" onclick="if(event.target===this) closeModal('settingsModal')">
-    <div class="modal">
-      <h3>
-        <span>Target Agent Endpoint &amp; Timeout Settings</span>
-        <button class="btn" onclick="closeModal('settingsModal')">Yopish</button>
-      </h3>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div>
-          <label style="display:block;font-size:0.76rem;font-weight:700;color:var(--muted);margin-bottom:4px;">Target Agent Base URL (`agent/`)</label>
-          <input class="f-input" id="cfgTargetUrl" style="width:100%;" value="http://localhost:8000" />
-        </div>
-        <div>
-          <label style="display:block;font-size:0.76rem;font-weight:700;color:var(--muted);margin-bottom:4px;">Interrogation Timeout (seconds)</label>
-          <input class="f-input" id="cfgTargetTimeout" type="number" min="10" max="300" value="90" style="width:100%;" />
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
-          <button class="btn btn-primary" onclick="saveTargetConfig()">Saqlash va Ulanishni Tekshirish</button>
-        </div>
+  <!-- ================= BOTTOM CREW STATUS BAR ================= -->
+  <footer class="sams-bottom-dock">
+    <div class="dock-item" onclick="switchPage('services')">
+      <div class="dock-avatar" style="background:var(--orange-soft); color:var(--orange);">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <div class="dock-name">1. Haqli</div>
+        <div class="dock-meta"><span class="status-dot" id="dot-haqli"></span> <span>:8002</span></div>
       </div>
     </div>
-  </div>
 
-  <!-- ANALYTICS & HEATMAP MODAL -->
-  <div class="modal-bg" id="analyticsModal" onclick="if(event.target===this) closeModal('analyticsModal')">
-    <div class="modal">
-      <h3>
-        <span>Red-Team Analytics &amp; Legal Branch Weak-Spot Heatmap</span>
-        <button class="btn" onclick="closeModal('analyticsModal')">Yopish</button>
-      </h3>
-      <div id="analyticsBody">Yuklanmoqda...</div>
+    <div class="dock-item" onclick="switchPage('traps')">
+      <div class="dock-avatar" style="background:var(--purple-soft); color:var(--purple);">
+        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div>
+        <div class="dock-name">2. Legal Agent</div>
+        <div class="dock-meta"><span class="status-dot" id="dot-agent"></span> <span>:8000 (Nishon)</span></div>
+      </div>
     </div>
-  </div>
+
+    <div class="dock-item" onclick="switchPage('audit')">
+      <div class="dock-avatar" style="background:var(--green-soft); color:var(--green);">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="dock-name">3. Counter Agent</div>
+        <div class="dock-meta"><span class="status-dot" id="dot-counter"></span> <span>:8001 (Auditor)</span></div>
+      </div>
+    </div>
+
+    <div class="dock-item" onclick="switchPage('train')">
+      <div class="dock-avatar" style="background:var(--primary-soft); color:var(--primary);">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </div>
+      <div>
+        <div class="dock-name">4. Lex.uz Baza</div>
+        <div class="dock-meta"><span class="status-dot" id="dot-vault"></span> <span>26+ Kodeks</span></div>
+      </div>
+    </div>
+  </footer>
 
   <script>
-    let leftTab = 'feed';
-    let auditsCache = [];
-    let selectedAudit = null;
-    let currentTrapMeta = null;
-    let isRunning = false;
-    let isPaused = false;
+    const COUNTER_BASE = (window.location.port === '8001') ? '' : 'http://localhost:8001';
+    let trapBank = [];
+    const DEFAULT_POS = {
+      haqli:   { x: 472, y: 198 },
+      agent:   { x: 358, y: 288 },
+      counter: { x: 222, y: 255 },
+      vault:   { x: 512, y: 352 }
+    };
+    const agentPos = JSON.parse(JSON.stringify(DEFAULT_POS));
 
-    function esc(s) {
-      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    function applyTheme(t) {
-      document.documentElement.setAttribute('data-theme', t);
-      localStorage.setItem('lex_auditor_theme', t);
-    }
-    applyTheme(localStorage.getItem('lex_auditor_theme') || 'dark');
     function toggleTheme() {
-      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-      applyTheme(cur === 'dark' ? 'light' : 'dark');
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('sams_theme', next);
+    }
+    if (localStorage.getItem('sams_theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
 
-    function openModal(id) {
-      document.getElementById(id).classList.add('open');
-      if (id === 'analyticsModal') renderAnalyticsModal();
+    /* ================= PAGE SWITCHER (5 DEDICATED BO'LIMLAR) ================= */
+    function switchPage(pageId) {
+      ['studio','audit','traps','gen10','train','services'].forEach(p => {
+        document.getElementById('nav-' + p)?.classList.toggle('active', p === pageId);
+        document.getElementById('page-' + p)?.classList.toggle('active', p === pageId);
+      });
+      if (pageId === 'traps') loadTrapBank();
+      if (pageId === 'gen10') loadRandom10AndPrompt();
+      if (pageId === 'train') searchCorpusArticles();
+      if (pageId === 'services') loadCrewServices();
     }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-    function setPhase(phase, busy) {
-      const pill = document.getElementById('phasePill');
-      pill.classList.toggle('busy', !!busy);
-      document.getElementById('phaseLabel').textContent = phase;
+    function switchGen10Tab(tab) {
+      ['prompt','list','paste'].forEach(t => {
+        const cap = t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById('g10Tab' + cap)?.classList.toggle('active', t === tab);
+        document.getElementById('g10Pane' + cap)?.classList.toggle('active', t === tab);
+      });
     }
 
-    function setRunningUI(running) {
-      isRunning = running;
-      document.getElementById('btnRunSingle').disabled = running;
-      document.getElementById('btnRunBatch').disabled = running;
-      document.getElementById('btnRunReg').disabled = running;
-      document.getElementById('btnStop').disabled = !running;
-      document.getElementById('btnPause').disabled = !running;
-      if (!running) {
-        isPaused = false;
-        document.getElementById('btnPause').textContent = 'Pause';
+    function switchVerdictPane(pane) {
+      ['compare','response','claims','fix'].forEach(p => {
+        const cap = p.charAt(0).toUpperCase() + p.slice(1);
+        document.getElementById('vBtn' + cap)?.classList.toggle('active', p === pane);
+        document.getElementById('vPane' + cap)?.classList.toggle('active', p === pane);
+      });
+    }
+
+    function switchTrainTab(tab) {
+      ['list','lex','custom'].forEach(t => {
+        const cap = t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById('trTab' + cap)?.classList.toggle('active', t === tab);
+        document.getElementById('trPane' + cap)?.classList.toggle('active', t === tab);
+      });
+    }
+
+    /* ================= 3D ROOM AGENT DRAGGING ================= */
+    let draggingAgentId = null;
+    let dragOffset = { x: 0, y: 0 };
+    let agentWasDragged = false;
+
+    function getSvgPoint(evt) {
+      const svg = document.getElementById('studioSvg');
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX;
+      pt.y = evt.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function startDragAgent(evt, agentId) {
+      if (evt.button !== 0) return;
+      evt.stopPropagation();
+      draggingAgentId = agentId;
+      agentWasDragged = false;
+      const pt = getSvgPoint(evt);
+      dragOffset.x = pt.x - agentPos[agentId].x;
+      dragOffset.y = pt.y - agentPos[agentId].y;
+      window.addEventListener('mousemove', onDragAgentMove);
+      window.addEventListener('mouseup', onDragAgentEnd);
+    }
+
+    function onDragAgentMove(evt) {
+      if (!draggingAgentId) return;
+      agentWasDragged = true;
+      const pt = getSvgPoint(evt);
+      const nx = Math.max(130, Math.min(690, Math.round(pt.x - dragOffset.x)));
+      const ny = Math.max(120, Math.min(410, Math.round(pt.y - dragOffset.y)));
+      agentPos[draggingAgentId] = { x: nx, y: ny };
+      document.getElementById('char-' + draggingAgentId)?.setAttribute('transform', `translate(${nx}, ${ny})`);
+      updateEnergyBeams();
+    }
+
+    function onDragAgentEnd() {
+      draggingAgentId = null;
+      window.removeEventListener('mousemove', onDragAgentMove);
+      window.removeEventListener('mouseup', onDragAgentEnd);
+    }
+
+    function updateEnergyBeams() {
+      // Enterprise Architecture Bus paths are fixed in SVG viewBox; no drag override needed.
+    }
+
+    function appendArchLog(message, tone = 'info') {
+      const el = document.getElementById('archConsoleLog');
+      if (!el) return;
+      const now = new Date();
+      const ts = now.toTimeString().slice(0, 8);
+      const color = tone === 'ok' ? 'var(--green)' : (tone === 'err' ? 'var(--danger)' : (tone === 'warn' ? 'var(--amber)' : 'var(--text-secondary)'));
+      const line = document.createElement('div');
+      line.style.color = color;
+      line.textContent = `[${ts}] ${message}`;
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+      while (el.children.length > 40) el.removeChild(el.firstChild);
+    }
+
+    function resetAgentPositions() {
+      Object.keys(DEFAULT_POS).forEach(id => {
+        agentPos[id] = { ...DEFAULT_POS[id] };
+        document.getElementById('char-' + id)?.setAttribute('transform', `translate(${agentPos[id].x}, ${agentPos[id].y})`);
+      });
+      updateEnergyBeams();
+    }
+
+    function onAgentClick(evt, id) {
+      if (agentWasDragged) return;
+      if (id === 'haqli') switchPage('services');
+      else if (id === 'agent') switchPage('traps');
+      else if (id === 'counter') switchPage('audit');
+      else if (id === 'vault') switchPage('train');
+    }
+
+    function setCrewWorkingState(activeIds = []) {
+      ['haqli','agent','counter','vault'].forEach(id => {
+        document.getElementById('char-' + id)?.classList.toggle('crew-working', activeIds.includes(id));
+        document.getElementById('dot-' + id)?.classList.toggle('working', activeIds.includes(id));
+      });
+      document.getElementById('beamHaqliToAgent').classList.toggle('active', activeIds.includes('haqli') || activeIds.includes('agent'));
+      document.getElementById('beamAgentToCounter').classList.toggle('active', activeIds.includes('agent') || activeIds.includes('counter'));
+      document.getElementById('beamCounterToVault').classList.toggle('active', activeIds.includes('counter') || activeIds.includes('vault'));
+    }
+
+    /* ================= AUDIT PIPELINE ================= */
+    function runQuickDemoTrap() {
+      runStudioPipeline({
+        question: "Oila kodeksiga ko'ra voyaga yetmagan 1, 2 va 3 ta bola uchun aliment miqdori qancha va har bir bola uchun eng kam chegara qaysi ko'rsatkichdan necha foiz etib belgilangan?",
+        category: "DIRECT_NORM_PRECISION",
+        expected_doc_ids: ["104720"],
+        expected_articles: ["99"],
+        expected_key_facts: ["99", "26,5", "MHTEKM"],
+        forbidden_claims: ["BHMning 26,5 foizi"],
+        gold_reference_summary: "Oila kodeksi 99-modda: 1 bola — 1/4, 2 bola — 1/3, 3+ bola — 1/2. Eng kam miqdor har bir bola uchun MHTEKMning (BHM emas!) 26,5 foizidan kam bo'lmasligi shart."
+      });
+    }
+
+    function setStudioStageStep(stepNum, statusText, badgeUpdates = {}) {
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('stStep' + i);
+        if (!el) continue;
+        el.classList.toggle('active', i === stepNum);
+        el.classList.toggle('done', i < stepNum || stepNum === 5);
       }
+      const lbl = document.getElementById('studioLiveStatusLabel');
+      if (lbl && statusText) lbl.textContent = statusText;
+      Object.keys(badgeUpdates).forEach(k => {
+        const b = document.getElementById('svgBadge-' + k);
+        if (b) b.textContent = badgeUpdates[k];
+      });
     }
 
-    async function refreshHealth() {
-      try {
-        const d = await (await fetch('/api/health')).json();
-        const th = d.target_health || {};
-        document.getElementById('cfgTargetUrl').value = d.target_agent_url || 'http://localhost:8000';
-        document.getElementById('cfgTargetTimeout').value = d.target_agent_timeout || 90;
-        const dot = document.getElementById('targetDot');
-        const lbl = document.getElementById('targetLabel');
-        if (th.reachable) {
-          dot.style.background = 'var(--pass)';
-          lbl.textContent = `Target ONLINE (${th.bm25_chunks || 0} chunks)`;
-        } else {
-          dot.style.background = 'var(--fail)';
-          lbl.textContent = `Target OFFLINE (${d.target_agent_url})`;
+    let autoPatrolRunning = false;
+    let activeAuditAbortCtrl = null;
+    let patrolHistoryRecords = [];
+
+    async function toggleAutoPatrol() {
+      const btn = document.getElementById('autoPatrolBtn');
+      const strip = document.getElementById('studioPatrolResultsStrip');
+
+      if (autoPatrolRunning) {
+        autoPatrolRunning = false;
+        if (activeAuditAbortCtrl) {
+          try { activeAuditAbortCtrl.abort(); } catch (_) {}
+          activeAuditAbortCtrl = null;
         }
-      } catch {}
-    }
-
-    async function saveTargetConfig() {
-      const url = document.getElementById('cfgTargetUrl').value.trim();
-      const timeout = Number(document.getElementById('cfgTargetTimeout').value) || 90;
-      await fetch('/api/config/target', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ target_agent_url: url, target_agent_timeout: timeout }),
-      });
-      await refreshHealth();
-      closeModal('settingsModal');
-    }
-
-    async function refreshAnalytics() {
-      try {
-        const a = await (await fetch('/api/analytics')).json();
-        document.getElementById('kpiAvg').textContent = `${a.average_score} / 100`;
-        document.getElementById('kpiTotal').textContent = `${a.total_audited} tekshiruv`;
-        document.getElementById('kpiPassRate').textContent = `${a.pass_rate_pct}%`;
-        document.getElementById('kpiSplit').textContent = `P:${a.pass_count} · W:${a.partial_count} · F:${a.fail_count}`;
-        document.getElementById('kpiGolden').textContent = String(a.golden_failures_count);
-        const topErr = Object.entries(a.error_code_counts || {})[0];
-        document.getElementById('kpiTopErr').textContent = topErr ? topErr[0] : 'NONE';
-        document.getElementById('kpiTopErrCnt').textContent = topErr ? `${topErr[1]} marta` : '0 marta';
-      } catch {}
-    }
-
-    async function renderAnalyticsModal() {
-      const a = await (await fetch('/api/analytics')).json();
-      const errBars = Object.entries(a.error_code_counts || {}).map(([k, v]) => `
-        <div class="rubric-row">
-          <div class="rubric-top"><span class="mono">${esc(k)}</span><span class="mono">${v}</span></div>
-          <div class="rubric-track"><div class="rubric-fill low" style="width:${Math.min(100, v * 15)}%"></div></div>
-        </div>
-      `).join('') || '<div style="color:var(--muted);font-size:0.8rem;">Hali xato qayd etilmagan.</div>';
-
-      const hmRows = (a.branch_heatmap || []).map(b => `
-        <div class="hm-row">
-          <strong class="mono">${esc(b.branch)}</strong>
-          <div class="rubric-track"><div class="rubric-fill ${b.avg_score >= 80 ? 'high' : b.avg_score >= 55 ? 'mid' : 'low'}" style="width:${b.avg_score}%"></div></div>
-          <span class="mono">${b.avg_score}/100</span>
-          <span class="mono" style="color:var(--fail);">F:${b.fail_rate_pct}%</span>
-        </div>
-      `).join('') || '<div style="color:var(--muted);font-size:0.8rem;">Hali soha statistikasi yo\'q.</div>';
-
-      document.getElementById('analyticsBody').innerHTML = `
-        <div class="dossier-card"><h4>Top Error Taxonomy Breakdown</h4>${errBars}</div>
-        <div class="dossier-card"><h4>Legal Branch Weak-Spot Heatmap (Eng zaiflar yuqorida)</h4>${hmRows}</div>
-      `;
-    }
-
-    function switchLeftTab(tab) {
-      leftTab = tab;
-      ['feed', 'bank', 'golden'].forEach(t => {
-        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t === tab);
-      });
-      if (tab === 'feed') loadAudits();
-      else if (tab === 'bank') loadTrapBank();
-      else loadGoldenFailures();
-    }
-
-    function resetFilters() {
-      ['fSearch', 'fVerdict', 'fCategory', 'fError', 'fLang'].forEach(id => document.getElementById(id).value = '');
-      loadAudits();
-    }
-
-    async function loadAudits() {
-      if (leftTab !== 'feed') return;
-      const params = new URLSearchParams();
-      const map = { search: 'fSearch', verdict: 'fVerdict', category: 'fCategory', error_code: 'fError', language: 'fLang' };
-      for (const [k, id] of Object.entries(map)) {
-        const val = document.getElementById(id).value.trim();
-        if (val) params.set(k, val);
-      }
-      auditsCache = await (await fetch('/api/audits?' + params.toString())).json();
-      renderAuditFeed();
-    }
-
-    function renderAuditFeed() {
-      const box = document.getElementById('leftList');
-      if (!auditsCache.length) {
-        box.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:0.8rem;">Hali tekshiruvlar yo\'q. <strong>Generate Trap [G]</strong> yoki <strong>Run Batch</strong> bosing.</div>';
+        btn.textContent = "▶ Avto-Patrul (Jonli 3D Sinov)";
+        setCrewWorkingState([]);
+        setStudioStageStep(0, "Avto-Patrul foydalanuvchi tomonidan to'xtatildi.");
         return;
       }
-      box.innerHTML = auditsCache.map((r, idx) => `
-        <div class="feed-card ${r.verdict} ${selectedAudit && selectedAudit.audit_id === r.audit_id ? 'selected' : ''}" onclick="selectAudit(${idx})">
-          <div class="fc-top">
-            <span class="verdict-badge ${r.verdict}">${r.verdict}</span>
-            <span class="score-chip">${r.total_score}/100</span>
-          </div>
-          <div class="fc-q">${esc(r.test_case.question)}</div>
-          <div class="fc-meta">
-            <span class="cat-chip">${esc(r.test_case.category)}</span>
-            <span class="cat-chip">${esc(r.test_case.language)}</span>
-            ${(r.error_codes || []).slice(0, 2).map(e => `<span class="err-chip">${esc(e)}</span>`).join('')}
-          </div>
-        </div>
-      `).join('');
-    }
 
-    async function loadTrapBank() {
-      const traps = await (await fetch('/api/traps/bank')).json();
-      const box = document.getElementById('leftList');
-      box.innerHTML = traps.map((t, i) => `
-        <div class="feed-card" onclick='loadTrapIntoComposer(${JSON.stringify(t).replace(/'/g, "&#39;")})'>
-          <div class="fc-top">
-            <span class="cat-chip">${esc(t.category)}</span>
-            <span class="cat-chip">${esc(t.language)} · ${esc(t.difficulty)}</span>
-          </div>
-          <div class="fc-q">${esc(t.question)}</div>
-          <div class="fc-meta" style="color:var(--brass);">${esc(t.trap_intent)}</div>
-        </div>
-      `).join('');
-    }
+      autoPatrolRunning = true;
+      btn.textContent = "⏹ Avto-Patrulni To'xtatish";
+      if (!trapBank.length) await loadTrapBank();
 
-    async function loadGoldenFailures() {
-      const items = await (await fetch('/api/golden-failures')).json();
-      const box = document.getElementById('leftList');
-      if (!items.length) {
-        box.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:0.8rem;">golden_failures.jsonl hozircha bo\'sh.</div>';
-        return;
+      const totalCount = parseInt(document.getElementById('patrolCountSelect')?.value || '3', 10) || 3;
+      patrolHistoryRecords = [];
+      strip.style.display = 'flex';
+      strip.innerHTML = `<span style="font-weight:700; color:var(--text-secondary);">Patrul natijalari (0/${totalCount}):</span>`;
+
+      // Pick distinct traps from trapBank
+      const pool = [...trapBank];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-      box.innerHTML = items.map(g => `
-        <div class="feed-card FAIL" onclick='loadTrapIntoComposer(${JSON.stringify(g).replace(/'/g, "&#39;")})'>
-          <div class="fc-top">
-            <span class="verdict-badge FAIL">${esc(g.verdict || 'FAIL')}</span>
-            <span class="score-chip">${g.total_score}/100</span>
-          </div>
-          <div class="fc-q">${esc(g.question)}</div>
-          <div class="fc-meta">${(g.error_codes || []).map(e => `<span class="err-chip">${esc(e)}</span>`).join('')}</div>
-        </div>
-      `).join('');
+      const selectedTraps = pool.slice(0, totalCount);
+
+      let sumScore = 0;
+      let completedCount = 0;
+
+      for (let idx = 0; idx < selectedTraps.length; idx++) {
+        if (!autoPatrolRunning) break;
+        const pick = selectedTraps[idx];
+        const prefix = `Patrul [${idx + 1}/${totalCount}] · `;
+        const rec = await runStudioPipeline(pick, true, prefix);
+        if (!autoPatrolRunning || !rec) break;
+
+        completedCount++;
+        const sc = rec.total_score ?? 0;
+        sumScore += sc;
+        const vd = rec.verdict || 'FAIL';
+        const bCls = vd === 'PASS' ? 'badge-pass' : (vd === 'PARTIAL' ? 'badge-warn' : 'badge-fail');
+        const recIndex = patrolHistoryRecords.length;
+        patrolHistoryRecords.push(rec);
+
+        // Render clickable chip in Studio Patrol Strip
+        strip.innerHTML = `<span style="font-weight:700; color:var(--text-secondary);">Patrul (${completedCount}/${totalCount}):</span>` +
+          patrolHistoryRecords.map((r, rIdx) => {
+            const rSc = r.total_score ?? 0;
+            const rVd = r.verdict || 'FAIL';
+            const rCls = rVd === 'PASS' ? 'badge-pass' : (rVd === 'PARTIAL' ? 'badge-warn' : 'badge-fail');
+            const qShort = ((r.test_case && r.test_case.question) || '').slice(0, 34);
+            return `<button class="btn" style="padding:3px 9px; font-size:11px; gap:5px;" onclick="openPatrolRecord(${rIdx})" title="${escapeHtml((r.test_case && r.test_case.question) || '')}">
+              <strong>#${rIdx + 1}</strong>
+              <span>${escapeHtml(qShort)}...</span>
+              <span class="badge ${rCls} mono">${rSc}/100 ${escapeHtml(rVd)}</span>
+            </button>`;
+          }).join('');
+
+        if (idx < selectedTraps.length - 1 && autoPatrolRunning) {
+          await new Promise(r => setTimeout(r, 1400));
+        }
+      }
+
+      if (autoPatrolRunning) {
+        autoPatrolRunning = false;
+        btn.textContent = "▶ Avto-Patrul (Jonli 3D Sinov)";
+        setCrewWorkingState([]);
+        const avg = completedCount > 0 ? Math.round(sumScore / completedCount) : 0;
+        setStudioStageStep(
+          5,
+          `✓ Avto-Patrul Yakunlandi: ${completedCount}/${totalCount} ta savol tekshirildi · O'rtacha ball: ${avg}/100`,
+          {
+            haqli: "1. Haqli · Tayyor",
+            agent: "2. Legal Agent (:8000)",
+            counter: `3. Counter · O'rtacha ${avg}/100`,
+            vault: "4. Lex.uz & data.egov.uz"
+          }
+        );
+      }
     }
 
-    function loadTrapIntoComposer(t) {
-      currentTrapMeta = t;
-      document.getElementById('pCategory').value = t.category || 'DIRECT_NORM_PRECISION';
-      document.getElementById('pLang').value = t.language || 'uz_latn';
-      document.getElementById('pFalsePremise').checked = !!t.is_false_premise;
-      document.getElementById('pQuestion').value = t.question || '';
-      document.getElementById('pTrapHint').textContent = t.trap_intent ? `TRAP: ${t.trap_intent}` : 'Loaded into interrogator.';
+    function openPatrolRecord(idx) {
+      const rec = patrolHistoryRecords[idx];
+      if (!rec) return;
+      renderAuditResult(rec);
+      switchPage('audit');
     }
 
-    async function generateTrap() {
-      setPhase('GENERATING TRAP...', true);
+    async function runStudioPipeline(taskObj = null, stayInStudio = false, stagePrefix = '') {
+      const inputEl = document.getElementById('studioPromptInput');
+      const question = (taskObj && taskObj.question) || (inputEl.value || '').trim();
+      if (!question) {
+        runQuickDemoTrap();
+        return null;
+      }
+      inputEl.value = question;
+
+      const task = taskObj || { question, category: "DIRECT_NORM_PRECISION" };
+      const onStudioPage = document.getElementById('page-studio').classList.contains('active');
+      document.getElementById('studioOpenReportBtn').style.display = 'none';
+
+      // Cancel any previous in-flight request so requests never overlap
+      if (activeAuditAbortCtrl) {
+        try { activeAuditAbortCtrl.abort(); } catch (_) {}
+      }
+      activeAuditAbortCtrl = new AbortController();
+
+      // Stage 1: Interrogating Target Agent (:8000) with live elapsed timer
+      setCrewWorkingState(['haqli', 'agent']);
+      const tStart = Date.now();
+      appendArchLog(`→ ${stagePrefix}Legal Agent (:8000) ga so'rov yuborildi: "${question.slice(0, 72)}${question.length > 72 ? '...' : ''}"`, 'info');
+      setStudioStageStep(1, `${stagePrefix}1/4 Legal Agent (:8000) so'roq qilinmoqda... (0.0s)`, {
+        haqli: "So'rov yuborildi",
+        agent: "Sintez qilmoqda...",
+        counter: "Kutmoqda",
+        vault: "15k+ Modda"
+      });
+
+      const elapsedInterval = setInterval(() => {
+        const sec = ((Date.now() - tStart) / 1000).toFixed(1);
+        const lbl = document.getElementById('studioLiveStatusLabel');
+        if (lbl) lbl.textContent = `${stagePrefix}1/4 Legal Agent (:8000) javob sintez qilmoqda... (${sec}s)`;
+      }, 400);
+
+      const targetOverride = document.getElementById('targetModeSelect').value || null;
+
       try {
-        const res = await fetch('/api/traps/generate', {
-          method: 'POST', headers: {'Content-Type':'application/json'},
+        const res = await fetch(`${COUNTER_BASE}/api/audit/single`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          signal: activeAuditAbortCtrl.signal,
           body: JSON.stringify({
-            category: document.getElementById('pCategory').value || null,
-            language: document.getElementById('pLang').value || null,
-            use_llm: true,
-          }),
+            question: task.question,
+            category: task.category || 'DIRECT_NORM_PRECISION',
+            language: task.language || 'uz_latn',
+            legal_branch: task.legal_branch || 'general',
+            trap_intent: task.trap_intent || '',
+            is_false_premise: Boolean(task.is_false_premise),
+            expected_doc_ids: task.expected_doc_ids || [],
+            expected_articles: task.expected_articles || [],
+            expected_key_facts: task.expected_key_facts || [],
+            forbidden_claims: task.forbidden_claims || [],
+            gold_reference_summary: task.gold_reference_summary || '',
+            target_agent_url: targetOverride
+          })
         });
-        const trap = await res.json();
-        loadTrapIntoComposer(trap);
+        clearInterval(elapsedInterval);
+        const rec = await res.json();
+
+        // Stage 2: Claim Parsing Animation
+        const claimsLen = (rec.extracted_claims || []).length;
+        const latMs = (rec.target_observation && rec.target_observation.latency_ms) || 0;
+        setCrewWorkingState(['counter']);
+        appendArchLog(`✓ Legal Agent (:8000) javobi olindi (${latMs} ms) · ${claimsLen} ta modda/da'vo ajratildi`, 'info');
+        setStudioStageStep(2, `${stagePrefix}2/4 Counter Agent ${claimsLen} ta huquqiy da'vo va moddani ajratdi...`, {
+          agent: `${latMs} ms`,
+          counter: `${claimsLen} ta modda`
+        });
+        await new Promise(r => setTimeout(r, 260));
+
+        // Stage 3: 4-Tier Lex.uz & data.egov.uz Verification Animation
+        setCrewWorkingState(['counter', 'vault']);
+        setStudioStageStep(3, `${stagePrefix}3/4 Lex.uz (15k+ modda) va data.egov.uz bazasi bilan solishtirilmoqda...`, {
+          counter: "4-Tier Audit",
+          vault: "Tekshirilmoqda..."
+        });
+        await new Promise(r => setTimeout(r, 280));
+
+        // Stage 4: Verdict Ready
+        setCrewWorkingState([]);
+        renderAuditResult(rec);
+
+        const sc = rec.total_score ?? 0;
+        const vd = rec.verdict || 'FAIL';
+        const vdUz = vd === 'PASS' ? 'ISHONCHLI' : (vd === 'PARTIAL' ? "QISMAN TO'G'RI" : 'XATO ANIQLANDI');
+        const verCount = (rec.verifications || []).filter(v => v.status === 'VERIFIED').length;
+        const totCount = (rec.verifications || []).length;
+        appendArchLog(
+          `★ YAKUNIY HUKM: ${sc}/100 (${vdUz}) · Tasdiqlangan moddalar: ${verCount}/${totCount}`,
+          vd === 'PASS' ? 'ok' : (vd === 'PARTIAL' ? 'warn' : 'err')
+        );
+        setStudioStageStep(5, `${stagePrefix}Hukm: ${sc}/100 (${vdUz}) · Tasdiqlangan moddalar: ${verCount}/${totCount}`, {
+          haqli: "Tayyor",
+          agent: `${latMs} ms`,
+          counter: `${sc}/100 · ${vdUz}`,
+          vault: `${verCount}/${totCount} tasdiq`
+        });
+        document.getElementById('studioOpenReportBtn').style.display = 'inline-flex';
+
+        if (!onStudioPage && !stayInStudio) {
+          switchPage('audit');
+        }
+        return rec;
+      } catch (e) {
+        clearInterval(elapsedInterval);
+        setCrewWorkingState([]);
+        if (e.name !== 'AbortError') {
+          appendArchLog(`✕ Xatolik: ${e.message}`, 'err');
+          setStudioStageStep(0, "Xatolik: " + e.message);
+        }
+        return null;
       } finally {
-        setPhase('IDLE · READY', false);
+        activeAuditAbortCtrl = null;
       }
     }
 
-    function selectAudit(idx) {
-      selectedAudit = auditsCache[idx];
-      renderAuditFeed();
-      renderDossier(selectedAudit);
+    function translateStatusUz(st) {
+      const map = {
+        VERIFIED: 'Tasdiqlandi (Lex.uz)',
+        MISQUOTED_OR_DRIFT: 'Xato Talqin',
+        FABRICATED: 'Soxta Modda',
+        REPEALED_OR_OUTDATED: 'Eski / Bekor Qilingan',
+        UNVERIFIED: 'Tasdiqlanmadi',
+      };
+      return map[st] || st;
     }
 
-    function renderDossier(r) {
-      if (!r) return;
-      document.getElementById('selectedAuditId').textContent = `${r.audit_id} · ${r.verdict} (${r.total_score}/100)`;
-      document.getElementById('rightScoreBadge').textContent = `${r.total_score} / 100`;
+    function translateErrorCodeUz(code) {
+      const map = {
+        FABRICATED_CITATION: 'Soxta Modda / Hujjat',
+        FALSE_PREMISE_COMPLIANCE: 'Soxta Shartga Aldangan',
+        REPEALED_OR_OUTDATED_NORM: 'Eski Qonun Normasi',
+        MISQUOTED_OR_DRIFT: 'Xato Talqin',
+        MISSED_EXCEPTION_OR_CONDITION: 'Istisno Tushib Qolgan',
+        HIERARCHY_OR_CONFLICT_ERROR: "Iyerarxiya Xatosi (O'RQ-682)",
+        TRANSLATION_OR_TERM_DRIFT: 'Atama / Til Xatosi',
+        INCOMPLETE_MULTI_HOP: "To'liq Emas",
+        UNGROUNDED_CLAIM: "Asossiz Da'vo",
+      };
+      return map[code] || code;
+    }
 
-      const flaggedHtml = (r.flagged_sentences || []).length
-        ? `<div class="flagged-box"><strong>Flagged / Suspicious Claims:</strong>${r.flagged_sentences.map(s => `<div>• ${esc(s)}</div>`).join('')}</div>`
-        : '';
+    function renderReadableMarkdown(rawText, verifications = []) {
+      const safe = escapeHtml(rawText || '');
+      const lines = safe.split(/\r?\n/);
+      let out = [];
+      let inList = false;
 
-      document.getElementById('centerInspector').innerHTML = `
-        <div class="dossier-card">
-          <h4>
-            <span>1. Auditor Probe (${esc(r.test_case.category)})</span>
-            <span class="cat-chip">${esc(r.test_case.language)} · ${esc(r.test_case.legal_branch)}</span>
-          </h4>
-          <div class="dossier-text" style="font-weight:600;">${esc(r.test_case.question)}</div>
-          ${r.test_case.trap_intent ? `<div style="margin-top:8px;font-size:0.77rem;color:var(--brass);"><strong>Trap Intent:</strong> ${esc(r.test_case.trap_intent)}</div>` : ''}
-        </div>
+      const formatInline = (str) => {
+        let s = str
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/`([^`]+)`/g, '<code class="mono" style="background:var(--bg-subtle);padding:1px 5px;border-radius:4px;font-size:12.5px;">$1</code>')
+          .replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank">Lex.uz Manba ↗</a>');
 
-        <div class="dossier-card">
-          <h4>
-            <span>2. Target Agent Response</span>
-            <span class="mono">${r.target_observation.latency_ms}ms · Target self-conf: ${r.target_observation.reported_confidence ?? 'N/A'}</span>
-          </h4>
-          <div class="dossier-text">${esc(r.target_observation.answer_text || r.target_observation.error || '(Empty response)')}</div>
-          ${flaggedHtml}
-        </div>
+        (verifications || []).forEach(v => {
+          const c = v.claim || {};
+          const art = c.cited_article ? `${c.cited_article}-modda` : '';
+          const token = art || c.cited_doc_number || '';
+          if (!token || token.length < 3) return;
+          const ok = v.status === 'VERIFIED';
+          const cls = ok ? 'hl-ok' : 'hl-bad';
+          const escapedTok = escapeHtml(token);
+          if (s.includes(escapedTok)) {
+            s = s.split(escapedTok).join(`<span class="${cls}" title="${escapeHtml(translateStatusUz(v.status))}: ${escapeHtml(v.auditor_note)}">${escapedTok}</span>`);
+          }
+        });
+        return s;
+      };
 
-        <div class="dossier-card">
-          <h4>
-            <span>3. Independent Auditor Verdict &amp; Benchmark Re-Answer</span>
-            <span class="verdict-badge ${r.verdict}">${r.verdict} · ${r.total_score}/100</span>
-          </h4>
-          <div class="dossier-text" style="margin-bottom:10px;"><strong>Critique:</strong> ${esc(r.auditor_critique)}</div>
-          <div class="benchmark-box"><strong>Etalon / Authoritative Legal Basis:</strong><br/>${esc(r.benchmark_re_answer)}</div>
-        </div>
-      `;
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) {
+          if (inList) { out.push('</ul>'); inList = false; }
+          continue;
+        }
+        if (/^#{1,4}\s+/.test(line)) {
+          if (inList) { out.push('</ul>'); inList = false; }
+          const text = line.replace(/^#{1,4}\s+/, '');
+          out.push(`<h4>${formatInline(text)}</h4>`);
+        } else if (/^[-*•]\s+/.test(line)) {
+          if (!inList) { out.push('<ul>'); inList = true; }
+          out.push(`<li>${formatInline(line.replace(/^[-*•]\s+/, ''))}</li>`);
+        } else if (/^\d+[.)]\s+/.test(line)) {
+          if (!inList) { out.push('<ul>'); inList = true; }
+          out.push(`<li>${formatInline(line)}</li>`);
+        } else {
+          if (inList) { out.push('</ul>'); inList = false; }
+          out.push(`<p>${formatInline(line)}</p>`);
+        }
+      }
+      if (inList) out.push('</ul>');
+      return out.join('') || '<p style="color:var(--text-muted);">Javob matni bo\'sh.</p>';
+    }
 
-      const s = r.score;
-      const barCls = (v, m) => (v / m >= 0.8 ? 'high' : v / m >= 0.5 ? 'mid' : 'low');
-      const rubricItems = [
-        ['Citation Exactness', s.citation_exactness, 25],
-        ['Legal Validity & Currency', s.legal_validity_currency, 25],
-        ['Reasoning & Completeness', s.reasoning_completeness, 25],
-        ['Cross-Lingual & Terms', s.cross_lingual_accuracy, 15],
-        ['Anti-Hallucination', s.anti_hallucination_calibration, 10],
+    function renderAuditResult(rec) {
+      document.getElementById('verdictEmptyMsg').style.display = 'none';
+      document.getElementById('verdictActiveBox').style.display = 'flex';
+      switchVerdictPane('compare');
+
+      const obs = rec.target_observation || {};
+      const tc = rec.test_case || {};
+      const verifications = rec.verifications || [];
+      const score = rec.total_score ?? 0;
+      const verdict = rec.verdict || 'FAIL';
+      const errCodes = rec.error_codes || [];
+
+      document.getElementById('navScoreBadge').textContent = `${score}`;
+      const scoreEl = document.getElementById('scoreNumber');
+      scoreEl.textContent = `${score}/100`;
+      scoreEl.style.color = score >= 80 ? 'var(--green)' : (score >= 55 ? 'var(--amber)' : 'var(--danger)');
+
+      const verOkCount = verifications.filter(v => v.status === 'VERIFIED').length;
+      const timingEl = document.getElementById('auditMetaTiming');
+      if (timingEl) {
+        timingEl.textContent = `${obs.latency_ms || 0} ms · ${verOkCount}/${verifications.length} modda tasdiq`;
+      }
+
+      const vCls = verdict === 'PASS' ? 'badge-pass' : (verdict === 'PARTIAL' ? 'badge-warn' : 'badge-fail');
+      const vLabelUz = verdict === 'PASS' ? 'ISHONCHLI (PASS)' : (verdict === 'PARTIAL' ? "QISMAN TO'G'RI (PARTIAL)" : 'XATO ANIQLANDI (FAIL)');
+      document.getElementById('verdictTagsRow').innerHTML =
+        `<span class="badge ${vCls}" style="font-size:12px; padding:4px 11px;">${escapeHtml(vLabelUz)}</span> ` +
+        errCodes.map(ec => `<span class="badge badge-fail" style="font-size:11.5px; padding:4px 10px;">${escapeHtml(translateErrorCodeUz(ec))}</span>`).join(' ');
+
+      document.getElementById('activePromptText').textContent = tc.question || '';
+      document.getElementById('claimsCountBadge').textContent = `${verifications.length}`;
+
+      // 1. Render 5-Criteria Rubric Breakdown (25+25+25+15+10 = 100)
+      const sc = rec.score || {};
+      const rubrics = [
+        { lbl: "Iqtibos Aniqligi", val: sc.citation_exactness ?? 0, max: 25 },
+        { lbl: "Qonuniy Kuch", val: sc.legal_validity_currency ?? 0, max: 25 },
+        { lbl: "Huquqiy Asoslash", val: sc.reasoning_completeness ?? 0, max: 25 },
+        { lbl: "Til & Atamalar", val: sc.cross_lingual_accuracy ?? 0, max: 15 },
+        { lbl: "Anti-Gallyutsinatsiya", val: sc.anti_hallucination_calibration ?? 0, max: 10 },
       ];
-
-      const verHtml = (r.verifications || []).map(v => {
-        const stCls = v.status === 'VERIFIED' ? 'PASS' : (v.status === 'UNVERIFIED' ? 'PARTIAL' : 'FAIL');
+      document.getElementById('rubricBreakdownBar').innerHTML = rubrics.map(r => {
+        const pct = Math.round((r.val / r.max) * 100);
+        const col = pct >= 80 ? 'var(--green)' : (pct >= 50 ? 'var(--amber)' : 'var(--danger)');
         return `
-          <div class="claim-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <span class="mono" style="font-weight:700;">${esc(v.claim.claim_id)}</span>
-              <span class="verdict-badge ${stCls}">${esc(v.status)}</span>
+          <div style="padding:10px 12px; border-radius:9px; background:var(--bg-subtle); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; margin-bottom:6px;">
+              <span>${escapeHtml(r.lbl)}</span>
+              <span class="mono" style="color:${col};">${r.val}/${r.max}</span>
             </div>
-            <div style="color:var(--text-2);margin-bottom:4px;">${esc(v.claim.claim_text.slice(0, 180))}</div>
-            <div style="font-size:0.74rem;color:var(--muted);">
-              Lex status: <strong class="mono">${esc(v.independent_norm_status)}</strong> · ${esc(v.auditor_note)}
+            <div style="height:6px; border-radius:99px; background:var(--border); overflow:hidden;">
+              <div style="width:${pct}%; height:100%; background:${col};"></div>
             </div>
-            ${v.independent_source_url ? `<div style="margin-top:4px;"><a href="${esc(v.independent_source_url)}" target="_blank" rel="noopener">Open Lex.uz Source ↗</a></div>` : ''}
           </div>
         `;
-      }).join('') || '<div style="font-size:0.78rem;color:var(--muted);">Hech qanday rasmiy sitata/modda ajratib olinmadi.</div>';
+      }).join('');
 
-      const rcHtml = (r.root_causes || []).map(rc => `
-        <div class="rc-card">
-          <div class="rc-comp">[${esc(rc.severity).toUpperCase()}] ${esc(rc.component)}</div>
-          <div style="margin-top:4px;">${esc(rc.explanation)}</div>
-          <div style="margin-top:5px;font-weight:600;color:var(--text);">Fix: ${esc(rc.recommended_fix)}</div>
-        </div>
-      `).join('') || '<div style="font-size:0.78rem;color:var(--pass);">Tizimda kritik root-cause aniqlanmadi.</div>';
+      // 2. Left Column: Structured Readable Diagnostic Cards
+      const failedVerifications = verifications.filter(v => v.status !== 'VERIFIED');
+      const flagged = rec.flagged_sentences || [];
+      let errCardsHtml = '';
 
-      document.getElementById('rightDrawer').innerHTML = `
-        <div class="dossier-card">
-          <h4><span>Score Rubric (0–100)</span><span class="mono">${r.total_score}/100</span></h4>
-          ${rubricItems.map(([lbl, val, max]) => `
-            <div class="rubric-row">
-              <div class="rubric-top"><span>${lbl}</span><span class="mono">${val}/${max}</span></div>
-              <div class="rubric-track"><div class="rubric-fill ${barCls(val, max)}" style="width:${Math.round((val/max)*100)}%"></div></div>
+      if (failedVerifications.length > 0) {
+        errCardsHtml += failedVerifications.map(v => {
+          const c = v.claim || {};
+          const cleanClaim = (c.claim_text || '').replace('[Target Agent Citation Card]', '').trim();
+          return `
+            <div style="padding:14px 15px; border-radius:10px; background:var(--danger-soft); border:1px solid var(--danger); color:var(--text-main);">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px;">
+                <strong style="color:var(--danger); font-size:13.5px;">${escapeHtml(c.cited_doc_title || 'Hujjat')} · ${escapeHtml(c.cited_article ? c.cited_article + '-modda' : 'Norma')}</strong>
+                <span class="badge badge-fail">${escapeHtml(translateStatusUz(v.status))}</span>
+              </div>
+              <div style="font-size:13px; font-weight:700; line-height:1.55; color:var(--text-main); margin-bottom:6px;">${escapeHtml(v.auditor_note)}</div>
+              ${cleanClaim ? `<div style="font-size:12px; color:var(--text-secondary); padding:8px 10px; border-radius:7px; background:var(--bg-panel); line-height:1.5;"><strong>Agent iborasi:</strong> "${escapeHtml(cleanClaim.slice(0, 240))}"</div>` : ''}
             </div>
-          `).join('')}
-        </div>
-
-        <div class="dossier-card">
-          <h4><span>Error Taxonomy Codes</span></h4>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            ${(r.error_codes || []).length
-              ? r.error_codes.map(e => `<span class="err-chip">${esc(e)}</span>`).join('')
-              : '<span class="verdict-badge PASS">ZERO ERRORS DETECTED</span>'}
+          `;
+        }).join('');
+      } else if (flagged.length > 0) {
+        errCardsHtml += flagged.map(f => {
+          const cleanF = f.replace('[Target Agent Citation Card]', '').trim();
+          return `
+            <div style="padding:13px 15px; border-radius:10px; background:var(--danger-soft); border:1px solid var(--danger); color:var(--danger); font-size:13px; font-weight:600; line-height:1.55;">
+              ${escapeHtml(cleanF)}
+            </div>
+          `;
+        }).join('');
+      } else {
+        errCardsHtml = `
+          <div style="padding:15px 16px; border-radius:10px; background:var(--green-soft); border:1px solid var(--green); color:var(--text-main); font-size:13.5px; line-height:1.6;">
+            <strong style="color:var(--green); display:block; margin-bottom:4px;">Xatolik aniqlanmadi</strong>
+            Legal Agent (:8000) javobida soxta modda, kuchini yo'qotgan qonun yoki terminologik ziddiyat topilmadi. Barcha <strong>${verifications.length} ta</strong> modda rasmiy Lex.uz va data.egov.uz bazalarida tasdiqlandi.
           </div>
-        </div>
-
-        <div class="dossier-card">
-          <h4><span>Independent Lex.uz Cross-Check (${(r.verifications || []).length})</span></h4>
-          ${verHtml}
-        </div>
-
-        <div class="dossier-card">
-          <h4><span>Root-Cause Diagnosis (agent/ Fix Plan)</span></h4>
-          ${rcHtml}
-        </div>
-      `;
-    }
-
-    async function consumeSSE(url, payload) {
-      setRunningUI(true);
-      try {
-        const res = await fetch(url, {
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(payload || {}),
-        });
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        let buf = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buf += dec.decode(value, { stream: true });
-          const parts = buf.split('\n\n');
-          buf = parts.pop() || '';
-          for (const part of parts) {
-            const line = part.trim();
-            if (!line.startsWith('data:')) continue;
-            const ev = JSON.parse(line.slice(5).trim());
-            if (ev.type === 'phase') {
-              setPhase(`${ev.phase}`, true);
-            } else if (ev.type === 'batch_start') {
-              document.getElementById('batchProgress').classList.add('active');
-              document.getElementById('progCount').textContent = `0 / ${ev.total}`;
-              document.getElementById('progFill').style.width = '0%';
-            } else if (ev.type === 'batch_progress') {
-              document.getElementById('progText').textContent = `[${ev.category}] ${ev.question.slice(0, 68)}...`;
-              document.getElementById('progCount').textContent = `${ev.index} / ${ev.total}`;
-              document.getElementById('progFill').style.width = `${Math.round((ev.index / ev.total) * 100)}%`;
-            } else if (ev.type === 'verdict') {
-              setPhase('VERDICT READY', false);
-              selectedAudit = ev.record;
-              auditsCache.unshift(ev.record);
-              if (leftTab === 'feed') renderAuditFeed();
-              renderDossier(ev.record);
-              refreshAnalytics();
-            } else if (ev.type === 'batch_done' || ev.type === 'batch_stopped') {
-              document.getElementById('progText').textContent =
-                ev.type === 'batch_stopped' ? `To'xtatildi (${ev.completed}/${ev.total})` : `Yakunlandi (${ev.completed}/${ev.total})`;
-              setPhase('IDLE · READY', false);
-              refreshAnalytics();
-            } else if (ev.type === 'error') {
-              alert('Auditor Xatolik: ' + ev.detail);
-            }
-          }
-        }
-      } finally {
-        setRunningUI(false);
-        setPhase('IDLE · READY', false);
+        `;
       }
+      document.getElementById('flaggedErrorsBox').innerHTML = errCardsHtml;
+
+      // 3. Right Column: Readable Authoritative Counter Agent Ground Truth
+      const verifiedExcerpts = verifications
+        .filter(v => v.independent_excerpt)
+        .map(v => ({
+          title: `${(v.claim && v.claim.cited_doc_title) || v.independent_doc_title || 'Lex.uz'} ${(v.claim && v.claim.cited_article) ? v.claim.cited_article + '-modda' : ''}`.trim(),
+          url: v.independent_source_url || 'https://lex.uz',
+          text: v.independent_excerpt
+        }));
+
+      const goldSummary = rec.benchmark_re_answer || tc.gold_reference_summary || '';
+      let goldHtml = '';
+      if (goldSummary) {
+        goldHtml += `
+          <div class="readable-doc" style="padding:14px 16px; border-radius:10px; background:var(--green-soft); border:1px solid var(--green); font-size:13.5px; line-height:1.65;">
+            ${renderReadableMarkdown(goldSummary, [])}
+          </div>
+        `;
+      }
+      if (verifiedExcerpts.length > 0) {
+        goldHtml += verifiedExcerpts.slice(0, 4).map(ve => `
+          <div style="padding:12px 14px; border-radius:9px; background:var(--bg-subtle); border:1px solid var(--border); font-size:13px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+              <strong style="color:var(--green); font-size:13px;">${escapeHtml(ve.title)}</strong>
+              <a href="${escapeHtml(ve.url)}" target="_blank" class="badge badge-info" style="text-decoration:none;">Lex.uz ↗</a>
+            </div>
+            <div style="color:var(--text-secondary); line-height:1.58;">${escapeHtml(ve.text)}</div>
+          </div>
+        `).join('');
+      }
+      document.getElementById('goldBenchmarkBox').innerHTML = goldHtml || '<div style="padding:12px; border-radius:9px; background:var(--green-soft); color:var(--green); font-size:13px;">Rasmiy Lex.uz korpusi bo\'yicha tekshirildi.</div>';
+      document.getElementById('judgeSummaryText').textContent = rec.auditor_critique || '';
+      document.getElementById('activeResponseBox').innerHTML = renderReadableMarkdown(obs.answer_text, verifications);
+
+      document.getElementById('claimsListContainer').innerHTML = verifications.map(v => {
+        const c = v.claim || {};
+        const ok = v.status === 'VERIFIED';
+        const bCls = ok ? 'badge-pass' : 'badge-fail';
+        return `
+          <div style="padding:14px 16px; border-radius:10px; background:var(--bg-subtle); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong style="font-size:14px;">${escapeHtml(c.cited_doc_title || 'Hujjat')} ${escapeHtml(c.cited_article ? '— ' + c.cited_article + '-modda' : '')}</strong>
+              <div style="display:flex; gap:6px; align-items:center;">
+                ${v.independent_source_url ? `<a href="${escapeHtml(v.independent_source_url)}" target="_blank" class="badge badge-info" style="text-decoration:none;">Lex.uz ↗</a>` : ''}
+                <span class="badge ${bCls}">${escapeHtml(translateStatusUz(v.status))}</span>
+              </div>
+            </div>
+            <div style="font-size:13px; color:var(--text-main); line-height:1.55;">${escapeHtml(v.auditor_note)}</div>
+            ${v.independent_excerpt ? `<div style="margin-top:8px; padding:10px 12px; border-radius:8px; background:var(--bg-panel); border:1px solid var(--border); font-size:12.5px; color:var(--text-secondary); line-height:1.6;">${escapeHtml(v.independent_excerpt)}</div>` : ''}
+          </div>
+        `;
+      }).join('') || '<div style="font-size:13.5px; color:var(--text-muted);">Iqtiboslar topilmadi.</div>';
+
+      const rcs = rec.root_causes || [];
+      document.getElementById('fixRecommendationText').innerHTML = rcs.map(rc => `
+        <div style="padding:14px 16px; border-radius:10px; background:var(--bg-subtle); border:1px solid var(--border);">
+          <div class="mono" style="font-weight:800; color:var(--primary); font-size:12px; margin-bottom:5px;">${escapeHtml(rc.component)}</div>
+          <div style="font-size:13px; line-height:1.55; margin-bottom:7px;">${escapeHtml(rc.explanation)}</div>
+          <div style="font-size:12.5px; color:var(--green); font-weight:700; padding:8px 10px; border-radius:7px; background:var(--green-soft);">Tavsiya etilgan yechim: ${escapeHtml(rc.recommended_fix)}</div>
+        </div>
+      `).join('') || '<div style="font-size:13.5px; color:var(--green); font-weight:700;">Arxitektura xatosi aniqlanmadi — tizim standartlarga mos ishlamoqda.</div>';
     }
 
-    async function runSingleAudit() {
-      const q = document.getElementById('pQuestion').value.trim();
-      if (!q || isRunning) return;
-      const meta = (currentTrapMeta && currentTrapMeta.question === q) ? currentTrapMeta : {};
-      await consumeSSE('/api/audit/single/stream', {
-        question: q,
-        category: document.getElementById('pCategory').value,
-        language: document.getElementById('pLang').value,
-        legal_branch: meta.legal_branch || 'general',
-        trap_intent: meta.trap_intent || '',
-        is_false_premise: document.getElementById('pFalsePremise').checked,
-        expected_doc_ids: meta.expected_doc_ids || [],
-        expected_articles: meta.expected_articles || [],
-        expected_key_facts: meta.expected_key_facts || [],
-        forbidden_claims: meta.forbidden_claims || [],
-        gold_reference_summary: meta.gold_reference_summary || '',
+    /* ================= BO'LIM 3: 24 TRAPS ================= */
+    let random10Questions = [];
+
+    async function loadRandom10AndPrompt() {
+      try {
+        const res = await fetch(`${COUNTER_BASE}/api/traps/random10`);
+        const data = await res.json();
+        document.getElementById('masterPromptBox').value = data.master_prompt || '';
+        random10Questions = data.questions || [];
+        document.getElementById('random10ListContainer').innerHTML = random10Questions.map((q, idx) => `
+          <div class="row-item" onclick="runStudioPipeline(random10Questions[${idx}])">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="badge badge-info">#${idx + 1} · ${escapeHtml(q.category)}</span>
+              <span class="mono" style="font-size:11px; color:var(--text-muted);">${escapeHtml(q.language)} · ${escapeHtml(q.legal_branch)}</span>
+            </div>
+            <div style="font-size:13px; font-weight:700;">${escapeHtml(q.question)}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    function copyMasterPrompt() {
+      const box = document.getElementById('masterPromptBox');
+      navigator.clipboard.writeText(box.value || '');
+      const btn = document.getElementById('copyMasterPromptBtn');
+      btn.textContent = "Nusxalandi (Copied)!";
+      setTimeout(() => { btn.textContent = "Master-Promptni Nusxalash (Copy)"; }, 1800);
+    }
+
+    async function runAll10RandomQuestions() {
+      if (!random10Questions.length) await loadRandom10AndPrompt();
+      switchGen10Tab('paste');
+      document.getElementById('pastedQuestionsInput').value = JSON.stringify(random10Questions, null, 2);
+      await runPasted10Questions();
+    }
+
+    async function runPasted10Questions() {
+      const raw = (document.getElementById('pastedQuestionsInput').value || '').trim();
+      if (!raw) return;
+      let items = [];
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) items = parsed;
+      } catch (_) {
+        items = raw.split(/\n+/).map(l => l.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(l => l.length > 8).map(q => ({ question: q }));
+      }
+      if (!items.length) return;
+
+      const statusEl = document.getElementById('batch10ProgressStatus');
+      const box = document.getElementById('batch10ResultsBox');
+      box.innerHTML = '';
+      const targetOverride = document.getElementById('targetModeSelect').value || null;
+      let totalScore = 0;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const qText = item.question || item.prompt || String(item);
+        statusEl.textContent = `Tekshirilmoqda: ${i + 1} / ${items.length}...`;
+        try {
+          const res = await fetch(`${COUNTER_BASE}/api/audit/single`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              question: qText,
+              category: item.category || 'DIRECT_NORM_PRECISION',
+              language: item.language || 'uz_latn',
+              legal_branch: item.legal_branch || 'general',
+              is_false_premise: Boolean(item.is_false_premise),
+              expected_articles: item.expected_articles || [],
+              expected_key_facts: item.expected_key_facts || [],
+              forbidden_claims: item.forbidden_claims || [],
+              gold_reference_summary: item.gold_reference_summary || '',
+              target_agent_url: targetOverride
+            })
+          });
+          const rec = await res.json();
+          const sc = rec.total_score ?? 0;
+          totalScore += sc;
+          const vCls = rec.verdict === 'PASS' ? 'badge-pass' : (rec.verdict === 'PARTIAL' ? 'badge-warn' : 'badge-fail');
+          const row = document.createElement('div');
+          row.className = 'row-item';
+          row.onclick = () => { renderAuditResult(rec); switchPage('audit'); };
+          row.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <strong>#${i + 1}. ${escapeHtml(qText.slice(0, 95))}${qText.length > 95 ? '...' : ''}</strong>
+              <span class="badge ${vCls} mono">${sc}/100 · ${escapeHtml(rec.verdict)}</span>
+            </div>
+            <div style="font-size:11.5px; color:var(--text-secondary);">${escapeHtml(rec.auditor_critique || '')}</div>
+          `;
+          box.appendChild(row);
+        } catch (err) {}
+      }
+      const avg = Math.round(totalScore / items.length);
+      statusEl.textContent = `Yakunlandi: ${items.length} ta savol tekshirildi · O'rtacha ball: ${avg}/100 (Batafsil ko'rish uchun qator ustiga bosing)`;
+    }
+    async function loadTrapBank() {
+      const cat = document.getElementById('filterCategory').value;
+      const lang = document.getElementById('filterLang').value;
+      const params = new URLSearchParams();
+      if (cat) params.set('category', cat);
+      if (lang) params.set('language', lang);
+      try {
+        const res = await fetch(`${COUNTER_BASE}/api/traps/bank?` + params.toString());
+        trapBank = await res.json();
+        document.getElementById('navTrapCount').textContent = `${trapBank.length}`;
+        document.getElementById('trapListContainer').innerHTML = trapBank.map((t, i) => `
+          <div class="row-item" onclick="runStudioPipeline(trapBank[${i}])">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span class="badge badge-info">${escapeHtml(t.category)}</span>
+              <span class="mono" style="font-size:11px; color:var(--text-muted);">${escapeHtml(t.language)} · ${escapeHtml(t.legal_branch)}</span>
+            </div>
+            <div style="font-size:13px; font-weight:700;">${escapeHtml(t.question)}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    /* ================= BO'LIM 4: TRAINING ================= */
+    async function runAutoTrainCorpus() {
+      const msg = document.getElementById('trainStatusMsg');
+      msg.textContent = "Lokal BM25 korpus va 26+ Kodeks moddalari Counter Agent xotirasiga yuklanmoqda...";
+      const res = await fetch(`${COUNTER_BASE}/api/corpus/train-auto`, { method: 'POST' });
+      const data = await res.json();
+      const total = data.stats ? data.stats.total_verified_articles : 0;
+      msg.textContent = `O'qitildi: Counter Agent xotirasida jami ${total} ta tasdiqlangan modda mavjud (${data.synced_from_local_bm25} tasi lokal korpusdan olindi).`;
+      searchCorpusArticles();
+    }
+
+    async function searchCorpusArticles() {
+      const q = (document.getElementById('corpusSearchInput')?.value || '').trim();
+      try {
+        const [statsRes, listRes] = await Promise.all([
+          fetch(`${COUNTER_BASE}/api/corpus/stats`),
+          fetch(`${COUNTER_BASE}/api/corpus/search?q=${encodeURIComponent(q)}&limit=150`)
+        ]);
+        const stats = await statsRes.json();
+        const items = await listRes.json();
+        const total = stats.total_verified_articles || items.length;
+        document.getElementById('corpusTotalBadge').textContent = `${total}`;
+        document.getElementById('navCorpusBadge').textContent = `${total}`;
+
+        document.getElementById('corpusTableContainer').innerHTML = items.map(a => `
+          <div style="padding:10px 12px; border-radius:8px; background:var(--bg-subtle); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <strong style="font-size:12.5px;">${escapeHtml(a.code_name)} — ${escapeHtml(a.article)}-modda</strong>
+              <a href="https://lex.uz/uz/docs/${escapeHtml(a.doc_id)}" target="_blank" class="badge badge-info" style="text-decoration:none;">Lex.uz #${escapeHtml(a.doc_id)}</a>
+            </div>
+            <div style="font-size:12px; color:var(--text-secondary); line-height:1.45;">${escapeHtml(a.summary_uz)}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function trainFromLiveLex() {
+      const doc_id = document.getElementById('trainLexDocId').value.trim();
+      const code_name = document.getElementById('trainLexTitle').value.trim();
+      if (!doc_id) return;
+      const msg = document.getElementById('trainStatusMsg');
+      msg.textContent = `Lex.uz (#${doc_id}) yuklanmoqda...`;
+      const res = await fetch(`${COUNTER_BASE}/api/corpus/train-lex`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({doc_id, code_name, branch: 'general'})
+      });
+      const data = await res.json();
+      msg.textContent = res.ok ? `"${data.doc_title}" dan ${data.trained_count} ta modda Counter Agentga o'qitildi.` : `Xato: ${data.detail}`;
+      searchCorpusArticles();
+    }
+
+    async function trainCustomArticle() {
+      const code_name = document.getElementById('trainCodeName').value.trim();
+      const article = document.getElementById('trainArticleNo').value.trim() || '1';
+      const doc_id = document.getElementById('trainDocId').value.trim() || 'custom';
+      const summary_uz = document.getElementById('trainSummaryUz').value.trim();
+      const bulk_mode = document.getElementById('trainBulkMode').checked;
+      if (!code_name || !summary_uz) return;
+      const res = await fetch(`${COUNTER_BASE}/api/corpus/train`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({code_name, article, doc_id, summary_uz, bulk_mode})
+      });
+      const data = await res.json();
+      document.getElementById('trainStatusMsg').textContent = `${data.trained_count} ta modda Counter Agent xotirasiga qo'shildi.`;
+      searchCorpusArticles();
+    }
+
+    /* ================= BO'LIM 5: SERVICES & HAQLI ================= */
+    async function loadCrewServices() {
+      try {
+        const res = await fetch(`${COUNTER_BASE}/api/sams/crew`);
+        const data = await res.json();
+        const items = (data.crew || []).slice(0, 3);
+        document.getElementById('servicesGridBox').innerHTML = items.map(c => `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${escapeHtml(c.name)}</strong>
+              <span class="badge ${c.online ? 'badge-pass' : 'badge-warn'}">${escapeHtml(c.status_label)}</span>
+            </div>
+            <div class="mono" style="font-size:11.5px; color:var(--text-muted);">Port :${c.port} · <a href="${escapeHtml(c.url)}" target="_blank">${escapeHtml(c.url)}</a></div>
+            <div style="font-size:12px; color:var(--text-secondary);">${escapeHtml(c.role)}</div>
+          </div>
+        `).join('');
+      } catch (e) {}
+    }
+
+    async function generateAndAuditTilxat() {
+      const lender = document.getElementById('tilxatLender').value.trim();
+      const borrower = document.getElementById('tilxatBorrower').value.trim();
+      const amount = document.getElementById('tilxatAmount').value.trim();
+      const pen = parseFloat(document.getElementById('tilxatPenalty').value) || 0.1;
+
+      await runStudioPipeline({
+        question: `Fuqarolar (${lender} va ${borrower}) o'rtasida ${amount} so'm qarz tilxati yozma tuzilishi shartmi (FK 733-modda) va kuniga ${pen}% penya sud tomonidan FK 326-modda bo'yicha kamaytirilishi mumkinmi?`,
+        category: 'NORM_CONFLICT_HIERARCHY',
+        expected_doc_ids: ['111189'],
+        expected_articles: ['733', '326'],
+        expected_key_facts: ['733', '326'],
+        forbidden_claims: ['sud neustoykani kamaytira olmaydi'],
+        gold_reference_summary: "FK 733-modda: BHMning 10 baravaridan ortiq qarz oddiy yozma shaklda (tilxat bilan) tuziladi. FK 326-modda: sud haddan tashqari yuqori neustoykani (penyani) kamaytirishga haqli."
       });
     }
 
-    async function runBatchAudit() {
-      if (isRunning) return;
-      const count = Number(document.getElementById('batchCount').value) || 10;
-      await consumeSSE('/api/audit/batch/stream', { count, use_llm_generation: true });
-    }
-
-    async function runRegression() {
-      if (isRunning) return;
-      await consumeSSE('/api/regression/run/stream', {});
-    }
-
-    async function stopAudit() {
-      await fetch('/api/audit/stop', { method: 'POST' });
-    }
-
-    async function togglePause() {
-      isPaused = !isPaused;
-      await fetch('/api/audit/pause?paused=' + isPaused, { method: 'POST' });
-      document.getElementById('btnPause').textContent = isPaused ? 'Resume' : 'Pause';
-    }
-
-    // Keyboard shortcuts: Ctrl+Enter (Run Audit), G (Generate Trap), R (Regression), / (Search)
-    document.addEventListener('keydown', e => {
-      const inField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault(); runSingleAudit();
-      } else if (!inField && e.key.toLowerCase() === 'g') {
-        e.preventDefault(); generateTrap();
-      } else if (!inField && e.key.toLowerCase() === 'r') {
-        e.preventDefault(); runRegression();
-      } else if (!inField && e.key === '/') {
-        e.preventDefault(); document.getElementById('fSearch').focus();
-      }
+    window.addEventListener('DOMContentLoaded', () => {
+      updateEnergyBeams();
+      searchCorpusArticles();
     });
-
-    refreshHealth();
-    refreshAnalytics();
-    loadAudits();
-    setInterval(refreshHealth, 25000);
   </script>
 </body>
 </html>

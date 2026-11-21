@@ -6,7 +6,7 @@ from datetime import date, datetime, timezone
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class AdversarialCategory(str, Enum):
@@ -197,6 +197,30 @@ class SingleAuditRequest(BaseModel):
     gold_reference_summary: str = ""
     target_agent_url: str | None = None
     target_timeout: float | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalize_legacy_fields(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        out = dict(data)
+        if not out.get("question") and out.get("prompt"):
+            out["question"] = out.pop("prompt")
+        if not out.get("gold_reference_summary") and out.get("expected_behavior"):
+            out["gold_reference_summary"] = out.pop("expected_behavior")
+        cat_map = {
+            "FAKE_ARTICLE_TRAP": "FABRICATED_CITATION_TRAP",
+            "REPEALED_LAW_TRAP": "TEMPORAL_REPEAL_TRAP",
+            "NORM_CONFLICT_TRAP": "NORM_CONFLICT_HIERARCHY",
+            "LANGUAGE_DISCREPANCY_TRAP": "CROSS_LINGUAL_DRIFT_TRAP",
+            "FABRICATION_PREMISE_TRAP": "FABRICATED_CITATION_TRAP",
+            "TEMPORAL_TRAP": "TEMPORAL_REPEAL_TRAP",
+            "AMBIGUOUS_QUERY_TRAP": "COMPLEX_PRACTICAL_CASE",
+        }
+        raw_cat = str(out.get("category") or "")
+        if raw_cat in cat_map:
+            out["category"] = cat_map[raw_cat]
+        return out
 
 
 class GenerateTrapRequest(BaseModel):

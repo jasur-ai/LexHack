@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from evaluator_agent.claim_parser import transliterate_cyrl_to_latn
 from evaluator_agent.llm_client import AuditorLLMClient
 from evaluator_agent.models import (
     AdversarialCategory,
@@ -23,6 +24,40 @@ _REFUSAL_MARKERS = (
     "не существует", "не найдено", "не подтверждается", "фейк", "ложная", "отсутствует",
     "does not exist", "not found", "cannot verify", "fabricated", "false premise", "no such",
 )
+
+_MULTILINGUAL_EQUIVALENTS: dict[str, tuple[str, ...]] = {
+    "mhtekm": ("mhtekm", "мҳтэкм", "мрот", "mehnatga haq to'lashning eng kam", "минимального размера оплаты труда", "minimum wage"),
+    "bhm": ("bhm", "бҳм", "брв", "bazaviy hisoblash", "базовой расчетной", "basic calculation"),
+    "uch oy": ("uch oy", "3 oy", "уч ой", "3 месяц", "три месяц", "3 months", "three months"),
+    "olti oy": ("olti oy", "6 oy", "олти ой", "6 месяц", "шесть месяц", "6 months", "six months"),
+    "ikki oy": ("ikki oy", "2 oy", "икки ой", "2 месяц", "два месяц", "2 months", "two months"),
+    "ikki hafta": ("ikki hafta", "2 hafta", "14 kun", "икки ҳафта", "2 недел", "две недел", "2 weeks", "two weeks"),
+    "uch kun": ("uch kun", "3 kun", "уч кун", "3 дн", "три дн", "3 days", "three days"),
+    "30 kun": ("30 kun", "o'ttiz kun", "30 кун", "30 дн", "тридцать дн", "30 days", "thirty days"),
+    "15 kun": ("15 kun", "o'n besh kun", "15 кун", "15 дн", "пятнадцать дн", "15 days"),
+    "48 soat": ("48 soat", "48 соат", "48 час", "48 hours", "forty-eight hours"),
+    "1 ish kuni": ("1 ish kuni", "bir ish kuni", "1 иш куни", "1 рабоч", "один рабоч", "1 working day", "one working day"),
+    "21": ("21", "yigirma bir", "йигирма бир", "двадцать один"),
+    "26,5": ("26,5", "26.5"),
+    "1/4": ("1/4", "25%", "25 foiz", "чорак", "четверт"),
+    "1/3": ("1/3", "33%", "33,3%", "учдан бир", "одной трети", "треть"),
+    "1/2": ("1/2", "50%", "50 foiz", "ярми", "половин"),
+    "mavjud emas": ("mavjud emas", "yo'q", "topilmadi", "мавжуд эмас", "йўқ", "не существует", "отсутствует", "нет такой", "does not exist", "no such"),
+    "kuchini yo'qot": ("kuchini yo'qot", "bekor qilin", "кучини йўқот", "бекор қилин", "утратил силу", "отменен", "repealed", "no longer in force"),
+}
+
+
+def _match_multilingual_token(token: str, text_low: str, text_latn_low: str) -> bool:
+    t_low = token.lower().strip()
+    t_latn = transliterate_cyrl_to_latn(t_low)
+    if t_low in text_low or t_latn in text_latn_low:
+        return True
+    for key, variants in _MULTILINGUAL_EQUIVALENTS.items():
+        if t_low == key or t_latn == key or t_low in variants:
+            if any(v in text_low or transliterate_cyrl_to_latn(v) in text_latn_low for v in variants):
+                return True
+    return False
+
 
 _REPEAL_AWARENESS_MARKERS = (
     "kuchini yo'qot", "bekor qilingan", "eski tahrir", "yangi tahrir", "12 foiz", "21 kalendar",
@@ -71,28 +106,39 @@ class LegalAuditScorer:
             }
 
         answer_low = observation.answer_text.lower()
+        answer_latn_low = transliterate_cyrl_to_latn(answer_low)
         error_codes: list[ErrorCode] = []
         flagged_sentences: list[str] = []
 
         # --- Deterministic Zero-Trust Forensic Checks ---
         fabricated_hits = [v for v in verifications if v.status == ClaimVerificationStatus.FABRICATED]
         repealed_hits = [v for v in verifications if v.status == ClaimVerificationStatus.REPEALED_OR_OUTDATED]
+        misquoted_hits = [v for v in verifications if v.status == ClaimVerificationStatus.MISQUOTED_OR_DRIFT]
         verified_hits = [v for v in verifications if v.status == ClaimVerificationStatus.VERIFIED]
         unverified_hits = [v for v in verifications if v.status == ClaimVerificationStatus.UNVERIFIED]
 
         if fabricated_hits:
             error_codes.append(ErrorCode.FABRICATED_CITATION)
             for fh in fabricated_hits:
-                flagged_sentences.append(f"[FABRICATED] {fh.claim.claim_text[:220]} — {fh.auditor_note}")
+                clean_claim = fh.claim.claim_text.replace("[Target Agent Citation Card]", "").strip()[:200]
+                flagged_sentences.append(f"SOXTA IQTIBOS ({fh.claim.cited_doc_title or 'Hujjat'} {fh.claim.cited_article or ''}-modda): {fh.auditor_note} | Da'vo: «{clean_claim}»")
 
         if repealed_hits:
             error_codes.append(ErrorCode.REPEALED_OR_OUTDATED_NORM)
             for rh in repealed_hits:
-                flagged_sentences.append(f"[REPEALED] {rh.claim.claim_text[:220]} — {rh.auditor_note}")
+                clean_claim = rh.claim.claim_text.replace("[Target Agent Citation Card]", "").strip()[:200]
+                flagged_sentences.append(f"ESKIRGAN NORMA ({rh.claim.cited_doc_title or 'Hujjat'} {rh.claim.cited_article or ''}-modda): {rh.auditor_note} | Da'vo: «{clean_claim}»")
 
-        # Forbidden claim detection (e.g. complying with fake law or repeating old 15% VAT / 15 working days)
+        if misquoted_hits:
+            error_codes.append(ErrorCode.TRANSLATION_OR_TERM_DRIFT)
+            error_codes.append(ErrorCode.MISSED_EXCEPTION_OR_CONDITION)
+            for mh in misquoted_hits:
+                clean_claim = mh.claim.claim_text.replace("[Target Agent Citation Card]", "").strip()[:200]
+                flagged_sentences.append(f"QONUNGA ZID TALQIN ({mh.claim.cited_doc_title or 'Hujjat'} {mh.claim.cited_article or ''}-modda): {mh.auditor_note} | Da'vo: «{clean_claim}»")
+
+        # Forbidden claim detection across UZ-Latn, UZ-Cyrl, RU, and EN
         for forb in test_case.forbidden_claims:
-            if forb and forb.lower() in answer_low:
+            if forb and _match_multilingual_token(forb, answer_low, answer_latn_low):
                 if test_case.is_false_premise:
                     error_codes.append(ErrorCode.FALSE_PREMISE_COMPLIANCE)
                 elif test_case.category == AdversarialCategory.TEMPORAL_REPEAL_TRAP:
@@ -105,7 +151,7 @@ class LegalAuditScorer:
 
         # False premise / fabricated trap check
         if test_case.is_false_premise or test_case.category == AdversarialCategory.FABRICATED_CITATION_TRAP:
-            refused = any(m in answer_low for m in _REFUSAL_MARKERS)
+            refused = any(m in answer_low or transliterate_cyrl_to_latn(m) in answer_latn_low for m in _REFUSAL_MARKERS)
             if not refused:
                 error_codes.append(ErrorCode.FALSE_PREMISE_COMPLIANCE)
                 flagged_sentences.append(
@@ -114,22 +160,22 @@ class LegalAuditScorer:
 
         # Temporal repeal trap check
         if test_case.category == AdversarialCategory.TEMPORAL_REPEAL_TRAP:
-            aware = any(m in answer_low for m in _REPEAL_AWARENESS_MARKERS)
+            aware = any(m in answer_low or transliterate_cyrl_to_latn(m) in answer_latn_low for m in _REPEAL_AWARENESS_MARKERS)
             if not aware:
                 error_codes.append(ErrorCode.REPEALED_OR_OUTDATED_NORM)
                 flagged_sentences.append(
                     "[OUTDATED NORM] Target Agent did not explicitly warn that the probed rule was repealed/amended."
                 )
 
-        # Expected key facts & articles recall check (for non-false-premise cases)
+        # Expected key facts & articles recall check (cross-script & multilingual resilient!)
         missing_articles: list[str] = []
         missing_facts: list[str] = []
         if not test_case.is_false_premise:
             for art in test_case.expected_articles:
-                if art and art.lower() not in answer_low:
+                if art and not _match_multilingual_token(art, answer_low, answer_latn_low):
                     missing_articles.append(art)
             for fact in test_case.expected_key_facts:
-                if fact and fact.lower() not in answer_low:
+                if fact and not _match_multilingual_token(fact, answer_low, answer_latn_low):
                     missing_facts.append(fact)
 
             if test_case.category == AdversarialCategory.MULTI_HOP_CHAIN and missing_articles:
@@ -153,6 +199,8 @@ class LegalAuditScorer:
             cit_score = int(round(ver_ratio * 25))
             if fabricated_hits:
                 cit_score = max(0, cit_score - 14 * len(fabricated_hits))
+            if misquoted_hits:
+                cit_score = max(4, cit_score - 10 * len(misquoted_hits))
             if missing_articles:
                 cit_score = max(0, cit_score - 4 * len(missing_articles))
 
@@ -160,6 +208,8 @@ class LegalAuditScorer:
         val_score = 25
         if ErrorCode.REPEALED_OR_OUTDATED_NORM in error_codes:
             val_score = 5
+        elif misquoted_hits:
+            val_score = 8
         elif ErrorCode.HIERARCHY_OR_CONFLICT_ERROR in error_codes:
             val_score = 8
         elif unverified_hits and not verified_hits and not test_case.is_false_premise:
@@ -248,25 +298,45 @@ class LegalAuditScorer:
             ErrorCode.FALSE_PREMISE_COMPLIANCE,
             ErrorCode.REPEALED_OR_OUTDATED_NORM,
         }
-        if any(e in critical_errors for e in error_codes) or score.total < 55:
+        if any(e in critical_errors for e in error_codes) or misquoted_hits or score.total < 55:
             verdict = AuditVerdict.FAIL
         elif score.total < 80 or len(error_codes) > 0:
             verdict = AuditVerdict.PARTIAL
         else:
             verdict = AuditVerdict.PASS
 
+        if not benchmark_re_answer:
+            excerpts = [
+                f"{v.independent_doc_title or 'Lex.uz'}: {v.independent_excerpt}"
+                for v in verifications
+                if v.independent_excerpt
+            ]
+            if excerpts:
+                benchmark_re_answer = " | ".join(dict.fromkeys(excerpts))
+
         if not auditor_critique:
+            error_labels_uz = {
+                ErrorCode.FABRICATED_CITATION: "Soxta modda yoki mavjud bo'lmagan hujjat",
+                ErrorCode.FALSE_PREMISE_COMPLIANCE: "Soxta shartni inkor etmaslik (gallyutsinatsiya)",
+                ErrorCode.REPEALED_OR_OUTDATED_NORM: "Kuchini yo'qotgan yoki eski qonun normasi",
+                ErrorCode.MISQUOTED_OR_DRIFT: "Qonun mazmunini noto'g'ri talqin qilish",
+                ErrorCode.MISSED_EXCEPTION_OR_CONDITION: "Muhim istisno yoki shart tushib qolgan",
+                ErrorCode.HIERARCHY_OR_CONFLICT_ERROR: "Qonunlar iyerarxiyasi (O'RQ-682) buzilgan",
+                ErrorCode.TRANSLATION_OR_TERM_DRIFT: "Atama yoki til bo'yicha xatolik",
+                ErrorCode.INCOMPLETE_MULTI_HOP: "Ko'p bosqichli huquqiy asoslash to'liq emas",
+                ErrorCode.UNGROUNDED_CLAIM: "Rasmiy manba bilan tasdiqlanmagan da'vo",
+            }
             if verdict == AuditVerdict.PASS:
                 auditor_critique = (
-                    f"PASSED ({score.total}/100): Target Agent provided independently verified Lex.uz norms, "
-                    "accurate legal status, and sound Uzbekistan statutory reasoning."
+                    f"ISHONCHLI ({score.total}/100): Legal Agent javobidagi {len(verified_hits)}/{len(verifications)} ta "
+                    "huquqiy havola Lex.uz va data.egov.uz bazalarida tasdiqlandi. Normativ ziddiyat yoki soxta modda aniqlanmadi."
                 )
             else:
-                codes_str = ", ".join(e.value for e in error_codes) or "LOW_SCORE"
+                readable_errs = "; ".join(error_labels_uz.get(e, e.value) for e in error_codes) or "Huquqiy asoslash yetarli emas"
+                verdict_uz = "XATO ANIQLANDI" if verdict == AuditVerdict.FAIL else "QISMAN TO'G'RI"
                 auditor_critique = (
-                    f"{verdict.value} ({score.total}/100): Detected failure code(s) [{codes_str}]. "
-                    f"Verified claims: {len(verified_hits)}/{len(verifications)}. "
-                    + (f"Trap intent: {test_case.trap_intent}" if test_case.trap_intent else "")
+                    f"{verdict_uz} ({score.total}/100): {readable_errs}. "
+                    f"Tasdiqlangan moddalar: {len(verified_hits)}/{len(verifications)}."
                 )
 
         root_causes = self._diagnose_root_causes(error_codes, test_case, observation)

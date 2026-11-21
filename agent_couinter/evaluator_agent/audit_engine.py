@@ -251,23 +251,32 @@ class RedTeamAuditEngine:
             "analytics": analytics.model_dump(mode="json"),
         }
 
-    @staticmethod
-    def _request_to_test_case(req: SingleAuditRequest) -> AdversarialTestCase:
+    def _request_to_test_case(self, req: SingleAuditRequest) -> AdversarialTestCase:
         lang = req.language or _detect_lang_simple(req.question)
+        inferred = self.verifier.knowledge.infer_ground_truth_for_question(req.question)
+
+        exp_docs = req.expected_doc_ids or inferred.get("expected_doc_ids", [])
+        exp_arts = req.expected_articles or inferred.get("expected_articles", [])
+        exp_facts = req.expected_key_facts or inferred.get("expected_key_facts", [])
+        forb_claims = req.forbidden_claims or inferred.get("forbidden_claims", [])
+        gold_sum = req.gold_reference_summary or inferred.get("gold_reference_summary", "")
+        is_fp = req.is_false_premise or bool(inferred.get("is_false_premise")) or (req.category.value == "FABRICATED_CITATION_TRAP")
+        cat = AdversarialCategory.FABRICATED_CITATION_TRAP if is_fp else req.category
+
         return AdversarialTestCase(
             case_id=f"man_{uuid.uuid4().hex[:8]}",
-            category=req.category,
+            category=cat,
             language=lang,
             legal_branch=req.legal_branch,
             difficulty="manual",
             question=req.question.strip(),
             as_of_date=req.as_of_date,
-            trap_intent=req.trap_intent or f"Manual red-team interrogation ({req.category.value})",
-            is_false_premise=req.is_false_premise or (req.category.value == "FABRICATED_CITATION_TRAP"),
-            expected_doc_ids=req.expected_doc_ids,
-            expected_articles=req.expected_articles,
-            expected_key_facts=req.expected_key_facts,
-            forbidden_claims=req.forbidden_claims,
-            gold_reference_summary=req.gold_reference_summary,
+            trap_intent=req.trap_intent or f"Zero-trust statutory audit ({cat.value})",
+            is_false_premise=is_fp,
+            expected_doc_ids=exp_docs,
+            expected_articles=exp_arts,
+            expected_key_facts=exp_facts,
+            forbidden_claims=forb_claims,
+            gold_reference_summary=gold_sum,
             source="manual",
         )
