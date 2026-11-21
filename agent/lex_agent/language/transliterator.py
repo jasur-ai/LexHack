@@ -238,6 +238,12 @@ def latin_to_cyrillic(text: str) -> str:
     n = len(norm)
     while i < n:
         matched = False
+        # "yo'q", "yo'l": Y followed by the letter Oʻ is "йў", not the digraph "yo" (ё) plus a hard sign
+        tri = norm[i : i + 3]
+        if tri in ("yo'", "Yo'", "YO'"):
+            out.append({"yo'": "йў", "Yo'": "Йў", "YO'": "ЙЎ"}[tri])
+            i += 3
+            continue
         if i + 2 <= n:
             pair = norm[i : i + 2]
             for lat, cyr in _LAT_DIGRAPHS:

@@ -625,4 +625,52 @@ ROWS = [
       "harbiy yoki muqobil xizmatdan bo'yin tovlash",
       "уклонение от военной или альтернативной службы",
       "111453:225"),
+    # ------------------------------------------------------------ how laws apply (Law on normative legal acts)
+    c("rights.legislation_hierarchy",
+      r"qaysi (?:hujjat|qonun|norma)~(?:ustuvor|ustun|qollaniladi|kuchli)|yuridik kuch\w*~(?:yuqori|ustun|teng)|"
+      r"(?:qonun|kodeks)\w*~(?:qaror|farmon|buyrug)\w*~(?:zid|ziddiyat|kolliziya|ustun)|kolliziya|"
+      r"normativ-huquqiy hujjatlar~(?:ziddiyat|nisbat|iyerarxiya)|iyerarxiya|maxsus qonun|keyin qabul qilingan|"
+      r"lex (?:specialis|posterior|superior)",
+      r"юридическ\w* сил\w*|коллизи\w*|противореч\w* друг другу|иерархи\w* (?:нормативн|закон|акт)|"
+      r"какой (?:закон|акт|документ) (?:применяется|имеет приоритет|главнее|приоритетн)|специальн\w* закон|"
+      r"(?:закон|акт)\w*~принят\w* позже|lex (?:specialis|posterior|superior)",
+      r"\bhierarchy of (?:laws|legal acts|norms)\b|\bwhich (?:law|act|rule) (?:prevails|applies|has priority)\b|"
+      r"\bconflict(?:ing)? (?:laws|norms|between (?:two )?laws)\b|\blex (?:specialis|posterior|superior)\b|\blegal force\b",
+      "normativ-huquqiy hujjatlarning nisbati yuridik kuchi ziddiyat",
+      "соотношение нормативно-правовых актов юридическая сила коллизия",
+      "5378966:18,6"),
+    c("rights.retroactivity",
+      r"orqaga qaytish kuch\w*|orqaga qayt(?:adi|maydi|ar)\w*|retroaktiv",
+      r"обратн\w* сил\w*|задним числом",
+      r"\bretroactiv\w*|\bex post facto\b|\bapply (?:backwards|to past (?:acts|offen[cs]es))\b",
+      "normativ-huquqiy hujjatning orqaga qaytish kuchi",
+      "обратная сила нормативно-правового акта",
+      "5378966:41;111453:13"),
+    c("rights.text_language_priority",
+      r"davlat tilidagi matn|(?:ozbek|rus|ingliz)\w* (?:tilidagi )?matn\w*~(?:farq|zid|ustun|qaysi)|"
+      r"tarjima\w*~(?:farq|zid|mos kelmas)|qaysi (?:til|matn)\w*~(?:ustun|qollaniladi|rasmiy)|rasmiy matn\w*~til",
+      r"текст\w* на государственном языке|расхожден\w* текст\w*|разночтени\w*|"
+      r"перевод\w*~(?:отлича|расход|не совпада)|какой текст (?:имеет|применяется|приоритет)",
+      r"\bofficial (?:uzbek|russian|english) text\b|\btranslation (?:differs|is different|does not match)\b|"
+      r"\bwhich (?:version|text|language) (?:prevails|has priority|is authoritative|applies)\b|\bauthoritative (?:text|version)\b",
+      "normativ-huquqiy hujjatning davlat tilidagi matni ustuvorligi",
+      "приоритет текста нормативно-правового акта на государственном языке",
+      "5378966:33"),
+    c("rights.in_favor_of_person",
+      r"inson foydasiga talqin|(?:fuqaro|inson)\w* foydasiga hal|in dubio pro cive|ziddiyat\w*~noaniqlik\w*~foydasiga",
+      r"толку\w* в пользу (?:человек|граждан)|в пользу человека|in dubio pro cive",
+      r"\bin dubio pro cive\b|\binterpreted in favou?r of the (?:person|citizen|individual)\b",
+      "qonunchilikdagi ziddiyat va noaniqliklar inson foydasiga talqin qilinadi",
+      "противоречия и неясности в законодательстве толкуются в пользу человека",
+      "6445145:20;5378966:18"),
+    c("rights.data_localization",
+      r"lokalizatsiya|server\w*~(?:ozbekiston|respublika|chet el|xorij)\w*~(?:hudud|saqla)|"
+      r"shaxsga doir malumot\w*~(?:chet el|xorij|hudud)\w*~saqla|malumotlar bazasi~hudud",
+      r"локализаци\w*|сервер\w*~(?:на территории|в узбекистан|за рубеж|за границ|в германи|в европ)|"
+      r"хран\w*~персональн\w* данн\w*~(?:за рубеж|за границ|территори|сервер)",
+      r"\bdata locali[sz]ation\b|\bservers? (?:physically )?located in uzbekistan\b|\blocali[sz]\w* (?:of )?(?:personal )?data\b|"
+      r"\bstor\w* (?:personal |citizens'? )?data (?:abroad|outside uzbekistan|in uzbekistan)\b",
+      "shaxsga doir ma'lumotlarni O'zbekiston hududida saqlash majburiyati",
+      "обязательное хранение персональных данных на территории Республики Узбекистан",
+      "4396419:27.1"),
 ]

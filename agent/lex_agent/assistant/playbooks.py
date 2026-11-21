@@ -312,6 +312,16 @@ LEADS: dict[str, Lead] = {
         "Заработная плата выплачивается не реже одного раза в каждые полмесяца.",
         "Wages must be paid at least every half month.",
         "6257288:253"),
+    "labour.dismissal.notice": _l(
+        "Ish beruvchi boʻshatish haqida yozma ogohlantirishi shart: tashkilot tugatilsa yoki shtat qisqarsa — kamida "
+        "2 oy, malaka yetarli boʻlmasa — kamida 2 hafta, xodimning aybli harakati uchun — kamida 3 kun oldin; "
+        "ogohlantirish oʻrniga shu muddatga teng pul kompensatsiyasi toʻlanishi mumkin.",
+        "Работодатель обязан письменно предупредить об увольнении: при ликвидации организации или сокращении штата — "
+        "не менее чем за 2 месяца, при недостаточной квалификации — за 2 недели, за виновные действия — за 3 дня; "
+        "предупреждение можно заменить денежной компенсацией за этот срок.",
+        "Your employer must warn you in writing: at least 2 months before a dismissal for liquidation or staff cuts, "
+        "2 weeks for insufficient qualification and 3 days for misconduct; the notice can be replaced by pay for that period.",
+        "6257288:165;6257288:560"),
     "labour.dismissal.own_will": _l(
         "Oʻz xohishingiz bilan ishdan ketish uchun ish beruvchini 14 kalendar kun oldin yozma ogohlantirasiz; "
         "hisob-kitob oxirgi ish kuni toʻlanadi.",
@@ -822,7 +832,6 @@ LEADS: dict[str, Lead] = {
 _LEAD_ALIASES: dict[str, str] = {
     "labour.leave.duration": "labour.leave.annual",
     "labour.leave.pay": "labour.leave.annual",
-    "labour.dismissal.notice": "labour.dismissal.own_will",
     "family.divorce.registry": "family.divorce",
     "family.divorce.court": "family.divorce",
     "family.alimony.court": "family.alimony",

@@ -197,7 +197,9 @@ ROWS = [
     c("family.adoption",
       r"farzandlikka ol|asrab ol|usynovl|bola(?:ni)? asra",
       r"усыновлен|удочерен",
-      r"\badopt\w*\b",
+      # "adopt a child", not "a newly adopted law / code / resolution"
+      r"\badopt(?:ion|ive|ing|s)?\b(?!\s+(?:law|act|code|statute|resolution|decree|legislation|regulation|norm)s?\b)|"
+      r"\badopted\b(?!\s+(?:law|act|code|statute|resolution|decree|legislation|regulation|norm|by|in)s?\b)",
       "farzandlikka olish tartibi va farzandlikka olishi mumkin bo'lgan shaxslar",
       "порядок усыновления и лица, имеющие право быть усыновителями",
       f"{OK}:151,152,155,159,153"),

@@ -16,6 +16,7 @@ from lex_agent.assistant import templates as doc_templates
 from lex_agent.assistant.checks import run_checks
 from lex_agent.assistant.entities import extract as extract_entities
 from lex_agent.assistant.playbooks import lead_for, playbook_for
+from lex_agent.assistant.premises import PREMISE_STEPS, PremiseChecker, PremiseReport
 from lex_agent.assistant.router import Route, classify, strip_injection
 from lex_agent.assistant.synthesis import SynthesisInput, compose, label_for
 from lex_agent.chunk_text import chunk_article_id
@@ -117,6 +118,8 @@ class LegalAgentOrchestrator:
         self.norm_resolver = NormConflictResolver()
         self.citation_guard = CitationVerificationGuard()
         self.cache = AnswerCache(max_items=self.settings.answer_cache_size, ttl_sec=self.settings.answer_cache_ttl_sec)
+        # False or outdated premises (articles that do not exist, invented codes and numbers, repealed rules)
+        self.premises = PremiseChecker(retriever.act_resolver, retriever.bm25_store.article_inventory)
 
     async def answer(self, request: AgentQueryRequest) -> AgentResponse:
         """Execute full multi-hop legal reasoning and return the complete verified `AgentResponse`."""
@@ -243,7 +246,13 @@ class LegalAgentOrchestrator:
         if route.kind == "illegal":
             # A request for help with wrongdoing is answered with the liability for it first, then lawful options
             qa, qa_topic = self._liability_first(qa), self._liability_first(qa_topic)
-        sim_key = self._similar_key(request, style, qa, route)
+        premise = PremiseReport()
+        if route.kind in ("legal", "illegal", "calculation", "figures"):
+            premise = await asyncio.to_thread(self.premises.check, request.query, response_lang)
+            if premise and route.kind in ("calculation", "figures"):
+                # "Is the 15-working-day leave of the 1995 code still valid?" asks about a rule, not for a calculation
+                route = Route("legal", flags=set(route.flags))
+        sim_key = None if premise else self._similar_key(request, style, qa, route)
         if sim_key:
             similar = self.cache.get(sim_key)
             if similar is not None:
@@ -264,6 +273,9 @@ class LegalAgentOrchestrator:
             ):
                 yield ev
             return
+        if route.kind == "figures" and any(a.article for a in qa.acts):
+            # "FK 108-109-moddalari … necha BHM" asks about the articles, not for the BHM value itself
+            route = Route("legal", flags=set(route.flags))
         if route.kind == "figures":
             sections, evidence = self._figures_answer(request.query, qa, response_lang)
             if sections is not None:
@@ -530,6 +542,19 @@ class LegalAgentOrchestrator:
             # Honest "not found": better than quoting an unrelated article (emergency numbers are still shown)
             answer_route = route.kind if route.kind == "emergency" else "not_found"
             top_evidence = []
+        if premise.refs:
+            # An outdated rule is answered with the article that states the current one, cited first
+            current = self._chunks_for(premise.refs, response_lang)
+            if current:
+                ids = {c.chunk.chunk_id for c in current}
+                top_evidence = (current + [e for e in top_evidence if e.chunk.chunk_id not in ids])[: (5 if concise else 6)]
+                if answer_route == "not_found":
+                    answer_route = route.kind
+        if premise.certain_false and not premise.refs and not qa_topic.concepts:
+            # The cited article, code or number does not exist and nothing else in the question names a situation:
+            # correct the premise instead of quoting an unrelated article
+            top_evidence = []
+            answer_route = "premise"
         lead_info = lead_for([m.id for m in qa_topic.concepts]) if top_evidence else None
         lead_refs: list[int] = []
         if lead_info:
@@ -549,7 +574,14 @@ class LegalAgentOrchestrator:
             lead_refs = [have[k] for k in lead_info[1] if k in have]
 
         translation_warnings: list[str] = []
-        if (request.compare_translations or plan.requires_translation_comparison) and self.comparator and top_evidence:
+        # The comparison downloads both lex.uz editions and needs an LLM: never on the extractive path or with live fetching off
+        if (
+            (request.compare_translations or plan.requires_translation_comparison)
+            and self.comparator
+            and top_evidence
+            and not self.llm.is_mock
+            and self.settings.lex_uz_enable_live_fallback
+        ):
             primary_doc_id = top_evidence[0].chunk.doc_id
             primary_article = top_evidence[0].chunk.article
             try:
@@ -601,9 +633,23 @@ class LegalAgentOrchestrator:
             prefix = replies.text("emergency", response_lang)
         elif route.kind == "illegal":
             prefix = replies.text("illegal", response_lang)
+        premise_notice = self.premises.notice(premise, response_lang) if premise else ""
+        if premise_notice and answer_route != "premise":
+            if premise.certain_false and not premise.temporal and top_evidence:
+                premise_notice = f"{premise_notice}\n\n{self.premises.current_label(response_lang)}"
+            prefix = f"{premise_notice}\n\n{prefix}" if prefix else premise_notice
 
         def _extractive() -> str:
             follow = self._follow_ups_for(qa_topic, response_lang)
+            if answer_route == "premise":
+                lk = response_lang.value if response_lang.value in PREMISE_STEPS else "uz_latn"
+                return render_sections({
+                    "answer": premise_notice,
+                    "key_points": [],
+                    "steps": list(PREMISE_STEPS[lk]),
+                    "caution": "",
+                    "follow_ups": list(follow or replies.EXAMPLES.get(replies.lang_key(response_lang), replies.EXAMPLES["uz"]))[:3],
+                })
             calc_hint = self._calc_hint(qa_topic, response_lang)
             sections_x = compose(
                 SynthesisInput(
@@ -745,7 +791,7 @@ class LegalAgentOrchestrator:
                 "passed": verification.passed and report.passed,
             }
         )
-        if answer_route == "not_found":
+        if answer_route in ("not_found", "premise"):
             verification = verification.model_copy(update={"passed": True, "confidence_score": 0.0})
 
         sections: AnswerSections | None = None
@@ -811,6 +857,8 @@ class LegalAgentOrchestrator:
                 "sim",
                 qa.concepts[0].id,
                 ",".join(sorted(qa.search_terms)),
+                # Different numbers ("3 ta bola" vs "1, 2 va 3 ta bola", "412-modda") make a different question
+                ",".join(re.findall(r"\d+", request.query)),
                 request.response_language.value if request.response_language else qa.language,
                 style,
                 request.as_of_date.isoformat() if request.as_of_date else "today",

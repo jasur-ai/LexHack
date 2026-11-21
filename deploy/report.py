@@ -46,6 +46,10 @@ def main() -> int:
         for name, b in (data.get("by_category") or {}).items():
             lines.append(f"category {name}: n {b['n']} pass {b['pass']} partial {b['partial']} fail {b['fail']} mean {b['mean_score']}")
         lines.append("codes: " + ", ".join(f"{k} {v}" for k, v in (data.get("error_codes") or {}).items()))
+        lat = data.get("target_latency_ms") or {}
+        lines.append(f"agent latency p50 {lat.get('p50')} ms, p95 {lat.get('p95')} ms")
+        for msg, count in (data.get("target_errors") or {}).items():
+            lines.append(f"target error {count}x: {msg}")
         _notice("counter-audit", lines)
     return 0
 

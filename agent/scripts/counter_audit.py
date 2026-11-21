@@ -133,6 +133,12 @@ def _summarise(results: list[dict[str, Any]], elapsed: float, args: argparse.Nam
         if r["suite"] != "vault":
             by_category[r["test_case"]["category"]].append(r)
     codes = Counter(code for r in results if r["suite"] != "vault" for code in r.get("error_codes") or [])
+    target_errors = Counter(
+        str((r.get("target_observation") or {}).get("error") or "")[:120]
+        for r in results
+        if (r.get("target_observation") or {}).get("error")
+    )
+    latencies = sorted(int((r.get("target_observation") or {}).get("latency_ms") or 0) for r in results)
     failures = [
         {
             "suite": r["suite"],
@@ -159,6 +165,11 @@ def _summarise(results: list[dict[str, Any]], elapsed: float, args: argparse.Nam
         "by_suite": {k: bucket(v) for k, v in sorted(by_suite.items())},
         "by_category": {k: bucket(v) for k, v in sorted(by_category.items())},
         "error_codes": dict(codes.most_common()),
+        "target_errors": dict(target_errors.most_common(5)),
+        "target_latency_ms": {
+            "p50": latencies[len(latencies) // 2] if latencies else 0,
+            "p95": latencies[int(len(latencies) * 0.95) - 1] if latencies else 0,
+        },
         "failures": failures,
     }
 
@@ -177,6 +188,10 @@ def _markdown(report: dict[str, Any]) -> str:
     for title, groups in (("suite", report["by_suite"]), ("category (dev suites)", report["by_category"])):
         for name, b in groups.items():
             lines.append(f"| {title}: {name} | {b['n']} | {b['pass']} | {b['partial']} | {b['fail']} | {b['mean_score']} |")
+    errors = report.get("target_errors") or {}
+    lat = report.get("target_latency_ms") or {}
+    lines += ["", f"Agent latency p50 {lat.get('p50')} ms, p95 {lat.get('p95')} ms; transport/timeout errors: {sum(errors.values())}"]
+    lines += [f"* {count}× {msg}" for msg, count in errors.items()]
     lines += ["", "Error codes (dev suites): " + (", ".join(f"{k} {v}" for k, v in report["error_codes"].items()) or "none"), ""]
     return "\n".join(lines) + "\n"
 

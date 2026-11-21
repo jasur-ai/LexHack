@@ -1,7 +1,7 @@
 {
-  "nonce": 2,
+  "nonce": 3,
   "branch": "arena/8a21e194-lexhack",
   "only": [],
-  "mode": "status",
-  "note": "Report URLs, plans, smoke test and counter-agent audit of the current deployment (no rebuild)"
+  "mode": "deploy",
+  "note": "Agent: premise checks (non-existent articles/codes/numbers, repealed rules), legislation concepts, live lex.uz fetches off in the request path"
 }

@@ -31,3 +31,12 @@ def test_language_detection_all_four_variants() -> None:
     assert detect_language("Ўзбекистон Республикаси Меҳнат кодексининг 161-моддаси") == Language.UZ_CYRL
     assert detect_language("Статья 161 Трудового кодекса Республики Узбекистан") == Language.RU
     assert detect_language("What does Article 161 of the Labor Code of Uzbekistan provide?") == Language.EN
+
+
+def test_yo_followed_by_o_apostrophe_is_y_plus_u_short() -> None:
+    from lex_agent.language.transliterator import latin_to_cyrillic
+
+    assert latin_to_cyrillic("yoʻq") == "йўқ"
+    assert latin_to_cyrillic("Yoʻl harakati, kuchini yoʻqotgan") == "Йўл ҳаракати, кучини йўқотган"
+    assert latin_to_cyrillic("yoshlar, Yorqin") == "ёшлар, Ёрқин"
+

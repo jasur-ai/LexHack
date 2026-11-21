@@ -179,6 +179,7 @@ class BM25Store:
         self._df_cache: dict[str, int] = {}
         self._df_lock = threading.Lock()
         self._n_docs: int | None = None
+        self._inventory: dict[str, frozenset[str]] | None = None
         self._local = threading.local()
         self._init_schema()
 
@@ -349,6 +350,21 @@ class BM25Store:
         with self._df_lock:
             self._df_cache.clear()
             self._n_docs = None
+            self._inventory = None
+
+    def article_inventory(self) -> dict[str, frozenset[str]]:
+        """Article ids of every act, e.g. {"104720": {"1", …, "238", "4.1"}}; used to spot articles that do not exist."""
+        cached = self._inventory
+        if cached is not None:
+            return cached
+        inventory: dict[str, set[str]] = {}
+        with _nullctx(self._reader()) as conn:
+            for row in conn.execute("SELECT DISTINCT canonical_id, article_id FROM chunks WHERE article_id IS NOT NULL AND article_id != ''"):
+                inventory.setdefault(row[0], set()).add(row[1])
+        frozen = {cid: frozenset(arts) for cid, arts in inventory.items()}
+        with self._df_lock:
+            self._inventory = frozen
+        return frozen
 
     def clear(self) -> None:
         """Remove every chunk (used before a forced full rebuild)."""

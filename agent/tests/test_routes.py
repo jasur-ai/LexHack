@@ -146,3 +146,11 @@ async def test_bare_request_for_help_asks_for_the_situation(rt: AgentRuntime) ->
         assert resp.route == "clarify" and resp.sources == []
         assert resp.sections.answer.startswith(start) and len(resp.sections.follow_ups) == 3
         assert _steps(events) == [1, 5]
+
+
+async def test_a_non_existent_article_is_corrected_not_quoted(rt: AgentRuntime) -> None:
+    resp, _ = await _ask(rt, "Mehnat kodeksining 950-moddasiga ko'ra smenali ish qachon taqiqlanadi?")
+    assert "950 raqamli modda mavjud emas" in resp.answer
+    if resp.route == "premise":
+        assert resp.sources == []
+

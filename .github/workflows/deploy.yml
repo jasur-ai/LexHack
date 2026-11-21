@@ -68,7 +68,7 @@ jobs:
           pip install --quiet -r agent_couinter/requirements.txt
           pip install --quiet -e agent_couinter --no-deps
           AGENT_URL=$(python -c "import json; print(json.load(open('render-result.json'))['services']['agent']['url'])")
-          python agent/scripts/counter_audit.py --target "$AGENT_URL" --json-out counter-audit.json --md-out counter-audit.md
+          python agent/scripts/counter_audit.py --target "$AGENT_URL" --concurrency 2 --json-out counter-audit.json --md-out counter-audit.md
           cat counter-audit.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish results as annotations

@@ -60,6 +60,22 @@ _ARTICLE_RE = re.compile(
     re.I,
 )
 _SUP = str.maketrans("¹²³⁴⁵⁶⁷⁸⁹", "123456789")
+# Several articles at once. Only plural forms count, so "104-1-modda" (article 104¹) is never read as a range.
+ARTICLE_RANGE_RE = re.compile(
+    r"(?<![\d.])(\d{1,4})\s*(?:[-–—]|va|hamda|ва|ҳамда|,)\s*(\d{1,4})\s*-?\s*(?:moddalar\w*|моддалар\w*)|"
+    r"(?:\bстать(?:и|ям|ями|ях)|\barticles|\bmoddalar\w*|\bмоддалар\w*)\s+(\d{1,4})\s*(?:[-–—]|и|and|&|,|va)\s*(\d{1,4})\b",
+    re.I,
+)
+
+
+def range_articles(text: str) -> list[tuple[str, int, int]]:
+    """Article numbers named as a range or list, with the span of the match: ("18", s, e), ("19", s, e)."""
+    out: list[tuple[str, int, int]] = []
+    for m in ARTICLE_RANGE_RE.finditer(text):
+        a, b = int(m.group(1) or m.group(3)), int(m.group(2) or m.group(4))
+        nums = list(range(a, b + 1)) if 0 < b - a <= 5 else [a, b]
+        out.extend((str(n), m.start(), m.end()) for n in nums)
+    return out
 _NUMBER_RE = re.compile(
     r"(?:o['ʻ‘’`]?rq|ўрқ|зру|\bpf|пф|уп|\bpq|пқ|пп|vmq|вмқ|пкм)\s*[-№]?\s*(\d{1,5})|\b(\d{2,4})\s*-\s*([ivxlc]{1,4}|[іх]{1,4})\b",
     re.I,
@@ -89,11 +105,15 @@ class _Title:
 
 
 def _article_ids(text: str) -> list[str]:
-    out: list[str] = []
+    """Article ids in the order they appear: "217", "104.1" (¹ or -1), and every member of a range or list."""
+    found: list[tuple[int, str]] = []
     for m in _ARTICLE_RE.finditer(text):
         base = m.group(1) or m.group(4) or m.group(7)
         sub = m.group(2) or m.group(5) or (m.group(3) or m.group(6) or "").translate(_SUP)
-        art = f"{base}.{sub}" if sub else base
+        found.append((m.start(), f"{base}.{sub}" if sub else base))
+    found.extend((start, art) for art, start, _ in range_articles(text))
+    out: list[str] = []
+    for _, art in sorted(found, key=lambda x: x[0]):
         if art not in out:
             out.append(art)
     return out
