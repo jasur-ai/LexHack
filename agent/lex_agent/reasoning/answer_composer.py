@@ -172,11 +172,32 @@ def parse_answer_sections(text: str) -> dict[str, Any]:
     }
 
 
+_POINT_END = re.compile(r"^(?P<core>.*?)(?P<dot>\.?)(?P<close>[»”\"]?)(?P<refs>(?:\s*\[\d+\])*)\s*$", re.S)
+
+
+def as_sentence(point: str) -> str:
+    """A key point as a complete sentence: «… mumkin emas.» [3] -> «… mumkin emas» [3].
+
+    Each point then ends a sentence, so readers, screen readers and sentence-splitting tools never run two points
+    (and the acts they cite) together."""
+    m = _POINT_END.match(point.strip())
+    if not m:
+        return point
+    core, close, refs = m.group("core"), m.group("close"), m.group("refs")
+    if not core or core.endswith(":"):
+        return point.strip()
+    if not close:
+        core = core.rstrip(";,")
+    if core.endswith(("!", "?", "…")) and not close and not refs:
+        return core
+    return f"{core}{close}{refs}."
+
+
 def render_sections(sections: dict[str, Any]) -> str:
     """Serialize sections back to the canonical marker format."""
     out: list[str] = ["### ANSWER", sections.get("answer", "").strip()]
     if sections.get("key_points"):
-        out += ["", "### KEY POINTS", *[f"- {p}" for p in sections["key_points"]]]
+        out += ["", "### KEY POINTS", *[f"- {as_sentence(p)}" for p in sections["key_points"]]]
     if sections.get("steps"):
         out += ["", "### STEPS", *[f"{i}. {s}" for i, s in enumerate(sections["steps"], start=1)]]
     if sections.get("caution"):

@@ -5,7 +5,9 @@ name: deploy
 #
 # Credentials come from repository secrets (RENDER_API_KEY, optional GEMINI_API_KEY) when they exist. Otherwise
 # the run waits for a sealed one-time handshake (see deploy/handshake.py), so no token is ever stored in plain text.
-# A run starts when deploy/request.json changes, or by hand from the Actions tab.
+# A run starts when deploy/request.json changes, or by hand from the Actions tab. A push deploys only from the
+# branch the request names: merging that branch into main also changes request.json, and that copy of the request
+# must not start a second deploy that nobody seals (it would wait for the handshake and fail).
 
 on:
   push:
@@ -30,15 +32,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check the deploy target
+        id: target
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          TARGET=$(python3 -c "import json; print(json.load(open('deploy/request.json')).get('branch') or '')")
+          if [ "$EVENT" = "push" ] && [ -n "$TARGET" ] && [ "$TARGET" != "$REF_NAME" ]; then
+            echo "::notice title=Nothing to deploy from ${REF_NAME}::deploy/request.json targets ${TARGET}; that branch's own run deploys it. Use 'Run workflow' to deploy by hand."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.target.outputs.skip != 'true'
         with:
           python-version: "3.11"
 
       - name: Install deploy tooling
+        if: steps.target.outputs.skip != 'true'
         run: pip install --quiet "pynacl==1.5.0" "httpx>=0.27,<1"
 
       - name: Use repository secrets
-        if: env.HAS_RENDER_SECRET == 'true'
+        if: steps.target.outputs.skip != 'true' && env.HAS_RENDER_SECRET == 'true'
         env:
           RENDER_SECRET: ${{ secrets.RENDER_API_KEY }}
           GEMINI_SECRET: ${{ secrets.GEMINI_API_KEY }}
@@ -47,12 +65,13 @@ jobs:
           if [ -n "$GEMINI_SECRET" ]; then echo "GEMINI_API_KEY=$GEMINI_SECRET" >> "$GITHUB_ENV"; fi
 
       - name: Receive credentials (sealed handshake)
-        if: env.HAS_RENDER_SECRET != 'true'
+        if: steps.target.outputs.skip != 'true' && env.HAS_RENDER_SECRET != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python deploy/handshake.py receive --timeout 900
 
       - name: Provision and deploy on Render
+        if: steps.target.outputs.skip != 'true'
         run: |
           BRANCH=$(python -c "import json; print(json.load(open('deploy/request.json')).get('branch') or '${{ github.ref_name }}')")
           ONLY=$(python -c "import json; print(','.join(json.load(open('deploy/request.json')).get('only') or []))")
@@ -60,10 +79,11 @@ jobs:
           python deploy/render_stack.py --branch "$BRANCH" --only "$ONLY" --mode "$MODE" --out render-result.json
 
       - name: Smoke-test the deployed stack
+        if: steps.target.outputs.skip != 'true'
         run: python deploy/smoke.py --render-result render-result.json --out smoke.json
 
       - name: Counter-agent audit of the deployed agent
-        if: always() && hashFiles('render-result.json') != ''
+        if: always() && steps.target.outputs.skip != 'true' && hashFiles('render-result.json') != ''
         run: |
           pip install --quiet -r agent_couinter/requirements.txt
           pip install --quiet -e agent_couinter --no-deps
@@ -73,11 +93,11 @@ jobs:
           cat counter-audit.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish results as annotations
-        if: always()
+        if: always() && steps.target.outputs.skip != 'true'
         run: python deploy/report.py
 
       - name: Upload results
-        if: always()
+        if: always() && steps.target.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: deploy-results

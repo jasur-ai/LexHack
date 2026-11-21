@@ -15,7 +15,7 @@ from lex_agent.assistant import calculators, followups, replies
 from lex_agent.assistant import templates as doc_templates
 from lex_agent.assistant.checks import run_checks
 from lex_agent.assistant.entities import extract as extract_entities
-from lex_agent.assistant.playbooks import lead_for, playbook_for
+from lex_agent.assistant.playbooks import lead_for, leads_for, playbook_for
 from lex_agent.assistant.premises import PREMISE_STEPS, PremiseChecker, PremiseReport
 from lex_agent.assistant.router import Route, classify, strip_injection
 from lex_agent.assistant.synthesis import SynthesisInput, compose, label_for
@@ -48,9 +48,11 @@ from lex_agent.reasoning.answer_composer import (
 from lex_agent.reasoning.citation_guard import CitationVerificationGuard
 from lex_agent.reasoning.decomposer import LegalQueryDecomposer
 from lex_agent.reasoning.norm_resolver import NormConflictResolver
-from lex_agent.retrieval.hybrid_retriever import HybridLegalRetriever
+from lex_agent.retrieval.hybrid_retriever import HybridLegalRetriever, is_boilerplate, scale_score
 
 logger = logging.getLogger(__name__)
+
+_CIVIL_IDS = ("111189", "180552")  # the two parts of the Civil Code
 
 # Criminal Code and Code of Administrative Responsibility: where the liability for wrongdoing is set
 _LIABILITY_ACTS = frozenset({"111453", "97664"})
@@ -389,7 +391,7 @@ class LegalAgentOrchestrator:
             for h in hits:
                 if q_idx > 0:
                     # Secondary (transliterated / translated) queries support but never outrank the original wording
-                    h.final_score *= 0.92
+                    h.final_score = scale_score(h.final_score, 0.92)
                 if h.chunk.chunk_id not in evidence_map or h.final_score > evidence_map[h.chunk.chunk_id].final_score:
                     if h.chunk.chunk_id not in evidence_map:
                         hop1_added += 1
@@ -466,12 +468,15 @@ class LegalAgentOrchestrator:
 
             hop_added = 0
             hop_live: list[str] = []
+            # A cross-referenced article supports the direct hits but never outranks the best of them. The cap is
+            # relative: reranker scores are often negative, and a fixed 0.55 would put every cross-reference first.
+            best_direct = max((e.final_score for e in evidence_map.values()), default=1.0)
+            ref_cap = best_direct - 0.01 - 0.45 * abs(best_direct)
             for ref_hits, live_ids in ref_results:
                 hop_live.extend(live_ids)
                 for h in ref_hits:
                     if h.chunk.chunk_id not in evidence_map:
-                        # Slightly discount secondary cross-ref chunks so primary direct hits remain #1
-                        h.final_score = min(h.final_score, 0.55)
+                        h.final_score = min(h.final_score, ref_cap)
                         evidence_map[h.chunk.chunk_id] = h
                         hop_added += 1
 
@@ -536,6 +541,13 @@ class LegalAgentOrchestrator:
             as_of_date=effective_as_of,
         )
         top_evidence = self._align_language(ordered_evidence[: (5 if concise else 6)], response_lang)
+        # Articles the question names itself ("Mehnat kodeksi 129-modda bo'yicha ...") are always answered: they join
+        # the sources and lead them unless the best hit already comes from one of the named acts.
+        named = [] if premise.temporal else self._named_articles(qa)
+        if named:
+            top_evidence = self._with_named_articles(top_evidence, named, response_lang, 5 if concise else 6)
+        if not premise.temporal:
+            top_evidence = self._cover_named_acts(qa, top_evidence, ordered_evidence, response_lang)
         self._attach_article_leads(top_evidence)
         answer_route = route.kind
         if not self._evidence_is_relevant(qa_topic, top_evidence):
@@ -556,7 +568,12 @@ class LegalAgentOrchestrator:
             top_evidence = []
             answer_route = "premise"
         lead_info = lead_for([m.id for m in qa_topic.concepts]) if top_evidence else None
+        if lead_info and named and not {doc for doc, _ in lead_info[1]} & {doc for doc, _ in named}:
+            # The question names articles of another act: the matched situation is a side remark, not the topic
+            # ("... 129-modda ... bosh buxgalter" is about probation, not about the accounting law)
+            lead_info = None
         lead_refs: list[int] = []
+        extra_leads: list[tuple[dict[str, str], list[int]]] = []
         if lead_info:
             # The articles that state the situation's direct answer must be among the numbered sources
             have = {(e.chunk.canonical_id, chunk_article_id(e.chunk)): i for i, e in enumerate(top_evidence, start=1)}
@@ -572,6 +589,9 @@ class LegalAgentOrchestrator:
             top_evidence.sort(key=lambda e: rank.get((e.chunk.canonical_id, chunk_article_id(e.chunk)), len(rank)))
             have = {(e.chunk.canonical_id, chunk_article_id(e.chunk)): i for i, e in enumerate(top_evidence, start=1)}
             lead_refs = [have[k] for k in lead_info[1] if k in have]
+            # A question about several situations ("5 oylik sinov, 14 kunlik taʼtil va 5 kunlik ogohlantirish") gets
+            # one direct line per situation, each with the article that states it
+            top_evidence, extra_leads = self._extra_leads(qa_topic, lead_info, top_evidence, response_lang)
 
         translation_warnings: list[str] = []
         # The comparison downloads both lex.uz editions and needs an LLM: never on the extractive path or with live fetching off
@@ -668,6 +688,13 @@ class LegalAgentOrchestrator:
                     calc_hint=calc_hint,
                     lead=lead_info[0] if lead_info else None,
                     lead_refs=lead_refs,
+                    extra_leads=extra_leads,
+                    pad_acts=(
+                        {doc for doc, _ in lead_info[1]}
+                        | {top_evidence[n - 1].chunk.canonical_id for _t, refs in extra_leads for n in refs}
+                        | {r.canonical_id for r in qa.acts}
+                        | (set(_CIVIL_IDS) if any(r.canonical_id in _CIVIL_IDS for r in qa.acts) else set())
+                    ) if lead_info else None,
                     full_text=self._full_article_text,
                 ),
                 self.facts,
@@ -893,6 +920,109 @@ class LegalAgentOrchestrator:
             for c in found.get(key, [])[:1]:
                 out.append(RetrievedChunk(chunk=c, bm25_score=1.0, final_score=1.0, retrieval_source="direct"))
         return out
+
+    def _named_articles(self, qa: Any) -> list[tuple[str, str]]:
+        """(act, article) pairs the question names explicitly and that exist in the corpus (at most four)."""
+        out: list[tuple[str, str]] = []
+        resolver = self.retriever.act_resolver
+        for ref in qa.acts:
+            if not ref.article:
+                continue
+            cid = ref.canonical_id
+            if cid in ("111189", "180552"):
+                cid = resolver.civil_part_for(ref.article) or cid
+            key = (cid, ref.article)
+            if key not in out and self._article_exists(cid, ref.article):
+                out.append(key)
+        return out[:4]
+
+    def _with_named_articles(
+        self, evidence: list[RetrievedChunk], named: list[tuple[str, str]], lang: Language, limit: int
+    ) -> list[RetrievedChunk]:
+        """The evidence with every named article in it. The named articles come first unless the best hit is
+        already from a named act (then it keeps the lead and the named articles follow it)."""
+        have = {(e.chunk.canonical_id, chunk_article_id(e.chunk)): e for e in evidence}
+        missing = [k for k in named if k not in have]
+        if missing:
+            ceiling = max((e.final_score for e in evidence), default=1.0)
+            for item in self._chunks_for(missing, lang):
+                item.final_score = ceiling
+                have.setdefault((item.chunk.canonical_id, chunk_article_id(item.chunk)), item)
+        named_items = [have[k] for k in named if k in have]
+        if not named_items:
+            return evidence
+        named_acts = {doc for doc, _ in named}
+        head = evidence[:1] if evidence and evidence[0].chunk.canonical_id in named_acts else []
+        ordered: list[RetrievedChunk] = []
+        seen: set[str] = set()
+        for item in [*head, *named_items, *evidence]:
+            if item.chunk.chunk_id not in seen:
+                seen.add(item.chunk.chunk_id)
+                ordered.append(item)
+        return ordered[:limit]
+
+    def _cover_named_acts(
+        self, qa: Any, evidence: list[RetrievedChunk], ranked: list[RetrievedChunk], lang: Language
+    ) -> list[RetrievedChunk]:
+        """A question that names an act without an article ("MJtKning qaysi moddasi ...?") gets that act's best
+        article among the sources even when other acts outrank it (it replaces the weakest source)."""
+        if not evidence:
+            return evidence
+        wanted = [r.canonical_id for r in qa.acts if not r.article and r.via in ("alias", "number")]
+        have = {e.chunk.canonical_id for e in evidence}
+        out = list(evidence)
+        for cid in dict.fromkeys(wanted):
+            group = {cid, *(_CIVIL_IDS if cid in _CIVIL_IDS else ())}
+            if have & group:
+                continue
+            best = next((r for r in ranked if r.chunk.canonical_id in group and not is_boilerplate(r)), None)
+            if best is None:
+                continue
+            best = self._align_language([best], lang)[0]
+            # Right after the articles the question names (or after the best hit), so it is shown, not just listed
+            named_keys = {(r.canonical_id, r.article) for r in qa.acts if r.article}
+            pos = 1
+            while pos < len(out) and (out[pos].chunk.canonical_id, chunk_article_id(out[pos].chunk)) in named_keys:
+                pos += 1
+            best.final_score = max(best.final_score, out[min(pos, len(out) - 1)].final_score)
+            out = out[:pos] + [best] + out[pos:]
+            if len(out) > max(len(evidence), 5):
+                out = out[: max(len(evidence), 5)]
+            have |= group
+        return out
+
+    def _extra_leads(
+        self, qa: Any, lead_info: Any, evidence: list[RetrievedChunk], lang: Language
+    ) -> tuple[list[RetrievedChunk], list[tuple[dict[str, str], list[int]]]]:
+        """Direct answers for the other specific situations of a multi-part question (at most two more)."""
+        primary = qa.concepts[0] if qa.concepts else None
+        if primary is None:
+            return evidence, []
+        # Another situation of the same branch of law, or one stated in several words: a bare entity word ("MChJ"
+        # in a labour question) names the employer, not a second question
+        others = [
+            m.id for m in qa.concepts[1:3]
+            if not m.concept.generic and m.matched and m.matched not in primary.matched and primary.matched not in m.matched
+            and (m.concept.domain == primary.concept.domain or len(m.matched.split()) >= 2)
+        ]
+        if not others:
+            return evidence, []
+        leads = [x for x in leads_for([primary.id, *others], limit=3)[1:]]
+        if not leads:
+            return evidence, []
+        keys = [(e.chunk.canonical_id, chunk_article_id(e.chunk)) for e in evidence]
+        wanted = [pairs[0] for _texts, pairs in leads if pairs and pairs[0] not in keys]
+        if wanted:
+            extra = self._chunks_for(wanted, lang)
+            keep = max(len(lead_info[1]) if lead_info else 1, 6 - len(extra))
+            evidence = evidence[:keep] + extra
+            keys = [(e.chunk.canonical_id, chunk_article_id(e.chunk)) for e in evidence]
+        out: list[tuple[dict[str, str], list[int]]] = []
+        for texts, pairs in leads:
+            refs = [keys.index(k) + 1 for k in pairs if k in keys][:2]
+            if refs:
+                out.append((texts, refs))
+        return evidence[:6], out
 
     def _full_article_text(self, item: RetrievedChunk) -> str:
         """All parts of a long article in the chunk's language (quotes may come from any part)."""

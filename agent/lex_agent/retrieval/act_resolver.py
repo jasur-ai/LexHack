@@ -52,6 +52,14 @@ _CODE_ALIASES: dict[str, tuple[str, ...]] = {
     "7655343": (r"suv kodeks\w*", r"водн\w* кодекс\w*", r"water code"),
 }
 _CIVIL_PARTS = ("111189", "180552")
+# Uzbek case suffixes on a Latin code abbreviation: "MJtKning 175-moddasi", "MKga ko'ra", "JKda"
+_ABBR_SUFFIX = r"(?:ning|ni|ga|ka|da|dan|dagi|si)?"
+_LATIN_ABBR = re.compile(r"^\\b([a-z]{2,5})\\b$")
+
+
+def _with_suffixes(pattern: str) -> str:
+    m = _LATIN_ABBR.match(pattern)
+    return rf"\b{m.group(1)}{_ABBR_SUFFIX}\b" if m else pattern
 
 _ARTICLE_RE = re.compile(
     r"(?<![\d.])(\d{1,4})(?:\s*[-.]\s*(\d{1,2})|\s*([¹²³⁴⁵⁶⁷⁸⁹]+))?\s*-?\s*(?:modda\w*|модда\w*)|"
@@ -119,13 +127,33 @@ def _article_ids(text: str) -> list[str]:
     return out
 
 
+def _article_spans(text: str) -> list[tuple[int, int, str]]:
+    """(start, end, article id) of every article mention, in order of appearance."""
+    found: list[tuple[int, int, str]] = []
+    for m in _ARTICLE_RE.finditer(text):
+        base = m.group(1) or m.group(4) or m.group(7)
+        sub = m.group(2) or m.group(5) or (m.group(3) or m.group(6) or "").translate(_SUP)
+        found.append((m.start(), m.end(), f"{base}.{sub}" if sub else base))
+    found.extend((start, end, art) for art, start, end in range_articles(text))
+    return sorted(found)
+
+
+def _distance(act: tuple[int, int], art: tuple[int, int]) -> int:
+    """Characters between an act mention and an article mention (0 when they touch or overlap)."""
+    if act[1] <= art[0]:
+        return art[0] - act[1]
+    if art[1] <= act[0]:
+        return act[0] - art[1]
+    return 0
+
+
 class ActResolver:
     """Resolves act names, abbreviations, numbers and article numbers mentioned in a question."""
 
     def __init__(self, catalog: dict[str, dict]) -> None:
         self.catalog = catalog
         self._aliases = [
-            (cid, re.compile(p, re.I)) for cid, pats in _CODE_ALIASES.items() for p in pats
+            (cid, re.compile(_with_suffixes(p), re.I)) for cid, pats in _CODE_ALIASES.items() for p in pats
         ]
         self._titles: list[_Title] = []
         self._by_number: dict[str, str] = {}
@@ -154,15 +182,19 @@ class ActResolver:
         folded = fold_for_match(question)
         articles = _article_ids(question)
         found: list[tuple[str, str]] = []
+        spans: dict[str, list[tuple[int, int]]] = {}
 
-        for m in _NUMBER_RE.finditer(question):
-            raw = m.group(0)
-            cid = self._by_number.get(number_tokens(raw))
-            if cid and all(cid != f for f, _ in found):
-                found.append((cid, "number"))
+        for m in _NUMBER_RE.finditer(folded):
+            cid = self._by_number.get(number_tokens(m.group(0)))
+            if cid:
+                spans.setdefault(cid, []).append(m.span())
+                if all(cid != f for f, _ in found):
+                    found.append((cid, "number"))
 
         for cid, rx in self._aliases:
-            if rx.search(folded) and all(cid != f for f, _ in found):
+            for m in rx.finditer(folded):
+                spans.setdefault(cid, []).append(m.span())
+            if cid in spans and all(cid != f for f, _ in found):
                 found.append((cid, "alias"))
 
         if len(found) < 3 and self._titles:
@@ -172,17 +204,39 @@ class ActResolver:
             for t in self._titles:
                 if " " + " ".join(t.terms) + " " in joined and all(t.canonical_id != f for f, _ in found):
                     found.append((t.canonical_id, "title"))
+                    first = re.search(r"\b" + re.escape(t.terms[0][:6]), folded)
+                    if first:
+                        spans.setdefault(t.canonical_id, []).append(first.span())
                     if len(found) >= 3:
                         break
 
+        bound = self._bind_articles(folded, [cid for cid, _ in found], spans) if len(found) > 1 else None
         refs: list[ActRef] = []
         for cid, via in found:
-            if articles:
-                for art in articles[:3]:
+            arts = bound.get(cid, []) if bound is not None else articles
+            if arts:
+                for art in arts[:3]:
                     refs.append(ActRef(cid, art, via))
             else:
                 refs.append(ActRef(cid, None, via))
         return refs
+
+    @staticmethod
+    def _bind_articles(
+        folded: str, acts: list[str], spans: dict[str, list[tuple[int, int]]]
+    ) -> dict[str, list[str]] | None:
+        """Each article number goes to the act named closest to it ("O'RQ-369 19-moddasi va MJtK" gives 19 to
+        O'RQ-369 only). ``None`` (every act gets every article, as before) when an act's position is unknown."""
+        if any(not spans.get(cid) for cid in acts):
+            return None
+        out: dict[str, list[str]] = {}
+        for start, end, art in _article_spans(folded):
+            best = min(acts, key=lambda cid: min(_distance(sp, (start, end)) for sp in spans[cid]))
+            # The two parts of the Civil Code share their names; either part may hold the article
+            for cid in ([c for c in acts if c in _CIVIL_PARTS] if best in _CIVIL_PARTS else [best]):
+                if art not in out.setdefault(cid, []):
+                    out[cid].append(art)
+        return out
 
     @staticmethod
     def civil_part_for(article: str | None) -> str | None:

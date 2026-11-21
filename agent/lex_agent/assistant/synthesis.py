@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from lex_agent.assistant import replies
-from lex_agent.assistant.act_names import en_article, en_title
+from lex_agent.assistant.act_names import en_article, en_title, plain_article
 from lex_agent.assistant.calculators import _rub, fines_in_text, som
 from lex_agent.assistant.playbooks import Playbook
 from lex_agent.chunk_text import article_body, chunk_article_id, display_text, short_act_title
@@ -114,6 +114,11 @@ class SynthesisInput:
     calc_hint: str | None = None
     lead: dict[str, str] | None = None  # verified one-sentence answer for the situation (uz/ru/en)
     lead_refs: list[int] = field(default_factory=list)  # 1-based evidence numbers that state the lead
+    # Leads of the other situations of a multi-part question: (texts by language, 1-based evidence numbers)
+    extra_leads: list[tuple[dict[str, str], list[int]]] = field(default_factory=list)
+    # With a verified lead, further key points come only from these acts (the lead's acts and the acts the question
+    # names): loosely related hits from other acts add noise to a direct answer
+    pad_acts: set[str] | None = None
     full_text: Callable[[RetrievedChunk], str] | None = None  # whole article text (all parts of a long article)
 
 
@@ -131,16 +136,47 @@ def _sentences(text: str) -> list[str]:
         continues = bool(merged) and merged[-1].endswith(".") and (
             bool(_ABBREV_END.search(merged[-1])) or part[:1].islower() or part[:1].isdigit()
         )
+        # A sanction ("— a fine of ...") stays with its offence even after a long disposition (quotes clip the middle)
+        sanction = part.startswith(("—", "–")) or (bool(merged) and merged[-1].endswith(("—", "–")))
         if merged and (continues or merged[-1].endswith((",", "—", "-", "–")) or part.startswith(("—", "–", "-"))) \
-                and len(merged[-1]) + len(part) < 520:
+                and len(merged[-1]) + len(part) < (900 if sanction else 520):
             merged[-1] = f"{merged[-1]} {part}"
         else:
             merged.append(part)
     out: list[str] = []
-    for s in merged:
+    for s in _expand_lists(merged):
         s = s.strip(" —-")
-        if 25 <= len(s) <= 520:
+        if 25 <= len(s) <= (900 if " — " in s or " – " in s else 520):
             out.append(s)
+    return out
+
+
+def _expand_lists(sentences: list[str]) -> list[str]:
+    """A list introduced by a colon ("The following data must be stored in Uzbekistan: biometric data; genetic
+    data; ...") becomes quotable statements: the whole list when it is short, and each item with its introduction
+    ("Deadlines for going to court: reinstatement — three months ...") — the introduction alone says nothing."""
+    out: list[str] = []
+    i = 0
+    while i < len(sentences):
+        intro = sentences[i]
+        if intro.endswith(":") and i + 1 < len(sentences):
+            items: list[str] = []
+            j = i + 1
+            while j < len(sentences) and len(sentences[j]) <= 260 and not sentences[j].endswith(":"):
+                items.append(sentences[j])
+                j += 1
+                if not items[-1].endswith((";", ",")):
+                    break  # the last item ends with a period
+            if items:
+                whole = f"{intro} {' '.join(items)}"
+                if len(whole) <= 360:
+                    out.append(whole)  # short enough to quote in full
+                else:
+                    out.extend(f"{intro} {it}" if len(intro) + len(it) <= 330 else it for it in items)
+                i = j
+                continue
+        out.append(intro)
+        i += 1
     return out
 
 
@@ -193,9 +229,18 @@ def _latin(text: str, lang: Language) -> str:
     return cyrillic_to_latin(text)
 
 
+_SANCTION_TAIL = re.compile(r"sabab boʻl|sabab bo'l|сабаб бўл|влеч[её]т|наказыва|jazolan|жазолан|jarima|жарима|штраф", re.I)
+
+
 def _clip(text: str, limit: int) -> str:
     if len(text) <= limit:
         return text
+    # "<offence>, — <sanction>": the sanction is what the reader needs, so the middle of the offence is cut instead
+    head, dash, tail = text.rpartition(" — ")
+    if dash and head and 20 <= len(tail) <= limit * 0.6 and _SANCTION_TAIL.search(tail):
+        room = limit - len(tail) - 4
+        if room >= 60:
+            return head[:room].rsplit(" ", 1)[0].rstrip(",;:—-") + "… — " + tail
     return text[: limit - 1].rsplit(" ", 1)[0].rstrip(",;:—-") + "…"
 
 
@@ -208,17 +253,51 @@ def label_for(item: RetrievedChunk, lang: Language) -> str:
     return _label(item, lang)
 
 
+_NUMBER_PREFIXES = {
+    "ru": (("ЎРҚ", "ЗРУ"), ("O'RQ", "ЗРУ"), ("ПФ", "УП"), ("ПҚ", "ПП")),
+    "en": (("ЎРҚ", "ZRU"), ("ЗРУ", "ZRU"), ("O'RQ", "ZRU"), ("ПФ", "UP"), ("УП", "UP"), ("ПҚ", "PP"), ("ПП", "PP")),
+}
+
+
+def act_number(item: RetrievedChunk, lang: Language) -> str:
+    """The number of a law or decree as lawyers cite it ("OʻRQ-547", "ЗРУ-547", "ZRU-547"); codes and the
+    Constitution are cited by name only."""
+    c = item.chunk
+    num = (c.doc_number or "").strip()
+    if not num or c.doc_type.value in ("code", "constitution") or c.canonical_id == FACTS_DOC_ID:
+        return ""
+    if not re.fullmatch(r"[A-Za-zА-Яа-яЎўҚқҒғҲҳ'ʻ]{1,5}-\d{1,5}", num):
+        return ""
+    lk = replies.lang_key(lang)
+    for src, dst in _NUMBER_PREFIXES.get(lk, ()):
+        if num.upper().startswith(src.upper() + "-"):
+            return dst + num[len(src):]
+    if lk == "uz" and re.search(r"[А-Яа-яЎўҚқҒғҲҳ]", num):
+        from lex_agent.language.transliterator import cyrillic_to_latin
+
+        return cyrillic_to_latin(num).replace("O'", "Oʻ").replace("G'", "Gʻ")
+    if lk == "uz_cyrl" and not re.search(r"[А-Яа-я]", num):
+        from lex_agent.language.transliterator import latin_to_cyrillic
+
+        return latin_to_cyrillic(num)
+    return num
+
+
 def _label(item: RetrievedChunk, lang: Language) -> str:
     c = item.chunk
     if c.canonical_id == FACTS_DOC_ID:
         return str(c.article or c.article_title or c.doc_title)
+    number = act_number(item, lang)
     if lang == Language.EN and en_title(c.canonical_id):
+        title = f"{en_title(c.canonical_id)} ({number})" if number else str(en_title(c.canonical_id))
         art = en_article(c.article)
-        return f"{en_title(c.canonical_id)}, {art}" if art else str(en_title(c.canonical_id))
+        return f"{title}, {art}" if art else title
     title = _display(short_act_title(c), c.language, lang)
+    if number:
+        title = f"{title} ({number})"
     art = c.article or ""
     if art:
-        art = _display(art, c.language, lang)
+        art = plain_article(_display(art, c.language, lang))
         return f"{title}, {art}"
     return title
 
@@ -289,16 +368,35 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
             text_lead = latin_to_cyrillic(text_lead)
         refs = " ".join(f"[{n}]" for n in inp.lead_refs)
         answer = f"{text_lead} {refs}"
+        for texts, extra_refs in inp.extra_leads[:2]:
+            extra_text = texts.get("ru" if lk == "ru" else "en" if lk == "en" else "uz", "")
+            if not extra_text:
+                continue
+            if lk == "uz_cyrl":
+                from lex_agent.language.transliterator import latin_to_cyrillic
+
+                extra_text = latin_to_cyrillic(extra_text)
+            answer += "\n" + extra_text + " " + " ".join(f"[{n}]" for n in extra_refs)
         # Quote the articles that state the lead: the sentence closest to the lead's own words
-        lead_terms = set(index_terms(inp.lead.get("ru", ""), language="ru")) | set(
-            index_terms(inp.lead.get("uz", ""), language="uz_latn")
-        )
+        def _lead_terms(texts: dict[str, str]) -> set[str]:
+            return set(index_terms(texts.get("ru", ""), language="ru")) | set(
+                index_terms(texts.get("uz", ""), language="uz_latn")
+            )
+
+        terms_by_ref: dict[int, set[str]] = {n: _lead_terms(inp.lead) for n in inp.lead_refs}
+        for texts, extra_refs in inp.extra_leads[:2]:
+            for n in extra_refs:
+                terms_by_ref.setdefault(n, _lead_terms(texts))
         used = set()
-        for n in inp.lead_refs[:2]:
+        # One quote per situation when the question has several (the first situation's article(s) first)
+        quote_refs = inp.lead_refs[: 1 if inp.extra_leads else 2] + [r[0] for _t, r in inp.extra_leads[:2] if r]
+        for n in quote_refs:
+            if n in used or not 1 <= n <= len(inp.evidence):
+                continue
             item = inp.evidence[n - 1]
-            p = best_sentence(item, terms, qtype, inp.expansion_terms | lead_terms, body=_body(item))
+            p = best_sentence(item, terms, qtype, inp.expansion_terms | terms_by_ref.get(n, set()), body=_body(item))
             if p:
-                q = _clip(_display(p.sentence, item.chunk.language, lang), 300)
+                q = _clip(_display(p.sentence, item.chunk.language, lang), 340)
                 key_points.append(f"{_label(item, lang)}: «{q}» [{n}]")
                 used.add(n)
     fine_lines = _fine_lines(top, lang, facts)
@@ -313,6 +411,8 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
             break
         key = (item.chunk.canonical_id, chunk_article_id(item.chunk))
         if key in seen_articles:
+            continue
+        if use_lead and inp.pad_acts is not None and item.chunk.canonical_id not in inp.pad_acts:
             continue
         if inp.evidence[0].final_score > 0 and item.final_score < 0.35 * top_score:
             continue
@@ -364,10 +464,18 @@ def _fine_lines(item: RetrievedChunk, lang: Language, facts: FactsPack | None) -
         else:
             parts.append(f"{low:g} {unit} = {fmt(low * bhm)}")
     since = f"{sv.start:%d.%m.%Y}" if sv.start else ""
-    head = {
-        "uz": f"Jarima soʻmda (1 BHM = {som(bhm)}, {since} dan)",
-        "uz_cyrl": f"Жарима сўмда (1 БҲМ = {fmt(bhm)}, {since} дан)",
-        "ru": f"Штраф в сумах (1 БРВ = {_rub(bhm)}, с {since})",
-        "en": f"Fine in soʻm (1 BHM = {som(bhm)}, since {since})",
-    }[lk]
+    if _SANCTION_TAIL.search(article_body(item.chunk)):
+        head = {
+            "uz": f"Jarima soʻmda (1 BHM = {som(bhm)}, {since} dan)",
+            "uz_cyrl": f"Жарима сўмда (1 БҲМ = {fmt(bhm)}, {since} дан)",
+            "ru": f"Штраф в сумах (1 БРВ = {_rub(bhm)}, с {since})",
+            "en": f"Fine in soʻm (1 BHM = {som(bhm)}, since {since})",
+        }[lk]
+    else:  # a threshold or a payment ("a loan above ten BHM"), not a fine
+        head = {
+            "uz": f"Soʻmda (1 BHM = {som(bhm)}, {since} dan)",
+            "uz_cyrl": f"Сўмда (1 БҲМ = {fmt(bhm)}, {since} дан)",
+            "ru": f"В сумах (1 БРВ = {_rub(bhm)}, с {since})",
+            "en": f"In soʻm (1 BHM = {som(bhm)}, since {since})",
+        }[lk]
     return [f"{head}: " + "; ".join(parts) + " [1]"]

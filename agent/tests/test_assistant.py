@@ -299,7 +299,17 @@ def test_playbooks_and_leads_are_consistent() -> None:
 def test_english_act_names() -> None:
     assert en_title("6257288") == "Labour Code"
     assert en_article("217-modda") == "art. 217"
-    assert en_article("Статья 128³") == "art. 128³"
+    # Superscripts are lost in plain text ("128³" -> "1283"), so answers write the hyphenated form
+    assert en_article("Статья 128³") == "art. 128-3"
+    assert en_title("2833860") == "Law on Electronic Government"
+
+
+def test_plain_article_numbers() -> None:
+    from lex_agent.assistant.act_names import plain_article
+
+    assert plain_article("27¹-modda") == "27-1-modda"
+    assert plain_article("Статья 215⁷") == "Статья 215-7"
+    assert plain_article("217-modda") == "217-modda"
 
 
 # ------------------------------------------------------------------------------------------------ checks

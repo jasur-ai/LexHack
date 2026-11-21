@@ -50,6 +50,35 @@ _FIGURE_WORDS = re.compile(
     re.I,
 )
 
+# Final provisions that amend or repeal *other* acts ("Ўзбекистон Республикасининг айрим қонун ҳужжатларини ўз
+# кучини йўқотган деб топиш", "Признание утратившими силу некоторых законодательных актов"). Their text is a list of
+# act titles and numbers, so a question that names an act number ("O'RQ-395") matches dozens of them while they
+# never answer anything. They rank last unless the question asks about amendments or repeal itself.
+_BOILERPLATE_TITLE = re.compile(
+    r"айрим қонун ҳужжатлари|қонун ҳужжатларини (?:ушбу қонунга )?мувофиқлаштириш|ўз кучини йўқотган деб (?:топ|ҳисобла)|"
+    r"(?:кодекси|қонуни|қарори)(?:га|ни) (?:ўзгартиш|ўзгартириш|қўшимча)|^ўзбекистон республикасининг \d{4} йил|"
+    r"некоторы[ех] законодательн|утратившими силу|приведение законодательства в соответствие|"
+    r"внесение изменени\w*(?: и дополнени\w*)? в (?:некоторые|кодекс|закон)",
+    re.I,
+)
+_AMENDMENT_QUESTION = re.compile(
+    r"kuchini yo\W?qot|bekor qilin|o\W?zgartish|o\W?zgartirish|qo\W?shimcha kirit|кучини йўқот|бекор қилин|ўзгартиш|"
+    r"ўзгартириш|утрат|отмен|изменени|дополнени|repeal|amend|invalidat|no longer in force",
+    re.I,
+)
+
+
+def scale_score(score: float, factor: float) -> float:
+    """``score`` scaled by ``factor`` (< 1 demotes) for scores of either sign: the reranker's scores are often
+    negative, and multiplying a negative score by 0.8 would *raise* it."""
+    return score * factor if score >= 0 else score / max(factor, 1e-6)
+
+
+def is_boilerplate(item: RetrievedChunk) -> bool:
+    """A final-provisions article that amends or repeals other acts (see ``_BOILERPLATE_TITLE``)."""
+    title = (item.chunk.article_title or "").strip()
+    return bool(title) and bool(_BOILERPLATE_TITLE.search(title))
+
 
 @dataclass(slots=True)
 class QueryAnalysis:
@@ -124,7 +153,7 @@ class HybridLegalRetriever:
     def analyze(self, query: str) -> QueryAnalysis:
         lang = detect_language(query).value
         stops = stop_terms(lang)
-        terms = [t for t in dict.fromkeys(query_terms(query, language=lang)) if t not in stops][:16]
+        terms = self._informative_terms([t for t in dict.fromkeys(query_terms(query, language=lang)) if t not in stops])
         if not terms:
             terms = list(dict.fromkeys(query_terms(query, language=lang)))[:8]
         corrections: dict[str, str] = {}
@@ -175,6 +204,23 @@ class HybridLegalRetriever:
             concepts=concepts,
             synonym_terms=syn_terms[:12],
         )
+
+    def _informative_terms(self, terms: list[str], limit: int = 16) -> list[str]:
+        """At most ``limit`` terms in question order. A long question keeps its rarest (most telling) terms: its
+        opening words are often boilerplate ("O'zbekiston Respublikasi ... ga ko'ra") while the facts come last."""
+        if len(terms) <= limit:
+            return terms
+        try:
+            dfs = self.bm25_store.doc_freqs(terms)
+        except Exception:  # pragma: no cover - an empty/locked index keeps the first terms
+            return terms[:limit]
+        # Terms the index has never seen (typos, foreign words) rank last; numbers always stay (act/article ids)
+        def rarity(t: str) -> tuple[int, int]:
+            df = dfs.get(t, 0)
+            return (0 if t.isdigit() else 1, df if df > 0 else 10**9)
+
+        keep = set(sorted(terms, key=rarity)[:limit])
+        return [t for t in terms if t in keep]
 
     # ------------------------------------------------------------------ main entry
     async def retrieve(
@@ -232,7 +278,9 @@ class HybridLegalRetriever:
         reranked = await asyncio.to_thread(
             self.reranker.rerank, qinfo, fused, top_k=max(rerank_top_k * 3, rerank_top_k + 6)
         )
-        ranked = self._demote_figures(qa, self._prefer_language_and_dedupe(qa.language, reranked))[:rerank_top_k]
+        ranked = self._demote_boilerplate(
+            qa, self._demote_figures(qa, self._prefer_language_and_dedupe(qa.language, reranked))
+        )[:rerank_top_k]
         for item in ranked:
             item.retrieval_hop = hop
         return ranked, live_fetched_ids
@@ -424,6 +472,19 @@ class HybridLegalRetriever:
             i for i in items if i.chunk.canonical_id == FACTS_DOC_ID
         ]
 
+    @staticmethod
+    def _demote_boilerplate(qa: QueryAnalysis, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        """Articles that only amend or repeal other acts go last, below every other hit (their scores too, so they
+        stay last when the hits of several queries are merged), unless the question is about amendments."""
+        flagged = [i for i in items if is_boilerplate(i)]
+        if not flagged or _AMENDMENT_QUESTION.search(qa.query):
+            return items
+        rest = [i for i in items if not is_boilerplate(i)]
+        floor = min((i.final_score for i in rest), default=0.0)
+        for i in flagged:
+            i.final_score = min(i.final_score, floor - 1.0 - abs(floor) * 0.1)
+        return rest + flagged
+
     def _prefer_language_and_dedupe(self, q_lang: str | Language, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
         """Prefer norms in the asker's language family and keep one chunk per (act, article) across editions."""
         if not items:
@@ -437,7 +498,7 @@ class HybridLegalRetriever:
                 factor = 1.0 if c_lang in (Language.UZ_LATN, Language.UZ_CYRL) else 0.8
             else:
                 factor = 1.0
-            item.final_score *= factor
+            item.final_score = scale_score(item.final_score, factor)
         items.sort(key=lambda r: r.final_score, reverse=True)
         seen: set[tuple[str, str]] = set()
         out: list[RetrievedChunk] = []
