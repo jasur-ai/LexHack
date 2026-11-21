@@ -204,3 +204,32 @@ def test_facts_values_have_sources_and_dates() -> None:
     assert facts.is_holiday(date(2027, 1, 1)) and facts.is_holiday(date(2026, 3, 20))
     assert not facts.is_holiday(date(2026, 11, 23))
     assert FACTS_DOC_ID == "practical-facts"
+
+
+# ------------------------------------------------------------------------------------------------ English bridge
+
+
+def test_english_questions_are_bridged_to_russian_statute_words() -> None:
+    from lex_agent.knowledge.synonyms import expansion_text
+
+    text = expansion_text("How long does a court take to decide a civil case?", language="en")
+    assert "суд" in text and "сроки рассмотрения" in text and "гражданское дело" in text
+    assert "декларация" in expansion_text("When is the deadline for the annual income declaration?", language="en")
+    assert detect_language("Hello").value == "en" and detect_language("ok rahmat").value == "uz_latn"
+
+
+def test_figures_cards_never_outrank_the_law_for_non_figure_questions() -> None:
+    from lex_agent.models import RetrievedChunk
+    from lex_agent.retrieval.hybrid_retriever import HybridLegalRetriever, QueryAnalysis
+
+    def item(doc: str, score: float) -> RetrievedChunk:
+        c = LegalChunk(chunk_id=f"{doc}:1", doc_id=doc, canonical_id=doc, doc_title=doc, doc_type=DocumentType.CODE,
+                       language=Language.EN if doc == FACTS_DOC_ID else Language.RU, status=NormStatus.IN_FORCE,
+                       article="1", text="x", legal_force_rank=3, url="https://lex.uz")
+        return RetrievedChunk(chunk=c, final_score=score)
+
+    items = [item(FACTS_DOC_ID, 2.0), item("3517337", 1.0)]
+    plain = QueryAnalysis(query="How long does a court take?", language="en", terms=["court"])
+    assert [i.chunk.canonical_id for i in HybridLegalRetriever._demote_figures(plain, list(items))] == ["3517337", FACTS_DOC_ID]
+    figures = QueryAnalysis(query="What is the minimum wage?", language="en", terms=["minimum", "wage"])
+    assert HybridLegalRetriever._demote_figures(figures, list(items))[0].chunk.canonical_id == FACTS_DOC_ID

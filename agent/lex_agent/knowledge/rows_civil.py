@@ -363,7 +363,7 @@ ROWS = [
       r"(?:magazin|dokon)\w*~(?:kaytar|almashtir)|almashtirib berma|pulimni kaytar|"
       r"(?:togri|tugri|mos) kelmadi\w*~kaytar|(?:olcham|razmer)\w*~(?:kelmadi|tugri|togri|mos)",
       r"вернуть товар|возврат\w* (?:товар|денег)|обмен\w* товар|вернуть деньги за",
-      r"\breturn (?:a |the )?(?:product|item|purchase)\b|\brefund\b",
+      r"\breturn (?:a |the )?(?:product|item|purchase)\b|\brefund\b|\bexchange (?:a |an |the |my )?(?:product|item|purchase|goods)\b",
       "iste'molchining maqbul sifatli tovarni almashtirib olish huquqi",
       "право потребителя на обмен товара надлежащего качества",
       f"{ISTEMOL}:18,13,17;{FK2}:433",

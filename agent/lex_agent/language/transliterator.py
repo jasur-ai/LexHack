@@ -86,6 +86,9 @@ _EN_COMMON = {
     "where", "which", "who", "whom", "of", "to", "in", "on", "for", "with", "from", "by", "about", "and", "or",
     "not", "if", "many", "much", "there", "get", "leave", "annual", "salary", "employer", "employee", "days",
     "fine", "rent", "landlord", "tenant", "divorce", "alimony", "court", "appeal", "deadline", "penalty",
+    # conversational English, so a bare "Hello" or "Thanks!" is answered in English
+    "hello", "hi", "hey", "thanks", "thank", "good", "morning", "afternoon", "evening", "bye", "goodbye", "please",
+    "help", "sorry", "yes",
 }
 
 _UZ_SUFFIX_RE = re.compile(

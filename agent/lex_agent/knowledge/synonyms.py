@@ -31,6 +31,9 @@ UZ: dict[str, str] = {
     "notarius": "notarius notarial", "hokim": "mahalliy davlat hokimiyati", "mahalla": "fuqarolar yig'ini",
     "soliqchi": "soliq organi", "bojhona": "bojxona", "bank": "bank kredit tashkiloti",
     # work
+    "ichkilik": "alkogol mastlik holati", "tekshiruvdan bosh tort": "tibbiy ko'rikdan o'tishdan bo'yin tovlash",
+    "ozini himoya": "zaruriy mudofaa", "ozimni himoya": "zaruriy mudofaa", "hatla": "mol-mulkni xatlash",
+    "sud ijrochi": "davlat ijrochisi ijro hujjati", "ijarada": "ijara turar joy", "ijaradagi": "ijara turar joy",
     "zarplat": "ish haqi", "maosh": "ish haqi", "oylik": "ish haqi", "avans": "ish haqi bo'nak", "premiya": "mukofot rag'batlantirish",
     "bonus": "mukofot rag'batlantirish", "shtraf": "jarima", "vigovor": "intizomiy jazo hayfsan", "hayfsan": "intizomiy jazo",
     "otpusk": "ta'til", "tatil": "ta'til", "bolnichn": "vaqtincha mehnatga qobiliyatsizlik", "dekret": "homiladorlik va tug'ish ta'tili",
@@ -128,6 +131,102 @@ RU: dict[str, str] = {
     "жалоб": "жалоба обращение", "обращени": "обращение", "армия": "воинская служба", "призыв": "призыв", "повестк": "призыв",
     "гражданств": "гражданство", "иностран": "иностранный гражданин", "суд": "суд", "исполнительн": "исполнительный документ",
 }
+
+# English everyday/legal words -> the Russian statutory words (the corpus has every act in Russian; there is no
+# English statute text, so an English question reaches the law only through this bridge and the situation lexicon).
+EN: dict[str, str] = {
+    # work
+    r"fir(?:e|ed|ing)\b|dismiss|laid off|lay(?:ing)? off|let go": "увольнение прекращение трудового договора по инициативе работодателя",
+    r"resign|quit(?:ting)?\b": "прекращение трудового договора по инициативе работника", r"notice\b": "предупреждение",
+    r"redundan": "сокращение численности штата работников", r"salary|wage|pay\b|paid\b|paycheck": "заработная плата оплата труда",
+    r"overtime": "сверхурочная работа", r"night (?:shift|work)": "работа в ночное время", r"weekend": "выходные дни",
+    r"public holiday|bank holiday": "праздничные нерабочие дни", r"shift\b|shifts\b": "продолжительность ежедневной работы смены",
+    r"working hours|work(?:ing)? week|hours a week": "продолжительность рабочего времени", r"vacation|annual leave|holiday leave": "ежегодный трудовой отпуск",
+    r"unpaid leave": "отпуск без сохранения заработной платы", r"sick leave|sick\b|illness": "временная нетрудоспособность пособие",
+    r"maternity|pregnan": "беременность и роды беременные женщины", r"childcare leave|parental leave|paternity leave": "отпуск по уходу за ребенком",
+    r"probation": "предварительное испытание", r"employment contract|work contract": "трудовой договор",
+    r"employer|boss\b": "работодатель", r"employee|worker|staff": "работник", r"severance": "выходное пособие",
+    r"workbook|employment record": "трудовая книжка", r"(?:workplace|work) (?:injury|accident)|injured at work": "трудовое увечье возмещение вреда работодатель",
+    r"strike\b": "забастовка", r"minimum wage": "минимальный размер оплаты труда", r"transfer(?:red)? to": "перевод на другую работу",
+    r"unused leave": "компенсация за неиспользованный отпуск", r"business trip": "служебная командировка",
+    r"discipline|reprimand": "дисциплинарное взыскание", r"labou?r inspector": "государственная инспекция труда",
+    # family
+    r"divorc": "расторжение брака", r"marri|wedding": "брак заключение брака брачный возраст", r"spouse|wife|husband": "супруг супруги",
+    r"child support|alimony|maintenance": "алименты содержание", r"custody|live with (?:me|the mother|the father)": "место жительства ребенка",
+    r"visit(?:ation)?\b|see (?:my|the|their) (?:child|kid|grand)": "общение с ребенком", r"grandparent|grandchild": "дедушка бабушка общение с ребенком",
+    r"paternity": "установление отцовства", r"adopt": "усыновление", r"prenup|marriage contract|marital agreement": "брачный договор",
+    r"parental rights": "лишение родительских прав", r"domestic violence|abus": "насилие притеснение охранный ордер",
+    r"ex-?wife|ex-?husband|former spouse": "бывший супруг содержание после расторжения брака",
+    # inheritance
+    r"inherit|estate\b|heir": "наследство наследование наследники", r"\bwill\b|testament": "завещание",
+    r"refuse (?:an |the )?inheritance|renounce": "отказ от наследства", r"no will|without a will": "наследование по закону очередь наследников",
+    # civil
+    r"loan|lend|borrow|lent\b": "заем договор займа", r"\bdebt": "долг обязательство взыскание",
+    r"limitation period|statute of limitations": "исковая давность срок", r"contract": "договор",
+    r"\bsell|\bsold|\bbuy|bought|purchase": "купля-продажа продавец покупатель оплата товара", r"gift": "дарение",
+    r"\brent\b|lease|landlord|tenant|letting": "договор найма жилого помещения наймодатель наниматель аренда",
+    r"sublet|sublease": "поднаем жилого помещения", r"power of attorney|proxy": "доверенность",
+    r"damage|compensat|harm": "возмещение вреда ущерб", r"moral (?:harm|damage)|emotional distress": "компенсация морального вреда",
+    r"flood": "затопление возмещение вреда", r"insur": "страхование страховая выплата", r"propert|own(?:er|ership)\b": "право собственности имущество",
+    r"money sent by mistake|wrong (?:account|transfer)": "неосновательное обогащение",
+    # consumer
+    r"\bshop|\bstore|seller|retailer": "продавец потребитель", r"refund|money back": "возврат денег потребителю",
+    r"exchange|return (?:a |an |the )?(?:item|product|purchase|goods)": "обмен товара надлежащего качества возврат",
+    r"faulty|defect|broken|poor quality": "товар ненадлежащего качества недостатки", r"warranty|guarantee": "гарантийный срок",
+    r"receipt": "чек документ об оплате", r"food poisoning|expired": "безопасность товара возмещение вреда",
+    # housing
+    r"evict": "выселение из жилого помещения", r"utilit|electricity|gas bill|water bill": "коммунальные услуги оплата",
+    r"renovat|redevelop|remodel|knock down a wall": "переустройство и перепланировка жилых помещений",
+    r"registration|register (?:at|my) (?:address|residence)|propiska": "регистрация по месту жительства месту пребывания",
+    r"privati": "приватизация жилья", r"neighbou?r": "соседи",
+    # admin and traffic
+    r"\bfine\b|\bfined\b|penalt": "штраф административная ответственность", r"speed": "превышение скорости движения",
+    r"red light|traffic light": "запрещающий сигнал светофора", r"drunk|alcohol|intoxicat|breathalyz|drink-?driv": "состояние опьянения освидетельствование",
+    r"refus\w* (?:a |the )?(?:breath|alcohol|sobriety) test": "уклонение от освидетельствования на состояние опьянения",
+    r"driv(?:ing|er)'?s? licen[cs]e|without a licen[cs]e": "водительское удостоверение право управления документы",
+    r"seat ?belt": "ремни безопасности", r"phone while driving|on the phone": "пользование телефоном во время управления",
+    r"car accident|crash|collision": "дорожно-транспортное происшествие", r"car insurance|motor insurance": "обязательное страхование гражданской ответственности владельцев транспортных средств",
+    r"parking|park(?:ed)?\b": "стоянка остановка транспортного средства", r"road rage": "дорожное хулиганство",
+    r"smok": "употребление табачной продукции в общественных местах", r"drinking in public|public drinking": "употребление алкогольной продукции в общественных местах",
+    r"hooligan": "хулиганство", r"wedding (?:rules|limit)": "проведение свадеб семейных торжеств",
+    # criminal
+    r"theft|steal|stole": "кража", r"fraud|scam|swindl|cheat": "мошенничество", r"robb": "грабеж разбой",
+    r"brib": "взятка дача получение взятки", r"assault|beat(?:en|ing)?\b|punch|injur": "телесное повреждение",
+    r"murder|kill": "убийство", r"kidnap|abduct": "похищение человека", r"drug|narcotic": "наркотические средства",
+    r"self-?defen[cs]e|defend(?:ing)? myself": "необходимая оборона", r"detain|arrest": "задержание подозреваемый права",
+    r"lawyer|attorney|defen[cs]e counsel": "защитник адвокат", r"\bbail\b|pre-?trial": "мера пресечения",
+    r"parole|early release": "условно-досрочное освобождение", r"threat": "угроза убийством", r"blackmail|extort": "вымогательство",
+    r"hack|account was hacked": "неправомерный доступ к компьютерной информации", r"forg": "подделка документов",
+    r"embezzl": "присвоение растрата", r"smuggl": "контрабанда", r"rape|sexual": "изнасилование",
+    # procedure
+    r"\bcourt": "суд", r"\bsue\b|lawsuit|file a claim|claim in court": "исковое заявление подача иска",
+    r"appeal": "апелляционная жалоба", r"cassation": "кассационная жалоба", r"court fee|filing fee|state duty": "государственная пошлина",
+    r"bailiff|enforcement|enforce": "исполнение исполнительный документ государственный исполнитель", r"seiz": "арест имущества должника",
+    r"deadline|time limit|how long": "срок", r"hearing|decide (?:a |the )?(?:\w+ )?case|trial": "сроки рассмотрения и разрешения дел",
+    r"civil case|civil dispute": "гражданское дело", r"criminal case": "уголовное дело",
+    r"jurisdiction|which court": "подсудность", r"defer|instal?lment": "отсрочка рассрочка",
+    # tax
+    r"\btax": "налог", r"income tax|personal income": "налог на доходы физических лиц ставка", r"declaration|tax return": "декларация о совокупном годовом доходе",
+    r"late payment interest|penalty interest": "пеня", r"\bvat\b": "налог на добавленную стоимость", r"tax audit|tax inspection": "налоговый аудит налоговая проверка",
+    r"rental income": "доход от сдачи имущества в аренду", r"taxpayer": "налогоплательщик права налогоплательщиков",
+    # social
+    r"pension|retire": "пенсия пенсия по возрасту", r"disabilit": "инвалидность пенсия по инвалидности",
+    r"survivor|breadwinner": "пенсия по случаю потери кормильца", r"benefit|allowance": "пособие",
+    r"work experience|years of service|service record": "стаж работы",
+    # rights and state
+    r"complain\w* to (?:a |the )?(?:state|government)|government (?:agency|body)|ministry": "обращение государственный орган рассмотрение",
+    r"personal data|my data": "персональные данные согласие на обработку", r"access to information|information request": "доступ к информации",
+    r"privacy": "неприкосновенность частной жизни", r"ombuds": "уполномоченный по правам человека",
+    # business
+    r"\bllc\b|limited liability|company": "общество с ограниченной ответственностью участники", r"founder|shareholder|participant": "участник учредитель",
+    r"licen[cs]e for|business licen": "лицензирование лицензия", r"entrepreneur|self-employed|sole trader": "индивидуальный предприниматель",
+    # migration
+    r"dual citizenship|second citizenship|two passports": "гражданство иностранного государства", r"citizenship|naturali": "гражданство прием в гражданство",
+    r"foreign(?:er| national| citizen)": "иностранные граждане", r"residence permit": "вид на жительство",
+    # public
+    r"military|army|conscript": "воинская обязанность военная служба призыв", r"deferr?al|deferment|postpone": "отсрочка от призыва",
+    r"school|universit|education": "образование", r"vaccin|hospital|medical": "охрана здоровья медицинская помощь",
+}
 # fmt: on
 
 _UZ_KEYS = sorted(UZ, key=len, reverse=True)
@@ -143,10 +242,18 @@ def _compiled() -> tuple[list[tuple[re.Pattern[str], str]], list[tuple[re.Patter
     return [(comp(k, True), UZ[k]) for k in _UZ_KEYS], [(comp(k, False), RU[k]) for k in _RU_KEYS]
 
 
+@lru_cache(maxsize=1)
+def _compiled_en() -> list[tuple[re.Pattern[str], str]]:
+    return [(re.compile(r"(?<![a-z])(?:" + k + ")", re.I), v) for k, v in EN.items()]
+
+
 def expansion_text(query: str, *, language: str, limit: int = 8) -> str:
     """Formal words for the everyday words of a question ("" when nothing matches)."""
     uz_rules, ru_rules = _compiled()
-    if language == "ru":
+    if language == "en":
+        view, rules = (query or "").lower(), _compiled_en()
+        limit = max(limit, 10)
+    elif language == "ru":
         view, rules = fold_ru(query), ru_rules
     else:
         view, rules = fold_uz(query), uz_rules

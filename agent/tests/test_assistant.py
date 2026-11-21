@@ -285,3 +285,54 @@ def test_compose_lead_and_fine_conversion(facts: FactsPack) -> None:
 def test_compose_not_found_is_honest() -> None:
     out = compose(SynthesisInput(query="xyz", lang=Language.RU, evidence=[]))
     assert "не нашлось" in out["answer"] and out["steps"]
+
+
+# ------------------------------------------------------------------------------------------------ yes/no and answer type
+
+
+def test_yes_no_prefix_only_for_plain_permission_questions() -> None:
+    from lex_agent.assistant.synthesis import asks_permission
+
+    assert asks_permission("Homilador ayolni ishdan bo'shatish mumkinmi")
+    assert asks_permission("Можно ли уволить беременную?") and asks_permission("Can my employer cut my salary?")
+    # duties, bans, negations and refusals invert the meaning, so no "Yes/No" is put in front of the lead
+    for q in ("Mehnat shartnomasi yozma tuzilishi shartmi?", "Обязан ли работодатель платить?",
+              "Is consent required to transfer me?", "Homilador ayolni bo'shatish mumkin emasmi?",
+              "Can a shop refuse to exchange an item?", "Может ли магазин отказать в обмене?"):
+        assert not asks_permission(q), q
+
+
+def test_lead_with_polarity_and_proper_noun_start() -> None:
+    texts, basis = lead_for(["migration.dual_citizenship"])
+    ev = [_chunk("Oʻzbekiston Respublikasida Oʻzbekiston Respublikasi fuqarosining chet davlat fuqaroligiga mansubligi "
+                 "tan olinmaydi.", doc=basis[0][0], art=basis[0][1], title="Fuqarolik toʻgʻrisidagi Qonun")]
+    out = compose(SynthesisInput(query="Ikki fuqarolikka ruxsat bormi?", lang=Language.UZ_LATN, evidence=ev,
+                                 lead=texts, lead_refs=[1]))
+    assert out["answer"].startswith("Yoʻq — Oʻzbekiston")  # the proper noun keeps its capital letter
+
+
+def test_duration_question_is_answered_by_the_article_that_states_a_quantity() -> None:
+    definition = _chunk("Декларация о совокупном годовом доходе представляет собой письменное заявление "
+                        "налогоплательщика о полученном доходе.", doc="4674902", art="396", lang=Language.RU,
+                        title="Налоговый кодекс")
+    deadline = _chunk("Декларация о совокупном годовом доходе представляется не позднее 1 апреля года, следующего "
+                      "за отчетным.", doc="4674902", art="397", lang=Language.RU, title="Налоговый кодекс")
+    deadline.final_score = 0.9
+    out = compose(SynthesisInput(query="Когда срок подачи декларации?", lang=Language.RU, evidence=[definition, deadline],
+                                 terms=["деклар", "срок"]))
+    assert "1 апреля" in out["answer"] and out["answer"].rstrip().endswith("[2]")
+
+
+def test_sentences_keep_abbreviations_together() -> None:
+    text = ("Покупатель вправе обменять товар другого размера, формы, расцветки и т. п. в течение десяти дней. "
+            "Требование подлежит удовлетворению.")
+    parts = _sentences(text)
+    assert parts[0].endswith("в течение десяти дней.") and len(parts) == 2
+
+
+def test_plain_bhm_conversion_is_not_called_a_fine() -> None:
+    facts = FactsPack(json.loads(FACTS_FILE.read_text(encoding="utf-8")))
+    res = calculators.run("fine", facts, extract("10 BHM qancha so'm"), "10 BHM qancha so'm")
+    assert res.ok and res.headline["uz"].startswith("10 BHM =")
+    fine = calculators.run("fine", facts, extract("Jarima 15 BHM qancha"), "Jarima 15 BHM qancha")
+    assert fine.headline["uz"].startswith("Jarima")

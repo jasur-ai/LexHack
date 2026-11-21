@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -40,6 +41,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 LIVE_CIRCUIT_COOLDOWN_SEC = 300
+
+# A question names a practical figure (then the figures card may lead the sources)
+_FIGURE_WORDS = re.compile(
+    r"\bbhm\b|\bbrv\b|\bбрв\b|\bбҳм\b|bazaviy|базов\w* (?:расч|величин)|mhtekm|\bмрот\b|eng kam (?:ish haqi|oylik|maosh)|"
+    r"энг кам|минимальн\w* (?:зарплат|размер|заработн)|minimum wage|base calculation|stavka|ставк|\brate\b|penya|пен[яи]|"
+    r"davlat boj|давлат бож|пошлин|state duty|court fee|qancha so'?m|сколько сум",
+    re.I,
+)
 
 
 @dataclass(slots=True)
@@ -147,7 +156,7 @@ class HybridLegalRetriever:
             exp_terms.append([t for t in dict.fromkeys(index_terms(phrase, language=plang)) if t not in pstops])
         syn_terms: list[str] = []
         if syn_text:
-            slang = "ru" if lang == "ru" else "uz_latn"
+            slang = "ru" if lang in ("ru", "en") else "uz_latn"  # English is bridged to the Russian statute words
             sstops = stop_terms(slang)
             syn_terms = [t for t in dict.fromkeys(index_terms(syn_text, language=slang)) if t not in sstops and t not in terms]
         try:
@@ -219,7 +228,7 @@ class HybridLegalRetriever:
 
         qinfo = self.query_info(qa, list_ranks)
         reranked = self.reranker.rerank(qinfo, fused, top_k=max(rerank_top_k * 3, rerank_top_k + 6))
-        ranked = self._prefer_language_and_dedupe(qa.language, reranked)[:rerank_top_k]
+        ranked = self._demote_figures(qa, self._prefer_language_and_dedupe(qa.language, reranked))[:rerank_top_k]
         for item in ranked:
             item.retrieval_hop = hop
         return ranked, live_fetched_ids
@@ -373,6 +382,22 @@ class HybridLegalRetriever:
 
         art = chunk_article_id(item.chunk)
         return item.chunk.canonical_id, art or item.chunk.chunk_id.split("#")[0]
+
+    @staticmethod
+    def _demote_figures(qa: QueryAnalysis, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
+        """Practical-figures cards are summaries, not law: they lead only when the question is about a figure
+        (BHM, minimum wage, a rate, a duty) — otherwise every statute article ranks above them. Without this an
+        English question matched the English figure cards (the only English text in the index) before the law."""
+        from lex_agent.knowledge.facts import FACTS_DOC_ID
+
+        if not any(i.chunk.canonical_id == FACTS_DOC_ID for i in items):
+            return items
+        wants = any(FACTS_DOC_ID in m.concept.target_docs for m in qa.concepts[:3]) or bool(_FIGURE_WORDS.search(qa.query))
+        if wants:
+            return items
+        return [i for i in items if i.chunk.canonical_id != FACTS_DOC_ID] + [
+            i for i in items if i.chunk.canonical_id == FACTS_DOC_ID
+        ]
 
     def _prefer_language_and_dedupe(self, q_lang: str | Language, items: list[RetrievedChunk]) -> list[RetrievedChunk]:
         """Prefer norms in the asker's language family and keep one chunk per (act, article) across editions."""

@@ -30,6 +30,14 @@ _NUMBERISH = re.compile(
     r"месяц\w*|год\w*|лет|недел\w*|час\w*)\b",
     re.I,
 )
+# A concrete quantity (digits or number words), stricter than _NUMBERISH which also accepts bare time units
+_QUANTITY = re.compile(
+    r"\d|\b(?:bir|ikki|uch|tort|toʻrt|to'rt|besh|olti|yetti|sakkiz|toʻqqiz|to'qqiz|oʻn|o'n|yigirma|oʻttiz|o'ttiz|qirq|"
+    r"ellik|oltmish|yetmish|sakson|yuz|ming|yarim|baravar\w*|foiz\w*|"
+    r"од(?:ин|ного|ной|ну|ном)|дв(?:а|е|ух)|тр(?:и|ех|ёх)|четыр\w*|пят\w*|шест\w*|сем(?:ь|и|ью)|восем\w*|девят\w*|"
+    r"десят\w*|двадцат\w*|тридцат\w*|сорок\w*|сто|ста|полутор\w*|половин\w*|процент\w*)\b",
+    re.I,
+)
 _QTYPES = {
     "amount": re.compile(r"\bqancha\b|\bnecha pul\b|miqdor|stavka|foiz|сколько|размер|ставк|how much|amount|rate", re.I),
     "duration": re.compile(r"necha kun|necha oy|necha yil|qancha muddat|muddat|qachon|qachongacha|necha soat|"
@@ -42,6 +50,8 @@ _QTYPES = {
     "action": re.compile(r"nima qil|qayerga|qanday qilib|qanday|что делать|куда|как |how (?:do|can|to)|what (?:can|should)", re.I),
 }
 _SENT_SPLIT = re.compile(r"(?<=[.;!?])\s+|\n+")
+_ABBREV_END = re.compile(r"(?:\b(?:т|п|ст|ч|г|гг|др|пр|см|руб|тыс|млн|млрд|им|напр|т\.\s?е|т\.\s?к|mln|mlrd|ming|y|b|m|"
+                         r"i\.e|e\.g|etc|art|no)\.)$", re.I)
 _LIST_ITEM = re.compile(r"^\s*(?:\d+\\?\)|[a-zа-я]\)|[-–•])\s*")
 
 
@@ -57,7 +67,9 @@ _PERMISSION_Q = re.compile(
 _DUTY_OR_NEGATION_Q = re.compile(
     r"shartmi|kerakmi|majburmi|taqiqlan\w*mi|emasmi|шартми|керакми|мажбурми|обязан|нужно ли|надо ли|запрещ|"
     r"не (?:мож|могут|вправе|имеет)|\b(?:required|must|need|have to|forbidden|prohibited|illegal|not allowed|"
-    r"can'?t|cannot)\b",
+    r"can'?t|cannot)\b|"
+    # "Can the shop REFUSE to exchange?" asks the opposite of "Can I exchange?"
+    r"rad et|bosh tort|boʻyin tov|bo'yin tov|рад эт|бош торт|отказ|\b(?:refus\w*|den(?:y|ied)|declin\w*|reject\w*|won'?t)\b",
     re.I,
 )
 _PROPER_START = re.compile(r"^(?:Oʻzbek|O'zbek|Ўзбек|Узбек|Uzbek|Markaziy|Центральн|Central|Konstitutsiya|Конституц)")
@@ -114,7 +126,12 @@ def _sentences(text: str) -> list[str]:
     for part in parts:
         if not part:
             continue
-        if merged and (merged[-1].endswith((",", "—", "-", "–")) or part.startswith(("—", "–", "-"))) \
+        # "и т. д.", "ст. 12", "5 mln. soʻm": a period after an abbreviation, or a lowercase continuation after a
+        # period, does not end the sentence
+        continues = bool(merged) and merged[-1].endswith(".") and (
+            bool(_ABBREV_END.search(merged[-1])) or part[:1].islower() or part[:1].isdigit()
+        )
+        if merged and (continues or merged[-1].endswith((",", "—", "-", "–")) or part.startswith(("—", "–", "-"))) \
                 and len(merged[-1]) + len(part) < 520:
             merged[-1] = f"{merged[-1]} {part}"
         else:
@@ -230,6 +247,17 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
             return None
 
     pick = best_sentence(top, terms, qtype, inp.expansion_terms, body=_body(top))
+    ref = 1
+    if qtype in ("amount", "duration") and not (pick and _QUANTITY.search(_latin(pick.sentence, top.chunk.language))):
+        # "How long / how much" is answered by the first close article that actually states a quantity
+        first_score = max(inp.evidence[0].final_score, 1e-9)
+        for j, item in enumerate(inp.evidence[1:3], start=2):
+            if inp.evidence[0].final_score > 0 and item.final_score < 0.5 * first_score:
+                break
+            p = best_sentence(item, terms, qtype, inp.expansion_terms, body=_body(item))
+            if p and _QUANTITY.search(_latin(p.sentence, item.chunk.language)):
+                top, pick, ref = item, p, j
+                break
     quote = _clip(_display(pick.sentence if pick else article_body(top.chunk)[:300], top.chunk.language, lang), 420)
     label = _label(top, lang)
     intro = {
@@ -239,17 +267,17 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
         "en": {"yesno": "Under the law", "default": "{label}"},
     }[lk]
     if qtype == "yesno":
-        answer = f"{intro['yesno']} ({label}): «{quote}» [1]"
+        answer = f"{intro['yesno']} ({label}): «{quote}» [{ref}]"
     elif lk == "en" and top.chunk.language != Language.EN:
         src = "Russian" if top.chunk.language == Language.RU else "Uzbek"
-        answer = f"{label} (official text in {src}): «{quote}» [1]"
+        answer = f"{label} (official text in {src}): «{quote}» [{ref}]"
     else:
-        answer = f"{label}: «{quote}» [1]"
+        answer = f"{label}: «{quote}» [{ref}]"
 
     key_points: list[str] = []
     polarity = (inp.lead or {}).get("polarity")
     use_lead = bool(inp.lead and inp.lead_refs) and qtype in ("action", "general", "amount", "duration", "yesno")
-    used: set[int] = {1}
+    used: set[int] = {ref}
     if use_lead and inp.lead:
         text_lead = inp.lead.get("ru" if lk == "ru" else "en" if lk == "en" else "uz", "")
         if qtype == "yesno" and polarity and asks_permission(inp.query):
@@ -275,18 +303,18 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
                 used.add(n)
     fine_lines = _fine_lines(top, lang, facts)
     key_points.extend(fine_lines)
-    top_score = max(top.final_score, 1e-9)
-    shown = used if use_lead else {1}
+    top_score = max(inp.evidence[0].final_score, 1e-9)
+    shown = used if use_lead else {ref}
     seen_articles = {(inp.evidence[n - 1].chunk.canonical_id, chunk_article_id(inp.evidence[n - 1].chunk)) for n in shown}
     for idx, item in enumerate(inp.evidence[:5], start=1):
-        if idx in used or (idx == 1 and not use_lead):
+        if idx in used or (idx == ref and not use_lead):
             continue
         if len(key_points) >= 3:
             break
         key = (item.chunk.canonical_id, chunk_article_id(item.chunk))
         if key in seen_articles:
             continue
-        if top.final_score > 0 and item.final_score < 0.35 * top_score:
+        if inp.evidence[0].final_score > 0 and item.final_score < 0.35 * top_score:
             continue
         seen_articles.add(key)
         p = best_sentence(item, terms, qtype, inp.expansion_terms, body=_body(item))

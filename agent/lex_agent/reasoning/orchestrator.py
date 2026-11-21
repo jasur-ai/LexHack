@@ -609,7 +609,11 @@ class LegalAgentOrchestrator:
                     query=request.query,
                     lang=response_lang,
                     evidence=top_evidence,
-                    terms=list(dict.fromkeys([*qa.search_terms, *qa_topic.search_terms])),
+                    terms=list(dict.fromkeys(
+                        # English questions are matched to the statute text through their bridged Russian words
+                        [*qa_topic.synonym_terms, *qa.search_terms] if qa.language == "en"
+                        else [*qa.search_terms, *qa_topic.search_terms]
+                    )),
                     expansion_terms=qa_topic.all_expansion_terms | set(qa_topic.synonym_terms),
                     concept_ids=[m.id for m in qa_topic.concepts],
                     follow_ups=follow,
@@ -914,6 +918,9 @@ class LegalAgentOrchestrator:
         from lex_agent.retrieval.reranker import chunk_terms
 
         terms = set(qa.search_terms)
+        if qa.language == "en":
+            # No statute is in English: an English question is judged by its bridged statutory (Russian) words
+            terms = set(qa.synonym_terms)
         if not terms:
             return False
         for item in evidence[:2]:
