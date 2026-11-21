@@ -56,7 +56,8 @@ jobs:
         run: |
           BRANCH=$(python -c "import json; print(json.load(open('deploy/request.json')).get('branch') or '${{ github.ref_name }}')")
           ONLY=$(python -c "import json; print(','.join(json.load(open('deploy/request.json')).get('only') or []))")
-          python deploy/render_stack.py --branch "$BRANCH" --only "$ONLY" --out render-result.json
+          MODE=$(python -c "import json; print(json.load(open('deploy/request.json')).get('mode') or 'deploy')")
+          python deploy/render_stack.py --branch "$BRANCH" --only "$ONLY" --mode "$MODE" --out render-result.json
 
       - name: Smoke-test the deployed stack
         run: python deploy/smoke.py --render-result render-result.json --out smoke.json
@@ -69,6 +70,10 @@ jobs:
           AGENT_URL=$(python -c "import json; print(json.load(open('render-result.json'))['services']['agent']['url'])")
           python agent/scripts/counter_audit.py --target "$AGENT_URL" --json-out counter-audit.json --md-out counter-audit.md
           cat counter-audit.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish results as annotations
+        if: always()
+        run: python deploy/report.py
 
       - name: Upload results
         if: always()

@@ -199,6 +199,7 @@ def main() -> int:
     parser.add_argument("--out", default="render-result.json")
     parser.add_argument("--only", default="", help="Comma-separated service keys to deploy (default: all)")
     parser.add_argument("--timeout", type=int, default=2400)
+    parser.add_argument("--mode", default="deploy", choices=["deploy", "status"], help="status: report only, change nothing")
     args = parser.parse_args()
 
     api_key = os.environ.get("RENDER_API_KEY", "").strip()
@@ -213,6 +214,23 @@ def main() -> int:
 
     urls: dict[str, str] = {}
     result: dict[str, Any] = {"owner": {"name": owner.get("name"), "type": owner.get("type")}, "branch": args.branch, "services": {}}
+    if args.mode == "status":
+        for spec in stack["services"]:
+            svc = render.find_service(owner["id"], spec["name"])
+            if not svc:
+                continue
+            deps = render.call("GET", f"/services/{svc['id']}/deploys", params={"limit": 1}) or []
+            dep = (deps[0].get("deploy") or {}) if deps else {}
+            result["services"][spec["key"]] = {
+                "id": svc["id"], "name": svc.get("name"), "url": (svc.get("serviceDetails") or {}).get("url", ""),
+                "dashboard": svc.get("dashboardUrl"), "plan": (svc.get("serviceDetails") or {}).get("plan"),
+                "plan_fallback_to_free": False, "created": False,
+                "deploy": {"id": dep.get("id"), "status": dep.get("status"), "commit": (dep.get("commit") or {}).get("id")},
+            }
+        Path(args.out).write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        for key, info in result["services"].items():
+            print(f"{key}: {info['url']} | plan {info['plan']} | last deploy {info['deploy']['status']}")
+        return 0
     pending: dict[str, tuple[str, str]] = {}
     for spec in stack["services"]:
         key = spec["key"]

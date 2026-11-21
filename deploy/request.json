@@ -1,6 +1,7 @@
 {
-  "nonce": 1,
+  "nonce": 2,
   "branch": "arena/8a21e194-lexhack",
   "only": [],
-  "note": "First deploy of haqli + legal agent on Render"
+  "mode": "status",
+  "note": "Report URLs, plans, smoke test and counter-agent audit of the current deployment (no rebuild)"
 }
