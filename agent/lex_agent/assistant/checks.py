@@ -24,7 +24,8 @@ _ART_RE = re.compile(r"(\d{1,4})(?:\s*[-.]\s*(\d{1,2})|[¹²³⁴⁵⁶⁷⁸⁹
 _CYR = re.compile(r"[\u0400-\u04ff]")
 _LAT = re.compile(r"[A-Za-z]")
 _UZ_CYR_ONLY = re.compile(r"[ўқғҳЎҚҒҲ]")
-_EN_WORDS = re.compile(r"\b(?:the|and|of|to|is|you|your|for|with|under|law|article)\b", re.I)
+_EN_WORDS = re.compile(r"\b(?:the|and|of|to|is|you|your|for|with|under|law|article|art|code|official|text|in|days?|"
+                       r"court|rate|tax|leave|fine|pay)\b", re.I)
 
 
 @dataclass(slots=True)

@@ -19,7 +19,7 @@ from lex_agent.assistant.act_names import en_article, en_title
 from lex_agent.assistant.calculators import _rub, fines_in_text, som
 from lex_agent.assistant.playbooks import Playbook
 from lex_agent.chunk_text import article_body, chunk_article_id, display_text, short_act_title
-from lex_agent.knowledge.facts import FactsPack
+from lex_agent.knowledge.facts import FACTS_DOC_ID, FactsPack
 from lex_agent.language.textproc import index_terms
 from lex_agent.models import Language, RetrievedChunk
 
@@ -35,11 +35,43 @@ _QTYPES = {
     "duration": re.compile(r"necha kun|necha oy|necha yil|qancha muddat|muddat|qachon|qachongacha|necha soat|"
                            r"сколько дней|срок|когда|до какого|how long|when|deadline|how many days", re.I),
     "yesno": re.compile(r"mumkinmi|shartmi|kerakmi|bo'?ladimi|boʻladimi|haqqi bormi|qonuniymi|majburmi|bormi\b|"
-                        r"можно ли|обязан|нужно ли|законно|вправе|\bli\b|^(?:is|can|do|does|must|should|may)\b", re.I),
+                        r"\w+(?:adimi|aydimi|manmi|ladimi|sami)\b|"
+                        r"мумкинми|шартми|керакми|бўладими|борми\b|қонунийми|мажбурми|\w+(?:адими|айдими|манми)\b|"
+                        r"можно ли|обязан|нужно ли|законно|вправе|\bли\b|\bli\b|"
+                        r"^(?:is|can|do|does|must|should|may|am|are)\b", re.I),
     "action": re.compile(r"nima qil|qayerga|qanday qilib|qanday|что делать|куда|как |how (?:do|can|to)|what (?:can|should)", re.I),
 }
 _SENT_SPLIT = re.compile(r"(?<=[.;!?])\s+|\n+")
 _LIST_ITEM = re.compile(r"^\s*(?:\d+\\?\)|[a-zа-я]\)|[-–•])\s*")
+
+
+# "Can / may / is it allowed ...?" — the only yes/no form a lead's polarity answers. Questions about a duty or a ban
+# ("Is consent required?", "Is it forbidden?") or negated ones invert the meaning, so they get no Yes/No prefix.
+_PERMISSION_Q = re.compile(
+    r"mumkinmi|bo'?ladimi|boʻladimi|\w+(?:adimi|ydimi)\b|ruxsat (?:bormi|etiladimi|beriladimi)|haqqi?m? bormi|"
+    r"мумкинми|бўладими|\w+(?:адими|йдими)\b|можно ли|мо(?:жет|гут|жно)\b.*\?|вправе ли|имеет ли право|"
+    r"разрешен\w* ли|^\s*\w+ ли\b|"
+    r"^(?:can|may|could)\b|\bis it (?:legal|allowed|possible|ok(?:ay)?)\b|\bam i allowed\b|\bdoes (?:a|an|the|my)\b",
+    re.I,
+)
+_DUTY_OR_NEGATION_Q = re.compile(
+    r"shartmi|kerakmi|majburmi|taqiqlan\w*mi|emasmi|шартми|керакми|мажбурми|обязан|нужно ли|надо ли|запрещ|"
+    r"не (?:мож|могут|вправе|имеет)|\b(?:required|must|need|have to|forbidden|prohibited|illegal|not allowed|"
+    r"can'?t|cannot)\b",
+    re.I,
+)
+_PROPER_START = re.compile(r"^(?:Oʻzbek|O'zbek|Ўзбек|Узбек|Uzbek|Markaziy|Центральн|Central|Konstitutsiya|Конституц)")
+
+
+def asks_permission(query: str) -> bool:
+    q = (query or "").strip()
+    return bool(_PERMISSION_Q.search(q)) and not _DUTY_OR_NEGATION_Q.search(q)
+
+
+def _lower_first(text: str) -> str:
+    if not text or _PROPER_START.match(text) or (len(text) > 1 and text[1].isupper()):
+        return text
+    return text[:1].lower() + text[1:]
 
 
 def question_type(query: str) -> str:
@@ -106,7 +138,14 @@ def best_sentence(
     """The sentence of the article that best answers the question (query terms weigh 1, expansions 0.5)."""
     c = item.chunk
     body = body if body is not None else article_body(c, prefer_lead=False)
+    compact = re.sub(r"\s+", " ", body).strip()
+    if 25 <= len(compact) <= 260 and not _LIST_ITEM.search(body):
+        # A short article is quoted whole ("Umumiy daʼvo muddati — uch yil.")
+        return Pick(sentence=compact, score=1.0, item_index=0)
     sentences = _sentences(body)[:60]
+    if c.canonical_id == FACTS_DOC_ID:
+        # A figures card starts with its own name; only the dated values answer anything
+        sentences = [x for x in sentences if re.search(r"\d", x)] or sentences
     best: Pick | None = None
     for pos, s in enumerate(sentences):
         sterms = set(index_terms(s, language=c.language.value))
@@ -115,7 +154,7 @@ def best_sentence(
         score = overlap / (0.6 + 0.4 * len(s) / 150) - 0.03 * pos
         if pos == 0:
             score += 0.4  # the first sentence usually states the article's main rule
-        if qtype in ("amount", "duration") and _NUMBERISH.search(s):
+        if qtype in ("amount", "duration") and _NUMBERISH.search(_latin(s, c.language)):
             score += 1.2
         if qtype == "yesno" and re.search(r"\b(?:mumkin|shart|haqli|majbur|taqiqlan|yoʻl qoʻyilmaydi|мумкин|шарт|ҳақли|"
                                           r"вправе|обязан|запрещ|не допуска|может|не может)\w*", s, re.I):
@@ -127,6 +166,14 @@ def best_sentence(
         if best is None or score > best.score:
             best = Pick(sentence=s, score=score, item_index=0)
     return best
+
+
+def _latin(text: str, lang: Language) -> str:
+    if lang != Language.UZ_CYRL:
+        return text
+    from lex_agent.language.transliterator import cyrillic_to_latin
+
+    return cyrillic_to_latin(text)
 
 
 def _clip(text: str, limit: int) -> str:
@@ -146,6 +193,8 @@ def label_for(item: RetrievedChunk, lang: Language) -> str:
 
 def _label(item: RetrievedChunk, lang: Language) -> str:
     c = item.chunk
+    if c.canonical_id == FACTS_DOC_ID:
+        return str(c.article or c.article_title or c.doc_title)
     if lang == Language.EN and en_title(c.canonical_id):
         art = en_article(c.article)
         return f"{en_title(c.canonical_id)}, {art}" if art else str(en_title(c.canonical_id))
@@ -191,26 +240,21 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
     }[lk]
     if qtype == "yesno":
         answer = f"{intro['yesno']} ({label}): «{quote}» [1]"
-    elif lk == "en":
+    elif lk == "en" and top.chunk.language != Language.EN:
         src = "Russian" if top.chunk.language == Language.RU else "Uzbek"
         answer = f"{label} (official text in {src}): «{quote}» [1]"
     else:
         answer = f"{label}: «{quote}» [1]"
 
     key_points: list[str] = []
-    has_number = bool(pick and _NUMBERISH.search(pick.sentence))
-    lead_is_yes_no = bool(inp.lead) and bool(
-        re.match(r"(?:Ha|Yoʻq|Да|Нет|Yes|No)\b", (inp.lead or {}).get("uz", "") + " ")
-        or re.match(r"(?:Да|Нет)\b", (inp.lead or {}).get("ru", ""))
-    )
-    use_lead = bool(inp.lead and inp.lead_refs) and (
-        qtype in ("action", "general")
-        or (qtype in ("amount", "duration") and not has_number)
-        or (qtype == "yesno" and lead_is_yes_no)
-    )
+    polarity = (inp.lead or {}).get("polarity")
+    use_lead = bool(inp.lead and inp.lead_refs) and qtype in ("action", "general", "amount", "duration", "yesno")
     used: set[int] = {1}
     if use_lead and inp.lead:
         text_lead = inp.lead.get("ru" if lk == "ru" else "en" if lk == "en" else "uz", "")
+        if qtype == "yesno" and polarity and asks_permission(inp.query):
+            word = {"yes": {"uz": "Ha", "ru": "Да", "en": "Yes"}, "no": {"uz": "Yoʻq", "ru": "Нет", "en": "No"}}[polarity]
+            text_lead = f"{word['ru' if lk == 'ru' else 'en' if lk == 'en' else 'uz']} — {_lower_first(text_lead)}"
         if lk == "uz_cyrl":
             from lex_agent.language.transliterator import latin_to_cyrillic
 
@@ -247,6 +291,8 @@ def compose(inp: SynthesisInput, facts: FactsPack | None = None) -> dict[str, An
         seen_articles.add(key)
         p = best_sentence(item, terms, qtype, inp.expansion_terms, body=_body(item))
         snippet = _clip(_display(p.sentence if p else article_body(item.chunk)[:200], item.chunk.language, lang), 230)
+        if lk == "en" and item.chunk.language != Language.EN:
+            snippet = f"«{snippet}»"  # statute wording in another language is always shown as a quote
         key_points.append(f"{_label(item, lang)}: {snippet} [{idx}]")
 
     steps: list[str] = []

@@ -67,7 +67,7 @@ def uz_number(words: str) -> float | None:
 
 
 _FINE_RE = re.compile(
-    r"bazaviy hisoblash mikdorining\s+((?:[a-z]+\s+){0,3}?[a-z]+)\s+baravar(?:i|idan)(?:\s+(?:dan|gacha))?"
+    r"bazaviy hisoblash mikdorining\s+((?:[a-z]+\s+){0,3}?[a-z]+)\s+baravar(?:idan|i)(?:\s+(?:dan|gacha))?"
     r"(?:\s+((?:[a-z]+\s+){0,3}?[a-z]+)\s+baravarigacha)?",
 )
 _RU_FINE_RE = re.compile(r"(?:от\s+)?(\w+)(?:\s+до\s+(\w+))?\s+базов\w+\s+расч[её]тн\w+\s+величин", re.I)
@@ -154,8 +154,11 @@ def _bhm(facts: FactsPack, on: date | None) -> tuple[float | None, str]:
 # ------------------------------------------------------------------------------------------------ calculators
 
 
+_FINE_WORD = re.compile(r"jarima|жарима|штраф|\bfine|penalt", re.I)
+
+
 def calc_fine(facts: FactsPack, ent: Entities, *, article_text: str = "", on: date | None = None,
-              basis: tuple[str, str] | None = None) -> CalcResult:
+              basis: tuple[str, str] | None = None, query: str = "") -> CalcResult:
     on = on or (ent.dates[0] if ent.dates else date.today())
     bhm, since = _bhm(facts, on)
     res = CalcResult(kind="fine", ok=False, facts=["bhm"], basis=[basis] if basis else [])
@@ -188,6 +191,16 @@ def calc_fine(facts: FactsPack, ent: Entities, *, article_text: str = "", on: da
     amount_ru = _rub(first_low * bhm) + (f" – {_rub(first_high * bhm)}" if first_high else "")
     amount_en = f"UZS {int(first_low * bhm):,}" + (f" – {int(first_high * bhm):,}" if first_high else "")
     note = len(multiples) > 1
+    if ent.bhm_multiple and query and not _FINE_WORD.search(query):
+        # A plain conversion ("10 BHM qancha so'm?") — not necessarily a fine
+        res.headline = _L(
+            f"{first_low:g} BHM = {amount} — 1 BHM {som(bhm)} ({since} dan) boʻyicha.",
+            f"{first_low:g} БРВ = {amount_ru} — исходя из БРВ {_rub(bhm)} (с {since}).",
+            f"{first_low:g} BHM = {amount_en}, using BHM = UZS {int(bhm):,} (since {since}).",
+        )
+        res.lines = {"uz": uz, "ru": ru, "en": en}
+        res.values = {"bhm": bhm, "multiple": first_low, "amount": first_low * bhm, "first_low": first_low * bhm}
+        return res
     res.headline = _L(
         f"Jarima {amount}" + (" (birinchi holat; boshqa holatlar quyida)" if note else "")
         + f" — 1 BHM {som(bhm)} ({since} dan) boʻyicha.",
@@ -197,7 +210,9 @@ def calc_fine(facts: FactsPack, ent: Entities, *, article_text: str = "", on: da
         + f", using BHM = UZS {int(bhm):,} (since {since}).",
     )
     res.lines = {"uz": uz, "ru": ru, "en": en}
-    res.values = {"bhm": bhm, "first_low": first_low * bhm}
+    res.values = {"bhm": bhm, "multiple": first_low, "amount": first_low * bhm, "first_low": first_low * bhm}
+    if first_high:
+        res.values["amount_max"] = first_high * bhm
     return res
 
 
@@ -608,7 +623,7 @@ CALCULATORS = ("fine", "state_duty", "alimony", "wage_delay", "tax_penalty", "se
 def run(kind: str, facts: FactsPack, ent: Entities, question: str, *, article_text: str = "",
         basis: tuple[str, str] | None = None) -> CalcResult:
     if kind == "fine":
-        return calc_fine(facts, ent, article_text=article_text, basis=basis)
+        return calc_fine(facts, ent, article_text=article_text, basis=basis, query=question)
     if kind == "state_duty":
         return calc_state_duty(facts, ent, question)
     if kind == "alimony":

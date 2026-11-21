@@ -59,6 +59,9 @@ _TEMPLATE = _rx(r"namuna|shablon|obrazets|blank|kanday yoziladi|yozib ber|tuzib 
                 r"составь|напиши (?:заявлени|жалоб|иск)|template|sample (?:letter|claim|application)|draft (?:a|an|my)")
 _CALC_VERB = _rx(r"hisobla|hisoblab ber|hisob-?kitob kil|kancha bo(?:la)?di|nechpul|kancha tolanadi|kancha chikadi|"
                  r"рассчита|посчита|сколько (?:будет|получится|составит|платить|положено)|calculat|how much (?:is|will|do)")
+# Names of the figures themselves contain "calculation" words ("bazaviy hisoblash miqdori" = base calculation amount)
+_FIGURE_NAMES = _rx(r"bazaviy hisoblash\w*(?: mikdor\w*)?|hisoblashning bazaviy|bazaviy mikdor\w*|"
+                    r"базов\w* расч[её]тн\w* величин\w*|base calculation amount")
 _QUANT = _rx(r"\bkancha\b|\bnecha\b|\bnechta\b|\bсколько\b|\bhow much\b|\bhow many\b")
 _OFF_TOPIC = _rx(r"ob-?havo|pogoda|погод|weather|futbol|футбол|football|retsept|рецепт|recipe|kino|фильм|movie|"
                  r"anekdot|анекдот|joke|sher\b|стих|poem|kod yoz|напиши код|write (?:a )?code|matematika|математик|"
@@ -117,6 +120,9 @@ class _V:
     def replace(self, old: str, new: str) -> _V:
         return _V([v.replace(old, new) for v in self.views])
 
+    def sub(self, rx: re.Pattern[str], new: str) -> _V:
+        return _V([rx.sub(new, v) for v in self.views])
+
 
 def classify(query: str, *, language: str, concepts: list[ConceptMatch] | None = None) -> Route:
     """Route one question (concepts from the situation lexicon sharpen the calculation decision)."""
@@ -142,7 +148,7 @@ def classify(query: str, *, language: str, concepts: list[ConceptMatch] | None =
     concepts = concepts or []
     if v.search(_CALC_TOPICS["fine"]):
         return Route("calculation", calc="fine", flags=flags)
-    if any(m.concept.domain == "figures" for m in concepts[:1]) and not v.search(_CALC_VERB):
+    if any(m.concept.domain == "figures" for m in concepts[:1]) and not v.sub(_FIGURE_NAMES, " ").search(_CALC_VERB):
         return Route("figures", flags=flags)
     if v.search(_TEMPLATE):
         kind = next((k for k, p in _TEMPLATE_KINDS if v.search(_rx(p))), "appeal_state_body")

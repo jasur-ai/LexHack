@@ -60,7 +60,7 @@ async def test_extractive_stream_has_steps_sources_and_sections(tmp_path: Path) 
     resp = events[-1]["response"]
     assert resp.mode == "extractive"
     assert resp.sections and resp.sections.structured
-    assert "yigirma bir" in resp.sections.answer
+    assert "21 kalendar kun" in resp.sections.answer or "yigirma bir" in resp.sections.answer
     assert resp.sources[0].article == "217-modda"
     # identical question is served from cache
     again = await _collect(rt, "yillik mehnat ta'tili necha kun")

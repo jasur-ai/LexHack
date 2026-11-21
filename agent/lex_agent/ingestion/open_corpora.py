@@ -37,7 +37,7 @@ from typing import Any
 
 from lex_agent.chunk_text import article_body
 from lex_agent.language.textproc import surface_tokens
-from lex_agent.language.transliterator import normalize_uzbek_apostrophes
+from lex_agent.language.transliterator import cyrillic_to_latin, normalize_uzbek_apostrophes
 from lex_agent.models import (
     LEGAL_FORCE_HIERARCHY,
     DocumentMetadata,
@@ -496,6 +496,22 @@ _FACT_TITLES: dict[str, tuple[str, str, str]] = {
 _FACT_HEADER = {"uz_latn": "Amaliy ko'rsatkichlar", "ru": "Практические показатели", "en": "Practical figures"}
 
 
+def _rule_reference(entry: dict[str, Any], doc: str, article: str, key: str) -> str:
+    """' (Mehnat kodeksi, 333-modda)' / ' (Трудовой кодекс, статья 333)' / ' (Labour Code, art. 333)'."""
+    if key == "en":
+        from lex_agent.assistant.act_names import en_title
+
+        title = en_title(doc)
+        return f" ({title}, art. {article})" if title else ""
+    if key == "ru":
+        title = entry.get("short_ru") or ""
+        return f" ({title}, статья {article})" if title else ""
+    title = entry.get("short_uz") or ""
+    if title and any("\u0400" <= ch <= "\u04ff" for ch in title):
+        title = cyrillic_to_latin(title)
+    return f" ({title}, {article}-modda)" if title else ""
+
+
 def load_practical_facts(path: Path, catalog: dict[str, dict[str, Any]] | None = None) -> list[LegalChunk]:
     """Chunks for the practical figures pack (one per series / rule / group, in Uzbek, Russian and English)."""
     from lex_agent.knowledge.facts import FACTS_DOC_ID, FactsPack
@@ -548,8 +564,7 @@ def load_practical_facts(path: Path, catalog: dict[str, dict[str, Any]] | None =
         doc_type = DocumentType.CODE if entry.get("doc_type") == "code" else DocumentType.LAW
         titles = _FACT_TITLES.get(rule_id, (rule_id, rule_id, rule_id))
         for (lang, key), title in zip(langs, titles):
-            src = entry.get("short_ru" if key == "ru" else "short_uz") or ""
-            ref = f" ({src}, {rule.get('article')}-{'статья' if key == 'ru' else 'modda'})" if src else ""
+            ref = _rule_reference(entry, str(rule.get("doc")), str(rule.get("article")), key)
             _add(rule_id, lang, title, pack.text(rule, key) + ref, doc_type=doc_type,
                  url=lex_url(str(rule.get("doc")), Language.RU if key == "ru" else Language.UZ_CYRL), effective=None)
     for group, items in (("deadlines", pack.deadlines), ("state_duty", pack.state_duty)):

@@ -526,8 +526,8 @@ class LegalAgentOrchestrator:
         self._attach_article_leads(top_evidence)
         answer_route = route.kind
         if not self._evidence_is_relevant(qa_topic, top_evidence):
-            # Honest "not found": better than quoting an unrelated article
-            answer_route = "not_found"
+            # Honest "not found": better than quoting an unrelated article (emergency numbers are still shown)
+            answer_route = route.kind if route.kind == "emergency" else "not_found"
             top_evidence = []
         lead_info = lead_for([m.id for m in qa_topic.concepts]) if top_evidence else None
         lead_refs: list[int] = []
@@ -541,7 +541,10 @@ class LegalAgentOrchestrator:
                 if len(extra) > room:
                     top_evidence = top_evidence[: max(3, 6 - len(extra))]
                 top_evidence = top_evidence + extra[: 6 - len(top_evidence)]
-                have = {(e.chunk.canonical_id, chunk_article_id(e.chunk)): i for i, e in enumerate(top_evidence, start=1)}
+            # The articles that state the direct answer become sources [1], [2] ... in the lead's own order
+            rank = {k: n for n, k in enumerate(lead_info[1])}
+            top_evidence.sort(key=lambda e: rank.get((e.chunk.canonical_id, chunk_article_id(e.chunk)), len(rank)))
+            have = {(e.chunk.canonical_id, chunk_article_id(e.chunk)): i for i, e in enumerate(top_evidence, start=1)}
             lead_refs = [have[k] for k in lead_info[1] if k in have]
 
         translation_warnings: list[str] = []
@@ -854,22 +857,34 @@ class LegalAgentOrchestrator:
     def _align_language(self, evidence: list[RetrievedChunk], lang: Language) -> list[RetrievedChunk]:
         """Show each article in the reader's language: the Russian text for Russian readers and the Uzbek text
         (converted to the reader's script later) for Uzbek readers; duplicates of one article are dropped."""
-        if lang == Language.EN or not evidence:
+        if not evidence:
             return evidence
         want_ru = lang == Language.RU
+        # Practical figures exist in uz_latn/ru/en; statutes only in uz (Cyrillic) and ru
+        facts_lang = {Language.RU: Language.RU, Language.EN: Language.EN}.get(lang, Language.UZ_LATN)
 
         def wrong(item: RetrievedChunk) -> bool:
+            if item.chunk.canonical_id == FACTS_DOC_ID:
+                return item.chunk.language != facts_lang
+            if lang == Language.EN:
+                return False
             is_ru = item.chunk.language == Language.RU
-            return is_ru != want_ru and item.chunk.canonical_id != FACTS_DOC_ID
+            return is_ru != want_ru
 
-        keys = [(e.chunk.canonical_id, chunk_article_id(e.chunk)) for e in evidence if wrong(e)]
         swapped: dict[tuple[str, str], Any] = {}
-        if keys:
-            langs = ("ru",) if want_ru else ("uz_cyrl", "uz_latn")
-            try:
-                swapped = self.retriever.bm25_store.get_articles(keys, languages=langs, per_article=1)
-            except Exception:  # pragma: no cover - defensive
-                swapped = {}
+        store = self.retriever.bm25_store
+        law_keys = [(e.chunk.canonical_id, chunk_article_id(e.chunk)) for e in evidence
+                    if wrong(e) and e.chunk.canonical_id != FACTS_DOC_ID]
+        fact_keys = [(e.chunk.canonical_id, chunk_article_id(e.chunk)) for e in evidence
+                     if wrong(e) and e.chunk.canonical_id == FACTS_DOC_ID]
+        try:
+            if law_keys:
+                swapped.update(store.get_articles(law_keys, languages=("ru",) if want_ru else ("uz_cyrl", "uz_latn"),
+                                                  per_article=1))
+            if fact_keys:
+                swapped.update(store.get_articles(fact_keys, languages=(facts_lang.value,), per_article=1))
+        except Exception:  # pragma: no cover - defensive
+            swapped = {}
         out: list[RetrievedChunk] = []
         seen: set[tuple[str, str]] = set()
         for e in evidence:
@@ -883,19 +898,30 @@ class LegalAgentOrchestrator:
         return out
 
     def _evidence_is_relevant(self, qa: Any, evidence: list[RetrievedChunk]) -> bool:
+        """Whether the evidence can answer the question: it comes from an act the question names, from an act the
+        matched situation points to, or the top article covers at least a third of the question's words."""
         if not evidence:
             return False
-        if qa.concepts or qa.acts:
+        docs = {e.chunk.canonical_id for e in evidence[:5]}
+        if qa.acts and docs & {r.canonical_id for r in qa.acts}:
             return True
+        if qa.concepts:
+            targets: set[str] = set()
+            for m in qa.concepts[:3]:
+                targets |= m.concept.target_docs
+            if docs & targets:
+                return True
         from lex_agent.retrieval.reranker import chunk_terms
 
         terms = set(qa.search_terms)
         if not terms:
             return False
-        ct = chunk_terms(evidence[0])
-        bag = ct.body | ct.art_title | ct.heading | ct.doc_title
-        coverage = len(terms & bag) / len(terms)
-        return coverage >= 0.34
+        for item in evidence[:2]:
+            ct = chunk_terms(item)
+            bag = ct.body | ct.art_title | ct.heading | ct.doc_title
+            if len(terms & bag) / len(terms) >= 0.34:
+                return True
+        return False
 
     def _follow_ups_for(self, qa: Any, lang: Language) -> list[str]:
         lk = replies.lang_key(lang)

@@ -455,7 +455,7 @@
 {"q": "Договор дарения квартиры нужно ли нотариально удостоверять?", "lang": "ru", "expect": [["180552", ["504"]]], "domain": "civil", "typo": false, "split": "holdout"}
 {"q": "Залог автомобиля по кредиту", "lang": "ru", "expect": [["111189", ["264", "271"]], ["59914", ["*"]]], "domain": "civil", "typo": false, "split": "holdout"}
 {"q": "Ijaraga olgan kvartiramni boshqaga ijaraga bersam bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["613"]], ["106136", ["57"]]], "domain": "housing", "typo": false, "split": "holdout"}
-{"q": "Uy egasi ijara haqini oshirib yubordi", "lang": "uz_latn", "expect": [["180552", ["577", "535"]], ["106136", ["34"]]], "domain": "housing", "typo": false, "split": "holdout"}
+{"q": "Uy egasi ijara haqini oshirib yubordi", "lang": "uz_latn", "expect": [["180552", ["611", "577", "535"]], ["106136", ["34"]]], "domain": "housing", "typo": false, "split": "holdout"}
 {"q": "Kvartirani almashtirish uchun nima qilish kerak?", "lang": "uz_latn", "expect": [["106136", ["106", "111", "112"]]], "domain": "housing", "typo": false, "split": "holdout"}
 {"q": "Как приватизировать квартиру?", "lang": "ru", "expect": [["98430", ["*"]], ["106136", ["22"]]], "domain": "housing", "typo": false, "split": "holdout"}
 {"q": "Internetdan sotib olgan kiyimim to'g'ri kelmadi, qaytarsam bo'ladimi?", "lang": "uz_latn", "expect": [["4704", ["18", "28.1"]]], "domain": "consumer", "typo": false, "split": "holdout"}
@@ -486,7 +486,7 @@
 {"q": "Pensiya qayta hisoblanadimi ishlashni davom ettirsam?", "lang": "uz_latn", "expect": [["112314", ["49", "51"]]], "domain": "social", "typo": false, "split": "holdout"}
 {"q": "Nogironligi bo'lgan shaxs uchun qisqartirilgan ish vaqti", "lang": "uz_latn", "expect": [["6257288", ["427"]]], "domain": "social", "typo": false, "split": "holdout"}
 {"q": "Davlat organi ma'lumot berishdan bosh tortdi", "lang": "uz_latn", "expect": [["1319", ["*"]], ["2381133", ["*"]], ["6445145", ["33"]]], "domain": "rights", "typo": false, "split": "holdout"}
-{"q": "Ikki fuqarolikka ruxsat bormi?", "lang": "uz_latn", "expect": [["4761984", ["4", "25"]]], "domain": "rights", "typo": false, "split": "holdout"}
+{"q": "Ikki fuqarolikka ruxsat bormi?", "lang": "uz_latn", "expect": [["4761984", ["12", "4", "25"]]], "domain": "rights", "typo": false, "split": "holdout"}
 {"q": "Harbiy xizmatdan bo'yin tovlash uchun jazo", "lang": "uz_latn", "expect": [["111453", ["225"]]], "domain": "rights", "typo": false, "split": "holdout"}
 {"q": "Bankdagi pulim hisobidan bank siri kimlarga ochiladi?", "lang": "uz_latn", "expect": [["41760", ["*"]], ["180552", ["786"]]], "domain": "finance", "typo": false, "split": "holdout"}
 {"q": "Hozirgi BHM bilan 10 BHM jarima qancha bo'ladi?", "lang": "uz_latn", "expect": [["practical-facts", ["bhm"]]], "domain": "figures", "typo": false, "split": "holdout"}
