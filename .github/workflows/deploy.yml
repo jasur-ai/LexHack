@@ -1,0 +1,83 @@
+name: deploy
+
+# Provisions and deploys the public stack: haqli (web app + API) and the legal agent on Render. Afterwards it
+# smoke-tests both services and runs the counter-agent's test suites against the deployed agent.
+#
+# Credentials come from repository secrets (RENDER_API_KEY, optional GEMINI_API_KEY) when they exist. Otherwise
+# the run waits for a sealed one-time handshake (see deploy/handshake.py), so no token is ever stored in plain text.
+# A run starts when deploy/request.json changes, or by hand from the Actions tab.
+
+on:
+  push:
+    paths:
+      - deploy/request.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      HAS_RENDER_SECRET: ${{ secrets.RENDER_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deploy tooling
+        run: pip install --quiet "pynacl==1.5.0" "httpx>=0.27,<1"
+
+      - name: Use repository secrets
+        if: env.HAS_RENDER_SECRET == 'true'
+        env:
+          RENDER_SECRET: ${{ secrets.RENDER_API_KEY }}
+          GEMINI_SECRET: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "RENDER_API_KEY=$RENDER_SECRET" >> "$GITHUB_ENV"
+          if [ -n "$GEMINI_SECRET" ]; then echo "GEMINI_API_KEY=$GEMINI_SECRET" >> "$GITHUB_ENV"; fi
+
+      - name: Receive credentials (sealed handshake)
+        if: env.HAS_RENDER_SECRET != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python deploy/handshake.py receive --timeout 900
+
+      - name: Provision and deploy on Render
+        run: |
+          BRANCH=$(python -c "import json; print(json.load(open('deploy/request.json')).get('branch') or '${{ github.ref_name }}')")
+          ONLY=$(python -c "import json; print(','.join(json.load(open('deploy/request.json')).get('only') or []))")
+          python deploy/render_stack.py --branch "$BRANCH" --only "$ONLY" --out render-result.json
+
+      - name: Smoke-test the deployed stack
+        run: python deploy/smoke.py --render-result render-result.json --out smoke.json
+
+      - name: Counter-agent audit of the deployed agent
+        if: always() && hashFiles('render-result.json') != ''
+        run: |
+          pip install --quiet -r agent_couinter/requirements.txt
+          pip install --quiet -e agent_couinter --no-deps
+          AGENT_URL=$(python -c "import json; print(json.load(open('render-result.json'))['services']['agent']['url'])")
+          python agent/scripts/counter_audit.py --target "$AGENT_URL" --json-out counter-audit.json --md-out counter-audit.md
+          cat counter-audit.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-results
+          path: |
+            render-result.json
+            smoke.json
+            counter-audit.json
+            counter-audit.md
+          if-no-files-found: ignore

@@ -108,8 +108,9 @@ def draft_dispute_documents(
                 "В связи с несвоевременным вручением постановления, прошу признать причину пропуска 10-дневного срока уважительной и восстановить срок обжалования.\n"
             )
 
+        organ_uz = organ_map_uz.get(category, "YHXX yuqori turuvchi organiga / Ma'muriy sudga")
         complaint_uz = (
-            f"Kimga: {organ_map_uz.get(category, 'YHXX yuqori turuvchi organiga / Ma\'muriy sudga')}\n"
+            f"Kimga: {organ_uz}\n"
             f"Arizachi: {citizen_name}\n"
             f"Javobgar / Qaror chiqargan organ: {respondent_name}\n"
             f"Sana: {today_str}\n\n"

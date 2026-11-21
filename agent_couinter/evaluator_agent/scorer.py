@@ -319,7 +319,6 @@ class LegalAuditScorer:
                 ErrorCode.FABRICATED_CITATION: "Soxta modda yoki mavjud bo'lmagan hujjat",
                 ErrorCode.FALSE_PREMISE_COMPLIANCE: "Soxta shartni inkor etmaslik (gallyutsinatsiya)",
                 ErrorCode.REPEALED_OR_OUTDATED_NORM: "Kuchini yo'qotgan yoki eski qonun normasi",
-                ErrorCode.MISQUOTED_OR_DRIFT: "Qonun mazmunini noto'g'ri talqin qilish",
                 ErrorCode.MISSED_EXCEPTION_OR_CONDITION: "Muhim istisno yoki shart tushib qolgan",
                 ErrorCode.HIERARCHY_OR_CONFLICT_ERROR: "Qonunlar iyerarxiyasi (O'RQ-682) buzilgan",
                 ErrorCode.TRANSLATION_OR_TERM_DRIFT: "Atama yoki til bo'yicha xatolik",
