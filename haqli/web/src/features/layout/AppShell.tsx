@@ -316,7 +316,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col flex-1 min-h-0">
         {/* Brand Header */}
         <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
-          <div className="flex flex-col gap-1">
+          <div
+            onClick={() => {
+              haptics.selection();
+              if (activeMode !== "citizen") setActiveMode("citizen");
+              setActiveTab("home");
+              onItemClick?.();
+            }}
+            role="button"
+            tabIndex={0}
+            className="flex flex-col gap-1 cursor-pointer hover:opacity-85 transition-opacity"
+            title="Asosiy sahifaga o'tish"
+          >
             <HaqliLogo className="h-7 w-auto" />
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-[10px] font-extrabold tracking-wider uppercase text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block">
@@ -374,40 +385,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Navigation Sections */}
         <div className="px-2.5 py-1 flex-1 overflow-y-auto space-y-2.5">
-          {/* Asosiy Boshqaruv (Home) */}
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                haptics.selection();
-                if (activeMode !== "citizen") setActiveMode("citizen");
-                setActiveTab("home");
-                onItemClick?.();
-              }}
-              className={`w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
-                activeMode === "citizen" && activeTab === "home"
-                  ? "bg-blue-50 text-[#0074ff] font-semibold border border-blue-100"
-                  : "text-slate-700 hover:bg-slate-50 font-medium"
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
-                    activeMode === "citizen" && activeTab === "home"
-                      ? "bg-[#0074ff] text-white"
-                      : "bg-slate-50 text-slate-500"
-                  }`}
-                >
-                  <Home className="h-3.5 w-3.5" />
-                </div>
-                <span className="text-xs truncate">Asosiy Boshqaruv</span>
-              </div>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium bg-emerald-50 text-emerald-700">
-                Live
-              </span>
-            </button>
-          </div>
-
           {/* Xizmatlar ⌄ (5 ta Himoya Moduli bo'yicha) */}
           <div className="pt-1">
             <button
@@ -711,7 +688,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-4 w-4" />
             </button>
-            <div className="lg:hidden flex items-center gap-2">
+            <div
+              onClick={() => {
+                haptics.selection();
+                if (activeMode !== "citizen") setActiveMode("citizen");
+                setActiveTab("home");
+              }}
+              role="button"
+              tabIndex={0}
+              className="lg:hidden flex items-center gap-2 cursor-pointer"
+            >
               <HaqliLogo className="h-7 w-auto" />
             </div>
             <div className="hidden lg:flex items-center gap-2">
