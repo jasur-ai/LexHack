@@ -12,8 +12,18 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
-from openai import AsyncOpenAI, AuthenticationError, BadRequestError, PermissionDeniedError
-from tenacity import retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
+from openai import (
+    AsyncOpenAI,
+    AuthenticationError,
+    BadRequestError,
+    PermissionDeniedError,
+)
+from tenacity import (
+    retry,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from lex_agent.config import Settings, get_settings
 
@@ -121,6 +131,20 @@ class LLMClient:
         if self._http and not self._http.is_closed:
             await self._http.aclose()
 
+    def _thinking_config(self, model: str) -> dict[str, Any] | None:
+        """Lowest-latency reasoning setting supported by the model (Gemini 3+ rejects `minimal` on non-lite models)."""
+        level = (self.settings.llm_thinking_level or "auto").strip().lower()
+        low = (model or "").lower()
+        if re.search(r"gemini-(?:[3-9]|\d{2})", low):
+            if level == "auto":
+                level = "minimal" if "lite" in low else "low"
+            if level in {"minimal", "low", "medium", "high"}:
+                return {"thinkingLevel": level}
+            return None
+        if "gemini-2.5" in low and "pro" not in low:
+            return {"thinkingBudget": 0}
+        return None
+
     @staticmethod
     def _messages_to_vertex_payload(
         messages: list[dict[str, Any]],
@@ -129,6 +153,7 @@ class LLMClient:
         temperature: float,
         max_tokens: int,
         json_mode: bool = False,
+        thinking: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         system_parts: list[dict[str, str]] = []
         contents: list[dict[str, Any]] = []
@@ -144,17 +169,12 @@ class LLMClient:
             else:
                 contents.append({"role": "user", "parts": [{"text": content}]})
 
-        gen_cfg: dict[str, Any] = {
-            "temperature": temperature,
-            "maxOutputTokens": max_tokens,
-        }
-        # Minimize reasoning latency so first streamed tokens arrive in ~1-2s instead of stalling
-        low_model = (model or "").lower()
-        if re.search(r"gemini-(?:3|4)", low_model):
-            gen_cfg["thinkingConfig"] = {"thinkingLevel": "minimal"}
-        elif "gemini-2.5" in low_model:
-            gen_cfg["thinkingConfig"] = {"thinkingBudget": 0}
-
+        gen_cfg: dict[str, Any] = {"maxOutputTokens": max_tokens}
+        # Gemini 3+ deprecates sampling parameters; older models still honour temperature.
+        if not re.search(r"gemini-(?:[3-9]|\d{2})", (model or "").lower()):
+            gen_cfg["temperature"] = temperature
+        if thinking:
+            gen_cfg["thinkingConfig"] = thinking
         if json_mode:
             gen_cfg["responseMimeType"] = "application/json"
 
@@ -166,6 +186,19 @@ class LLMClient:
             payload["systemInstruction"] = {"parts": system_parts}
         return payload
 
+    def _gemini_attempts(self, model: str) -> list[tuple[str, dict[str, Any] | None]]:
+        attempts: list[tuple[str, dict[str, Any] | None]] = [(model, self._thinking_config(model))]
+        fallback = (self.settings.llm_fallback_model or "").strip()
+        if fallback and fallback != model:
+            attempts.append((fallback, self._thinking_config(fallback)))
+        return attempts
+
+    @staticmethod
+    def _raise_for_gemini(status: int, body: str) -> None:
+        if status in (401, 403):
+            raise PermissionError(f"API authentication failed ({status}): {body[:400]}")
+        raise RuntimeError(f"AI service error ({status}): {body[:400]}")
+
     async def _gemini_generate(
         self,
         messages: list[dict[str, Any]],
@@ -175,35 +208,43 @@ class LLMClient:
         max_tokens: int,
         json_mode: bool = False,
     ) -> str:
-        url = f"{self._gemini_models_base()}/{model}:generateContent"
-        payload = self._messages_to_vertex_payload(
-            messages,
-            model=model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            json_mode=json_mode,
-        )
         http = self._get_http()
-        resp = await http.post(
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": self._resolved_api_key(),
-            },
-            json=payload,
-        )
-        if resp.status_code in (401, 403):
-            raise PermissionError(f"API authentication failed ({resp.status_code}): {resp.text[:400]}")
-        if resp.status_code >= 400:
-            raise RuntimeError(f"AI service error ({resp.status_code}): {resp.text[:400]}")
-        data = resp.json()
-        candidates = data.get("candidates") or []
-        if not candidates:
-            return ""
-        parts = candidates[0].get("content", {}).get("parts") or []
-        return "".join(
-            p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought")
-        ).strip()
+        headers = {"Content-Type": "application/json", "x-goog-api-key": self._resolved_api_key()}
+        last_status, last_body = 0, ""
+        for attempt_model, thinking in self._gemini_attempts(model):
+            for thinking_cfg in (thinking, None) if thinking else (None,):
+                payload = self._messages_to_vertex_payload(
+                    messages,
+                    model=attempt_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    json_mode=json_mode,
+                    thinking=thinking_cfg,
+                )
+                resp = await http.post(
+                    f"{self._gemini_models_base()}/{attempt_model}:generateContent",
+                    headers=headers,
+                    json=payload,
+                    timeout=self.settings.llm_request_timeout,
+                )
+                if resp.status_code < 400:
+                    data = resp.json()
+                    candidates = data.get("candidates") or []
+                    if not candidates:
+                        return ""
+                    parts = candidates[0].get("content", {}).get("parts") or []
+                    return "".join(
+                        p.get("text", "") for p in parts if isinstance(p, dict) and not p.get("thought")
+                    ).strip()
+                last_status, last_body = resp.status_code, resp.text
+                if resp.status_code == 400 and thinking_cfg and "think" in last_body.lower():
+                    continue  # retry the same model without a thinking config
+                break
+            if last_status == 404:
+                continue  # model not available for this key -> try the fallback model
+            self._raise_for_gemini(last_status, last_body)
+        self._raise_for_gemini(last_status, last_body)
+        return ""
 
     async def _gemini_stream_generate(
         self,
@@ -213,46 +254,49 @@ class LLMClient:
         temperature: float,
         max_tokens: int,
     ) -> AsyncIterator[str]:
-        url = f"{self._gemini_models_base()}/{model}:streamGenerateContent?alt=sse"
-        payload = self._messages_to_vertex_payload(
-            messages,
-            model=model,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            json_mode=False,
-        )
         http = self._get_http()
-        async with http.stream(
-            "POST",
-            url,
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": self._resolved_api_key(),
-            },
-            json=payload,
-        ) as resp:
-            if resp.status_code in (401, 403):
-                body = (await resp.aread()).decode("utf-8", errors="replace")
-                raise PermissionError(f"API authentication failed ({resp.status_code}): {body[:400]}")
-            if resp.status_code >= 400:
-                body = (await resp.aread()).decode("utf-8", errors="replace")
-                raise RuntimeError(f"AI service error ({resp.status_code}): {body[:400]}")
-            async for line in resp.aiter_lines():
-                if not line or not line.startswith("data:"):
+        headers = {"Content-Type": "application/json", "x-goog-api-key": self._resolved_api_key()}
+        last_status, last_body = 0, ""
+        for attempt_model, thinking in self._gemini_attempts(model):
+            for thinking_cfg in (thinking, None) if thinking else (None,):
+                payload = self._messages_to_vertex_payload(
+                    messages,
+                    model=attempt_model,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    json_mode=False,
+                    thinking=thinking_cfg,
+                )
+                url = f"{self._gemini_models_base()}/{attempt_model}:streamGenerateContent?alt=sse"
+                async with http.stream("POST", url, headers=headers, json=payload) as resp:
+                    if resp.status_code >= 400:
+                        last_status = resp.status_code
+                        last_body = (await resp.aread()).decode("utf-8", errors="replace")
+                    else:
+                        async for line in resp.aiter_lines():
+                            if not line or not line.startswith("data:"):
+                                continue
+                            raw_data = line[5:].strip()
+                            if not raw_data or raw_data == "[DONE]":
+                                continue
+                            try:
+                                chunk = json.loads(raw_data)
+                            except json.JSONDecodeError:
+                                continue
+                            for cand in chunk.get("candidates") or []:
+                                for part in cand.get("content", {}).get("parts") or []:
+                                    if isinstance(part, dict) and not part.get("thought"):
+                                        txt = part.get("text")
+                                        if txt:
+                                            yield txt
+                        return
+                if last_status == 400 and thinking_cfg and "think" in last_body.lower():
                     continue
-                raw_data = line[5:].strip()
-                if not raw_data or raw_data == "[DONE]":
-                    continue
-                try:
-                    chunk = json.loads(raw_data)
-                except json.JSONDecodeError:
-                    continue
-                for cand in chunk.get("candidates") or []:
-                    for part in cand.get("content", {}).get("parts") or []:
-                        if isinstance(part, dict) and not part.get("thought"):
-                            txt = part.get("text")
-                            if txt:
-                                yield txt
+                break
+            if last_status == 404:
+                continue
+            self._raise_for_gemini(last_status, last_body)
+        self._raise_for_gemini(last_status, last_body)
 
     @retry(
         retry=retry_if_not_exception_type((AuthenticationError, PermissionDeniedError, BadRequestError, PermissionError, RuntimeError)),

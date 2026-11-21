@@ -7,7 +7,10 @@ import re
 import sqlite3
 from pathlib import Path
 
-from lex_agent.language.transliterator import normalize_uzbek_apostrophes, to_searchable_uzbek_latin
+from lex_agent.language.transliterator import (
+    normalize_uzbek_apostrophes,
+    to_searchable_uzbek_latin,
+)
 from lex_agent.models import LegalChunk, NormStatus, RetrievalFilter, RetrievedChunk
 
 logger = logging.getLogger(__name__)
@@ -136,7 +139,14 @@ def _build_fts_queries(query: str) -> list[str]:
 
 
 class BM25Store:
-    """SQLite-persisted chunk store with C-speed FTS5 BM25 full-text search and exact doc/article SQL lookup."""
+    """SQLite-persisted chunk store with C-speed FTS5 BM25 full-text search and exact doc/article SQL lookup.
+
+    Schema: ``chunks`` (one row per chunk, integer ``rid`` primary key) and the ``chunks_fts`` FTS5 table whose
+    ``rowid`` equals ``chunks.rid``. Article titles live in their own heavily weighted FTS column because they are
+    the most precise summary of what a norm regulates.
+    """
+
+    _FTS_COLUMNS = ("doc_title", "doc_number", "article", "article_title", "body")
 
     def __init__(self, db_path: Path) -> None:
         self.db_path = db_path
@@ -145,7 +155,7 @@ class BM25Store:
         self._init_schema()
 
     def _connect(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, timeout=30.0)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
@@ -153,10 +163,19 @@ class BM25Store:
 
     def _init_schema(self) -> None:
         with self._connect() as conn:
+            cols = [r["name"] for r in conn.execute("PRAGMA table_info(chunks)").fetchall()]
+            fts_cols = [r["name"] for r in conn.execute("PRAGMA table_info(chunks_fts)").fetchall()]
+            if (cols and "rid" not in cols) or (fts_cols and "article_title" not in fts_cols):
+                # Legacy cache layout (pre-2026.11): it only ever held re-fetchable data, so rebuild it.
+                logger.warning("Upgrading legacy BM25 index layout at %s (cached chunks will be rebuilt).", self.db_path)
+                conn.execute("DROP TABLE IF EXISTS chunks_fts")
+                conn.execute("DROP TABLE IF EXISTS chunks")
+                conn.execute("DROP TABLE IF EXISTS index_meta")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS chunks (
-                    chunk_id TEXT PRIMARY KEY,
+                    rid INTEGER PRIMARY KEY AUTOINCREMENT,
+                    chunk_id TEXT NOT NULL UNIQUE,
                     doc_id TEXT NOT NULL,
                     canonical_id TEXT NOT NULL,
                     language TEXT NOT NULL,
@@ -175,54 +194,79 @@ class BM25Store:
             conn.execute("CREATE INDEX IF NOT EXISTS idx_chunks_canonical ON chunks(canonical_id)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_chunks_doc_number ON chunks(doc_number)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_chunks_article ON chunks(article)")
-
-            # Native C-speed SQLite FTS5 index with BM25 ranking
             conn.execute(
                 """
                 CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
-                    chunk_id UNINDEXED,
                     doc_title,
                     doc_number,
                     article,
+                    article_title,
                     body,
                     tokenize='unicode61 remove_diacritics 2'
                 )
                 """
             )
+            conn.execute("CREATE TABLE IF NOT EXISTS index_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
+
+    @staticmethod
+    def _fts_body(c: LegalChunk) -> str:
+        """Searchable body: apostrophe-normalized text plus a Latin mirror for Uzbek Cyrillic."""
+        base = normalize_uzbek_apostrophes(c.text)
+        mirror = c.normalized_text or ""
+        if mirror and mirror != base and mirror != c.text:
+            return f"{base}\n{mirror}"
+        return base
+
+    @classmethod
+    def _fts_row(cls, rid: int, c: LegalChunk) -> tuple[int, str, str, str, str, str]:
+        return (
+            rid,
+            normalize_uzbek_apostrophes(c.doc_title),
+            normalize_uzbek_apostrophes(c.doc_number or ""),
+            c.article or "",
+            normalize_uzbek_apostrophes(c.article_title or ""),
+            cls._fts_body(c),
+        )
+
+    @staticmethod
+    def _stored_json(c: LegalChunk) -> str:
+        # The searchable mirror lives in FTS only; keeping it out of chunk_json halves the database size.
+        return c.model_dump_json(exclude={"normalized_text"})
 
     def _ensure_fts_synced(self) -> None:
-        """One-time fast backfill of FTS5 table if existing chunks predate FTS5 creation."""
+        """Backfill the FTS5 table if it is out of sync with ``chunks`` (e.g. after an interrupted build)."""
         if self._fts_ready:
             return
         with self._connect() as conn:
             total_chunks = int(conn.execute("SELECT COUNT(*) FROM chunks").fetchone()[0])
             total_fts = int(conn.execute("SELECT COUNT(*) FROM chunks_fts").fetchone()[0])
-            if total_chunks > 0 and total_fts < total_chunks:
-                logger.info("Building fast SQLite FTS5 BM25 index for %d existing chunks (one-time)...", total_chunks)
+            if total_chunks != total_fts:
+                logger.info("Re-syncing SQLite FTS5 index for %d chunks...", total_chunks)
                 conn.execute("DELETE FROM chunks_fts")
-                cursor = conn.execute("SELECT chunk_id, chunk_json FROM chunks")
-                batch: list[tuple[str, str, str, str, str]] = []
-                for row in cursor:
+                batch: list[tuple[int, str, str, str, str, str]] = []
+                for row in conn.execute("SELECT rid, chunk_json FROM chunks"):
                     c = LegalChunk.model_validate_json(row["chunk_json"])
-                    body = c.text if not c.normalized_text or c.normalized_text == c.text else f"{c.text}\n{c.normalized_text}"
-                    batch.append((c.chunk_id, c.doc_title, c.doc_number or "", c.article or "", body))
+                    batch.append(self._fts_row(int(row["rid"]), c))
                     if len(batch) >= 1000:
                         conn.executemany(
-                            "INSERT INTO chunks_fts(chunk_id, doc_title, doc_number, article, body) VALUES (?, ?, ?, ?, ?)",
+                            "INSERT INTO chunks_fts(rowid, doc_title, doc_number, article, article_title, body) "
+                            "VALUES (?, ?, ?, ?, ?, ?)",
                             batch,
                         )
                         batch.clear()
                 if batch:
                     conn.executemany(
-                        "INSERT INTO chunks_fts(chunk_id, doc_title, doc_number, article, body) VALUES (?, ?, ?, ?, ?)",
+                        "INSERT INTO chunks_fts(rowid, doc_title, doc_number, article, article_title, body) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
                         batch,
                     )
-                logger.info("SQLite FTS5 BM25 index ready (%d chunks).", total_chunks)
         self._fts_ready = True
 
     def upsert_chunks(self, chunks: list[LegalChunk]) -> None:
         if not chunks:
             return
+        # De-duplicate within the batch (last one wins)
+        unique: dict[str, LegalChunk] = {c.chunk_id: c for c in chunks}
         rows = [
             (
                 c.chunk_id,
@@ -236,41 +280,88 @@ class BM25Store:
                 c.legal_force_rank,
                 c.effective_date.isoformat() if c.effective_date else None,
                 c.expiry_date.isoformat() if c.expiry_date else None,
-                c.model_dump_json(),
+                self._stored_json(c),
             )
-            for c in chunks
+            for c in unique.values()
         ]
-        fts_rows = [
-            (
-                c.chunk_id,
-                c.doc_title,
-                c.doc_number or "",
-                c.article or "",
-                c.text if not c.normalized_text or c.normalized_text == c.text else f"{c.text}\n{c.normalized_text}",
-            )
-            for c in chunks
-        ]
-        chunk_ids = [(c.chunk_id,) for c in chunks]
         with self._connect() as conn:
+            ids = list(unique)
+            existing: dict[str, int] = {}
+            for i in range(0, len(ids), 500):
+                part = ids[i : i + 500]
+                q = f"SELECT rid, chunk_id FROM chunks WHERE chunk_id IN ({','.join('?' * len(part))})"
+                existing.update({r["chunk_id"]: int(r["rid"]) for r in conn.execute(q, part)})
+            if existing:
+                conn.executemany("DELETE FROM chunks_fts WHERE rowid = ?", [(rid,) for rid in existing.values()])
             conn.executemany(
                 """
-                INSERT OR REPLACE INTO chunks (
+                INSERT INTO chunks (
                     chunk_id, doc_id, canonical_id, language, doc_type, doc_number,
                     article, status, legal_force_rank, effective_date, expiry_date, chunk_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(chunk_id) DO UPDATE SET
+                    doc_id=excluded.doc_id, canonical_id=excluded.canonical_id, language=excluded.language,
+                    doc_type=excluded.doc_type, doc_number=excluded.doc_number, article=excluded.article,
+                    status=excluded.status, legal_force_rank=excluded.legal_force_rank,
+                    effective_date=excluded.effective_date, expiry_date=excluded.expiry_date,
+                    chunk_json=excluded.chunk_json
                 """,
                 rows,
             )
-            conn.executemany("DELETE FROM chunks_fts WHERE chunk_id = ?", chunk_ids)
+            rid_map: dict[str, int] = {}
+            for i in range(0, len(ids), 500):
+                part = ids[i : i + 500]
+                q = f"SELECT rid, chunk_id FROM chunks WHERE chunk_id IN ({','.join('?' * len(part))})"
+                rid_map.update({r["chunk_id"]: int(r["rid"]) for r in conn.execute(q, part)})
             conn.executemany(
-                "INSERT INTO chunks_fts(chunk_id, doc_title, doc_number, article, body) VALUES (?, ?, ?, ?, ?)",
-                fts_rows,
+                "INSERT INTO chunks_fts(rowid, doc_title, doc_number, article, article_title, body) VALUES (?, ?, ?, ?, ?, ?)",
+                [self._fts_row(rid_map[c.chunk_id], c) for c in unique.values()],
             )
         self._fts_ready = True
+
+    def clear(self) -> None:
+        """Remove every chunk (used before a forced full rebuild)."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM chunks_fts")
+            conn.execute("DELETE FROM chunks")
+            conn.execute("DELETE FROM index_meta")
+        self._fts_ready = True
+
+    def iter_chunks(self, batch_size: int = 1000):
+        """Yield every stored chunk (used to carry runtime-ingested documents across full rebuilds)."""
+        last = 0
+        while True:
+            with self._connect() as conn:
+                rows = conn.execute(
+                    "SELECT rid, chunk_json FROM chunks WHERE rid > ? ORDER BY rid LIMIT ?", (last, batch_size)
+                ).fetchall()
+            if not rows:
+                return
+            for r in rows:
+                yield LegalChunk.model_validate_json(r["chunk_json"])
+            last = int(rows[-1]["rid"])
+
+    def max_rid(self) -> int:
+        with self._connect() as conn:
+            return int(conn.execute("SELECT COALESCE(MAX(rid), 0) FROM chunks").fetchone()[0])
+
+    def count_after(self, rid: int) -> tuple[int, int]:
+        """(chunks, distinct documents) stored after row id ``rid`` — i.e. added after the bundled build."""
+        with self._connect() as conn:
+            row = conn.execute("SELECT COUNT(*), COUNT(DISTINCT doc_id) FROM chunks WHERE rid > ?", (rid,)).fetchone()
+            return int(row[0]), int(row[1])
+
+    def optimize(self) -> None:
+        with self._connect() as conn:
+            conn.execute("INSERT INTO chunks_fts(chunks_fts) VALUES('optimize')")
 
     def count(self) -> int:
         with self._connect() as conn:
             return int(conn.execute("SELECT COUNT(*) FROM chunks").fetchone()[0])
+
+    def language_counts(self) -> dict[str, int]:
+        with self._connect() as conn:
+            return {r["language"]: int(r["n"]) for r in conn.execute("SELECT language, COUNT(*) AS n FROM chunks GROUP BY language")}
 
     def rebuild_index(self) -> int:
         """Ensure FTS5 index is synced and optimized."""
@@ -318,9 +409,9 @@ class BM25Store:
                 try:
                     rows = conn.execute(
                         """
-                        SELECT c.chunk_json, bm25(chunks_fts, 0.0, 4.0, 5.0, 4.5, 1.0) AS rank_score
+                        SELECT c.chunk_json, bm25(chunks_fts, 3.0, 5.0, 4.5, 6.0, 1.0) AS rank_score
                         FROM chunks_fts
-                        JOIN chunks c ON c.chunk_id = chunks_fts.chunk_id
+                        JOIN chunks c ON c.rid = chunks_fts.rowid
                         WHERE chunks_fts MATCH ?
                         ORDER BY rank_score
                         LIMIT ?
@@ -363,6 +454,13 @@ class BM25Store:
             )
             for score, chunk in scored_items[:top_k]
         ]
+
+    def get_chunks_by_ids(self, chunk_ids: list[str]) -> dict[str, LegalChunk]:
+        if not chunk_ids:
+            return {}
+        with self._connect() as conn:
+            q = f"SELECT chunk_id, chunk_json FROM chunks WHERE chunk_id IN ({','.join('?' * len(chunk_ids))})"
+            return {r["chunk_id"]: LegalChunk.model_validate_json(r["chunk_json"]) for r in conn.execute(q, chunk_ids)}
 
     def get_chunks_by_doc(
         self,

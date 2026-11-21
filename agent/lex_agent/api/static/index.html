@@ -677,7 +677,15 @@
 
     .sb-backdrop { display: none; position: absolute; inset: 0; background: rgba(12, 16, 22, 0.45); z-index: 35; }
     .sb-backdrop.open { display: block; }
-  </style>
+      .ans-sec { margin: 10px 0 0; }
+    .ans-lead { font-size: 1.02em; }
+    .ans-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .ans-caution { border-left: 3px solid #d97706; background: rgba(217, 119, 6, 0.08); padding: 8px 12px; border-radius: 8px; }
+    .ans-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ans-chip { border: 1px solid var(--border, #d0d7e2); background: transparent; color: inherit; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.82rem; cursor: pointer; text-align: left; }
+    .ans-chip:hover { background: rgba(127, 127, 127, 0.08); }
+    a.cite, sup.cite { display: inline-flex; align-items: center; justify-content: center; min-width: 1.35em; height: 1.35em; padding: 0 4px; margin-left: 2px; border-radius: 6px; font-size: 0.7em; font-weight: 700; vertical-align: super; text-decoration: none; background: rgba(13, 148, 136, 0.14); color: inherit; }
+</style>
 </head>
 <body>
   <div class="stage">
@@ -1215,6 +1223,68 @@
       return html;
     }
 
+    // Concise answers arrive as "### ANSWER / KEY POINTS / STEPS / CAUTION / FOLLOW-UPS" sections with [n] markers.
+    const SECTION_LABELS = {
+      'ANSWER': '', 'KEY POINTS': 'Asosiy jihatlar', 'STEPS': 'Nima qilish kerak',
+      'CAUTION': 'Diqqat', 'FOLLOW-UPS': 'Davom ettirish uchun savollar'
+    };
+    function renderAgentAnswer(md, sources) {
+      const text = md || '';
+      if (!/^#{2,4}\s*(ANSWER|KEY POINTS|STEPS|CAUTION|FOLLOW-UPS)\s*$/im.test(text)) {
+        return linkCitations(renderMarkdownLite(text), sources);
+      }
+      const parts = text.split(/^#{2,4}\s*(ANSWER|KEY POINTS|STEPS|CAUTION|FOLLOW-UPS)\s*$/im);
+      let html = parts[0].trim() ? renderMarkdownLite(parts[0].trim()) : '';
+      for (let i = 1; i < parts.length; i += 2) {
+        const name = parts[i].toUpperCase();
+        const body = (parts[i + 1] || '').trim();
+        if (!body) continue;
+        if (name === 'FOLLOW-UPS') {
+          const qs = body.split('\n').map(l => l.replace(/^\s*(?:[-*\u2022]|\d+[.)])\s*/, '').trim()).filter(Boolean).slice(0, 3);
+          html += `<div class="ans-sec"><div class="ans-label">${SECTION_LABELS[name]}</div><div class="ans-chips">` +
+            qs.map(q => `<button class="ans-chip" type="button" data-q="${esc(q)}">${esc(q)}</button>`).join('') + '</div></div>';
+          continue;
+        }
+        const label = SECTION_LABELS[name];
+        const cls = name === 'CAUTION' ? 'ans-sec ans-caution' : (name === 'ANSWER' ? 'ans-sec ans-lead' : 'ans-sec');
+        html += `<div class="${cls}">${label ? `<div class="ans-label">${label}</div>` : ''}${renderMarkdownLite(body)}</div>`;
+      }
+      return linkCitations(html, sources);
+    }
+    function linkCitations(html, sources) {
+      const list = sources || [];
+      return html.replace(/\[(\d{1,2})\]/g, (m, n) => {
+        const src = list.find(s => String(s.n) === n);
+        if (!src) return `<sup class="cite">${n}</sup>`;
+        const title = esc(`${src.title || ''}${src.article ? ', ' + src.article : ''}`);
+        return `<a class="cite" href="${esc(src.url)}" target="_blank" rel="noopener" title="${title}">${n}</a>`;
+      });
+    }
+    document.addEventListener('click', (e) => {
+      const chip = e.target.closest && e.target.closest('.ans-chip');
+      if (chip && chip.dataset.q && typeof quickAsk === 'function') quickAsk(chip.dataset.q);
+    });
+    function renderNumberedSources(sources) {
+      if (!sources || !sources.length) return '';
+      return `
+        <div class="sources-label">${SVG.book}<span>Manbalar (${sources.length})</span></div>
+        <div class="sources-row">
+          ${sources.slice(0, 8).map(s => `
+            <a class="source-card" href="${esc(s.url)}" target="_blank" rel="noopener">
+              <div class="source-ico"><b>${esc(String(s.n))}</b></div>
+              <div class="source-meta">
+                <div class="source-title">${esc(s.title || s.full_title || '')}</div>
+                <div class="source-sub">
+                  ${s.article ? `<span>${esc(s.article)}</span>` : ''}
+                  ${s.article_title ? `<span>${esc(s.article_title).slice(0, 80)}</span>` : ''}
+                </div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function toggleSidebar(forceState) {
       const sb = document.getElementById('sidebar');
       const bd = document.getElementById('sbBackdrop');
@@ -1300,8 +1370,8 @@
                 <div class="ai-identity"><span class="ai-badge-ico">${SVG.scale}</span><span>Adolat · Huquqiy Maslahatchi</span></div>
                 <span class="verify-pill">${SVG.checkCircle}<span>Tasdiqlangan</span></span>
               </div>
-              <div class="ai-content">${renderMarkdownLite(m.text)}</div>
-              ${renderSourceCards(m.citations || [])}
+              <div class="ai-content">${renderAgentAnswer(m.text, m.sources || [])}</div>
+              ${(m.sources && m.sources.length) ? renderNumberedSources(m.sources) : renderSourceCards(m.citations || [])}
             </div>
           `;
         }
@@ -1509,6 +1579,7 @@
       }
 
       try {
+        let liveSources = [];
         const res = await fetch('/api/ask/stream', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -1551,19 +1622,22 @@
               const skel = document.getElementById(uid + '_skel');
               if (skel) skel.remove();
               streamedText += ev.text;
-              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(streamedText) + '<span class="stream-caret"></span>';
+              document.getElementById(uid + '_body').innerHTML = renderAgentAnswer(streamedText, liveSources) + '<span class="stream-caret"></span>';
               scrollBox.scrollTop = scrollBox.scrollHeight;
             } else if (ev.type === 'replace_answer') {
               streamedText = ev.text;
-              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(streamedText);
+              document.getElementById(uid + '_body').innerHTML = renderAgentAnswer(streamedText, liveSources);
+            } else if (ev.type === 'sources') {
+              liveSources = ev.sources || [];
             } else if (ev.type === 'done') {
               const skel = document.getElementById(uid + '_skel');
               if (skel) skel.remove();
               renderSteps(true);
               const d = ev.response;
               const v = d.verification || {};
-              document.getElementById(uid + '_body').innerHTML = renderMarkdownLite(d.answer);
-              document.getElementById(uid + '_sources').innerHTML = renderSourceCards(d.citations);
+              document.getElementById(uid + '_body').innerHTML = renderAgentAnswer(d.answer, d.sources);
+              document.getElementById(uid + '_sources').innerHTML =
+                (d.sources && d.sources.length) ? renderNumberedSources(d.sources) : renderSourceCards(d.citations);
               document.getElementById(uid + '_footer').innerHTML = `
                 <div class="msg-actions">
                   <div class="act-btns">
@@ -1581,7 +1655,7 @@
               document.getElementById(uid + '_redo').onclick = () => quickAsk(query);
               document.getElementById(uid + '_md').onclick = () => exportMarkdown(query, d.answer);
 
-              if (session) { session.messages.push({ role: 'ai', text: d.answer, citations: d.citations }); saveSessions(); }
+              if (session) { session.messages.push({ role: 'ai', text: d.answer, citations: d.citations, sources: d.sources || [] }); saveSessions(); }
               scrollBox.scrollTop = scrollBox.scrollHeight;
             } else if (ev.type === 'error') {
               throw new Error(ev.detail || 'Xatolik yuz berdi');

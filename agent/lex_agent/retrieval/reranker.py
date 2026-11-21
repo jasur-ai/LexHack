@@ -91,6 +91,12 @@ class LegalReranker:
 
             body_overlap = len(q_tokens & all_tokens) / max(len(q_tokens), 1)
             title_overlap = len(q_tokens & title_tokens) / max(len(q_tokens), 1)
+            # Title precision: an article whose title is fully explained by the question is the most specific match
+            art_title_tokens = set(legal_tokenize(cand.chunk.article_title or "", drop_stopwords=True))
+            title_precision = (
+                len(q_tokens & art_title_tokens) / len(art_title_tokens) if art_title_tokens else 0.0
+            )
+            first_part_bonus = 0.02 if not cand.chunk.clause or str(cand.chunk.clause).startswith("1/") else 0.0
             norm_bm25 = cand.bm25_score / max_bm25 if cand.bm25_score > 0 else 0.0
 
             art_bonus = 0.0
@@ -103,7 +109,14 @@ class LegalReranker:
             authority_tiebreak = (cand.chunk.legal_force_rank / 100.0) * 0.015
             status_penalty = -0.35 if cand.chunk.status == NormStatus.REPEALED else 0.0
 
-            relevance = (0.45 * norm_bm25) + (0.35 * body_overlap) + (0.20 * title_overlap) + art_bonus
+            relevance = (
+                (0.45 * norm_bm25)
+                + (0.35 * body_overlap)
+                + (0.20 * title_overlap)
+                + (0.18 * title_precision)
+                + first_part_bonus
+                + art_bonus
+            )
             cand.rerank_score = relevance
             cand.final_score = relevance + (cand.rrf_score * 2.0) + authority_tiebreak + status_penalty
 

@@ -7,14 +7,13 @@ import re
 from datetime import date, datetime
 
 from lex_agent.language.transliterator import (
-    detect_language,
     normalize_uzbek_apostrophes,
     to_searchable_uzbek_latin,
 )
 from lex_agent.models import (
+    LEGAL_FORCE_HIERARCHY,
     DocumentMetadata,
     DocumentType,
-    LEGAL_FORCE_HIERARCHY,
     LegalBranch,
     LegalChunk,
 )

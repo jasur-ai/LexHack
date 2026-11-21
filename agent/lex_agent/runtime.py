@@ -92,6 +92,19 @@ class AgentRuntime:
             temporal_lookup=temporal_lookup,
         )
 
+    def build_index(self, *, force: bool = False) -> dict:
+        """Index the bundled open corpora (no-op when the bundle fingerprint is unchanged)."""
+        from lex_agent.ingestion.open_corpora import build_bundled_index
+
+        return build_bundled_index(
+            bm25_store=self.bm25_store,
+            registry=self.ingestion.registry,
+            parser=self.parser,
+            corpus_dir=self.settings.corpus_dir,
+            cache_dir=self.settings.cache_dir,
+            force=force,
+        )
+
     async def close(self) -> None:
         await self.fetcher.close()
         await self.llm.close()

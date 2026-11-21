@@ -9,7 +9,16 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    UploadFile,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 from openai import AuthenticationError
@@ -17,6 +26,11 @@ from pydantic import BaseModel, Field
 
 from lex_agent import __version__
 from lex_agent.capabilities.document_analyzer import extract_text_from_uploaded_bytes
+from lex_agent.ingestion.open_corpora import (
+    read_index_stats,
+    runtime_ingested_counts,
+    source_registry,
+)
 from lex_agent.models import (
     AgentQueryRequest,
     AgentResponse,
@@ -73,9 +87,11 @@ def create_app() -> FastAPI:
         rt = AgentRuntime.build()
         runtime_holder["rt"] = rt
         logging.basicConfig(level=getattr(logging, rt.settings.log_level.upper(), logging.INFO))
-        # Pre-warm fast SQLite FTS5 BM25 index, seed foundational Uzbekistan Codes pack, and warm HTTP pool
+        # Offline knowledge base: index the bundled open corpora once (seconds; skipped when unchanged)
+        if rt.settings.auto_build_index:
+            stats = rt.build_index()
+            logger.info("Bundled legal corpora index: %s", "up to date" if stats.get("skipped") else stats)
         rt.bm25_store._ensure_fts_synced()
-        rt.ingestion.seed_foundational_codes_fast()
         await rt.llm.warmup()
         logger.info(
             "Lex.uz Legal AI Agent v%s initialized (chunks=%d, qdrant_mode=%s, llm=%s)",
@@ -99,13 +115,29 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    from lex_agent.config import get_settings as _get_settings
+
+    _cors = [o.strip() for o in (_get_settings().cors_origins or "*").split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
+        allow_origins=_cors or ["*"],
+        allow_credentials="*" not in _cors,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
+        """Ingestion mutates the shared knowledge base: require the admin token (or explicit dev opt-in)."""
+        cfg = _get_settings()
+        if cfg.admin_token:
+            if x_admin_token != cfg.admin_token:
+                raise HTTPException(status_code=403, detail="Admin token required (X-Admin-Token).")
+            return
+        if not cfg.allow_open_ingest:
+            raise HTTPException(
+                status_code=403,
+                detail="Ingestion is disabled. Set ADMIN_TOKEN (or ALLOW_OPEN_INGEST=true for local development).",
+            )
 
     @app.exception_handler(AuthenticationError)
     async def handle_llm_auth_error(_request: Request, exc: AuthenticationError) -> JSONResponse:
@@ -140,14 +172,22 @@ def create_app() -> FastAPI:
             if rt.settings.qdrant_mode == "local" and rt.vector_store._client is None
             else rt.vector_store.count()
         )
+        index_stats = read_index_stats(rt.settings.bm25_db_path)
         return {
             "status": "ok",
             "version": __version__,
             "llm_mode": rt.llm.active_mode_label,
+            "llm_configured": not rt.llm.is_mock,
+            "answer_mode": "extractive" if rt.llm.is_mock else "llm",
             "embedding_provider": rt.settings.embedding_provider,
+            "vector_search": rt.vector_store.enabled,
             "qdrant_mode": rt.settings.qdrant_mode,
             "bm25_chunks": bm25_count,
-            "vector_chunks": vec_count,
+            "vector_chunks": vec_count if rt.vector_store.enabled else 0,
+            "index_ready": bm25_count > 0,
+            "index_sources": {k: v.get("documents", 0) for k, v in (index_stats.get("sources") or {}).items()},
+            "live_lex_enabled": rt.settings.lex_uz_enable_live_fallback,
+            "answer_cache": rt.orchestrator.cache.stats(),
         }
 
     @app.get("/", response_class=HTMLResponse, include_in_schema=False)
@@ -181,6 +221,21 @@ def create_app() -> FastAPI:
         reg_stats["bm25_chunks"] = payload["bm25_chunks"]
         reg_stats["vector_chunks"] = payload["vector_chunks"]
         return reg_stats
+
+    @app.get("/api/sources")
+    async def list_sources() -> dict[str, Any]:
+        """Every knowledge source the agent cites, with live document/chunk counts."""
+        rt = get_rt()
+        stats = read_index_stats(rt.settings.bm25_db_path)
+        items = [
+            s.to_dict()
+            for s in source_registry(
+                stats,
+                live_enabled=rt.settings.lex_uz_enable_live_fallback,
+                runtime_counts=runtime_ingested_counts(rt.bm25_store, stats),
+            )
+        ]
+        return {"sources": items, "total_chunks": rt.bm25_store.count(), "languages": rt.bm25_store.language_counts()}
 
     @app.post("/api/ask", response_model=AgentResponse)
     async def ask_legal_question(req: AgentQueryRequest) -> AgentResponse:
@@ -275,7 +330,7 @@ def create_app() -> FastAPI:
         rt = get_rt()
         return await rt.temporal_lookup.compare(req)
 
-    @app.post("/api/ingest/lex-doc")
+    @app.post("/api/ingest/lex-doc", dependencies=[Depends(require_admin)])
     async def ingest_lex_doc(req: IngestLexDocRequest) -> dict[str, Any]:
         rt = get_rt()
         return await rt.ingestion.ingest_lex_doc(
@@ -284,7 +339,7 @@ def create_app() -> FastAPI:
             language=req.language,
         )
 
-    @app.post("/api/ingest/lex-search")
+    @app.post("/api/ingest/lex-search", dependencies=[Depends(require_admin)])
     async def ingest_lex_search(req: IngestLexSearchRequest) -> dict[str, Any]:
         rt = get_rt()
         return await rt.ingestion.ingest_lex_search(
@@ -294,12 +349,12 @@ def create_app() -> FastAPI:
             fetch_all_languages=req.fetch_all_languages,
         )
 
-    @app.post("/api/ingest/bootstrap-core")
+    @app.post("/api/ingest/bootstrap-core", dependencies=[Depends(require_admin)])
     async def ingest_bootstrap_core(fetch_all_languages: bool = True) -> dict[str, Any]:
         rt = get_rt()
         return await rt.ingestion.bootstrap_core_codes(fetch_all_languages=fetch_all_languages)
 
-    @app.post("/api/ingest/huggingface")
+    @app.post("/api/ingest/huggingface", dependencies=[Depends(require_admin)])
     async def ingest_huggingface(req: IngestHFRequest) -> dict[str, Any]:
         rt = get_rt()
         try:
@@ -311,7 +366,7 @@ def create_app() -> FastAPI:
         except RuntimeError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/ingest/url")
+    @app.post("/api/ingest/url", dependencies=[Depends(require_admin)])
     async def ingest_external_url(req: IngestUrlRequest) -> dict[str, Any]:
         """Ingest legal documents or commentaries from sud.uz, ksu.uz, adliya.uz, soliq.uz, norma.uz, etc."""
         rt = get_rt()
@@ -320,7 +375,7 @@ def create_app() -> FastAPI:
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    @app.post("/api/ingest/upload")
+    @app.post("/api/ingest/upload", dependencies=[Depends(require_admin)])
     async def ingest_uploaded_knowledge(
         file: UploadFile = File(...),
         title: str | None = Form(None),

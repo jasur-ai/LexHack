@@ -31,7 +31,7 @@ CODE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 
 # Act numbers: O'RQ-682, ЎРҚ-682, ЗРУ-682, PF-158, ПФ-158, УП-158, PQ-450, ПҚ-450, ПП-450, VMQ-123, ПКМ-123
 _DOC_NUMBER_RE = re.compile(
-    r"\b((?:O'RQ|ЎРҚ|ЗРУ|PF|ПФ|УП|PQ|ПҚ|ПП|VMQ|ВМҚ|ПКМ|F|Ф|Р)-?\s*\d{1,5}(?:-\w+)?)\b",
+    r"\b((?:O'RQ|ЎРҚ|ЗРУ|PF|ПФ|УП|PQ|ПҚ|ПП|VMQ|ВМҚ|ПКМ|F|Ф|Р)-?\s*\d{1,5}(?:-[IVXLC]{1,6}(?![\w']))?)(?![\w'])",
     re.IGNORECASE,
 )
 

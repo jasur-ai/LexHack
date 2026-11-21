@@ -1,0 +1,46 @@
+{
+  "updated": "2026-09-01",
+  "note": "Frequently requested legal constants. Each fact cites the official act that set it. Review on every new presidential decree on wages/BHM.",
+  "facts": [
+    {
+      "id": "bhm-2026-09",
+      "lang": "uz_latn",
+      "doc_type": "presidential_decree",
+      "doc_number": "PF-115",
+      "doc_id": "pf-115-2026",
+      "title": "Oʻzbekiston Respublikasi Prezidentining “Ish haqi, pensiyalar, stipendiyalar va nafaqalar miqdorini oshirish toʻgʻrisida”gi Farmoni (PF-115, 23.06.2026)",
+      "short_title": "Prezident Farmoni PF-115 (23.06.2026)",
+      "adopted": "2026-06-23",
+      "effective": "2026-09-01",
+      "branches": [
+        "labor",
+        "administrative",
+        "tax"
+      ],
+      "article": "BHM va MHTEKM",
+      "article_title": "Bazaviy hisoblash miqdori va eng kam ish haqi",
+      "url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/",
+      "text": "2026-yil 1-sentabrdan boshlab bazaviy hisoblash miqdori (BHM) — 440 000 soʻm, mehnatga haq toʻlashning eng kam miqdori (MHTEKM, eng kam ish haqi) — oyiga 1 360 000 soʻm etib belgilangan. 2026-yil 1-iyuldan pensiyani hisoblashning bazaviy miqdori — oyiga 504 000 soʻm. Avvalgi qiymatlar: 2025-yil 1-avgustdan 2026-yil 31-avgustgacha BHM — 412 000 soʻm, MHTEKM — 1 271 000 soʻm; 2024-yil 1-oktabrdan 2025-yil 31-iyulgacha BHM — 375 000 soʻm. BHM jarimalar, davlat boji, yigʻimlar va boshqa toʻlovlarni hisoblashda qoʻllaniladi: masalan, 5 BHM jarima 2026-yil 1-sentabrdan 2 200 000 soʻmni tashkil etadi. Jarima yoki yigʻim qaysi sanadagi BHM boʻyicha hisoblanishi huquqbuzarlik sodir etilgan yoki toʻlov amalga oshirilgan sanaga bogʻliq."
+    },
+    {
+      "id": "bhm-2026-09",
+      "lang": "ru",
+      "doc_type": "presidential_decree",
+      "doc_number": "УП-115",
+      "doc_id": "pf-115-2026",
+      "title": "Указ Президента Республики Узбекистан «О повышении размеров заработной платы, пенсий, стипендий и пособий» (УП-115, 23.06.2026)",
+      "short_title": "Указ Президента УП-115 (23.06.2026)",
+      "adopted": "2026-06-23",
+      "effective": "2026-09-01",
+      "branches": [
+        "labor",
+        "administrative",
+        "tax"
+      ],
+      "article": "БРВ и МРОТ",
+      "article_title": "Базовая расчётная величина и минимальный размер оплаты труда",
+      "url": "https://www.gazeta.uz/oz/2026/06/23/ish-haqi-nafaqalar/",
+      "text": "С 1 сентября 2026 года базовая расчётная величина (БРВ) составляет 440 000 сумов, минимальный размер оплаты труда (МРОТ) — 1 360 000 сумов в месяц. С 1 июля 2026 года базовая величина для исчисления пенсий — 504 000 сумов в месяц. Прежние значения: с 1 августа 2025 года по 31 августа 2026 года БРВ — 412 000 сумов, МРОТ — 1 271 000 сумов; с 1 октября 2024 года по 31 июля 2025 года БРВ — 375 000 сумов. БРВ применяется для расчёта штрафов, государственной пошлины, сборов и других платежей: например, штраф в 5 БРВ с 1 сентября 2026 года составляет 2 200 000 сумов. Какая БРВ применяется, зависит от даты совершения правонарушения или даты платежа."
+    }
+  ]
+}

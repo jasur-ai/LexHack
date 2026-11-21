@@ -1,0 +1,40 @@
+{"q": "Ish beruvchi meni ishdan haydadi, bu qonuniymi?", "lang": "uz_latn", "expect": [["6257288", ["161", "165", "166"]]]}
+{"q": "Yillik ta'til necha kun beriladi?", "lang": "uz_latn", "expect": [["6257288", ["217", "216"]]]}
+{"q": "Ish haqini oyiga necha marta to'lash kerak?", "lang": "uz_latn", "expect": [["6257288", ["253"]]]}
+{"q": "Ishga kirganda sinov muddati qancha bo'ladi?", "lang": "uz_latn", "expect": [["6257288", ["130", "129"]]]}
+{"q": "O'z xohishim bilan ishdan bo'shamoqchiman, qancha oldin ogohlantirishim kerak?", "lang": "uz_latn", "expect": [["6257288", ["160"]]]}
+{"q": "Ish vaqti haftasiga necha soatdan oshmasligi kerak?", "lang": "uz_latn", "expect": [["6257288", ["182"]]]}
+{"q": "Mehnat shartnomasi yozma tuzilishi shartmi?", "lang": "uz_latn", "expect": [["6257288", ["106"]]]}
+{"q": "Nikoh yoshi necha yosh?", "lang": "uz_latn", "expect": [["104720", ["15"]]]}
+{"q": "Bitta bola uchun aliment miqdori qancha?", "lang": "uz_latn", "expect": [["104720", ["99", "98"]]]}
+{"q": "Ajrashish uchun qayerga murojaat qilish kerak?", "lang": "uz_latn", "expect": [["104720", ["38", "41", "42", "43"]]]}
+{"q": "Do'stimga qarz berdim, tilxat yozish shartmi?", "lang": "uz_latn", "expect": [["180552", ["733", "732"]], ["111189", ["108"]]]}
+{"q": "Qarzni qaytarmasa necha yil ichida sudga murojaat qilsam bo'ladi?", "lang": "uz_latn", "expect": [["111189", ["150", "153", "154"]], ["180552", ["737"]]]}
+{"q": "Sotib olgan telefonim buzuq chiqdi, do'konga qaytarsam bo'ladimi?", "lang": "uz_latn", "expect": [["180552", ["434", "433", "435", "408"]]]}
+{"q": "Meros qachon ochiladi?", "lang": "uz_latn", "expect": [["180552", ["1116"]]]}
+{"q": "Vasiyatnoma notarial tasdiqlanishi kerakmi?", "lang": "uz_latn", "expect": [["180552", ["1124", "1125"]]]}
+{"q": "Firibgarlik uchun qanday jazo bor?", "lang": "uz_latn", "expect": [["111453", ["168"]]]}
+{"q": "O'g'rilik jinoyati uchun javobgarlik", "lang": "uz_latn", "expect": [["111453", ["169"]]]}
+{"q": "Mast holda mashina haydaganlik uchun jarima qancha?", "lang": "uz_latn", "expect": [["97664", ["131"]], ["111453", ["261.1"]]]}
+{"q": "Mayda bezorilik uchun javobgarlik", "lang": "uz_latn", "expect": [["97664", ["183"]]]}
+{"q": "Neustoyka nima va qachon to'lanadi?", "lang": "uz_latn", "expect": [["111189", ["260", "261", "263"]]]}
+{"q": "Sudga da'vo arizasi berishda davlat boji", "lang": "uz_latn", "expect": [["3517337", ["128", "270.6"]], ["3523891", ["113"]]]}
+{"q": "BHM qancha hozir?", "lang": "uz_latn", "expect": [["pf-115-2026", ["*"]]]}
+{"q": "Eng kam ish haqi qancha?", "lang": "uz_latn", "expect": [["pf-115-2026", ["*"]], ["6257288", ["245"]]]}
+{"q": "Shaxsiy hayot daxlsizligi huquqi", "lang": "uz_latn", "expect": [["6445145", ["31"]]]}
+{"q": "Shaxsga doir ma'lumotlarga ishlov berish uchun rozilik kerakmi?", "lang": "uz_latn", "expect": [["4396419", ["21", "18"]]]}
+{"q": "Soliq to'lashdan bo'yin tovlash jinoyati", "lang": "uz_latn", "expect": [["111453", ["184"]]]}
+{"q": "Turar joydan majburan ko'chirish mumkinmi?", "lang": "uz_latn", "expect": [["106136", ["70", "71", "74"]]]}
+{"q": "Увольнение работника по инициативе работодателя", "lang": "ru", "expect": [["6257288", ["161", "165", "166"]]]}
+{"q": "Сколько дней составляет ежегодный трудовой отпуск?", "lang": "ru", "expect": [["6257288", ["217", "216"]]]}
+{"q": "Размер алиментов на одного ребенка", "lang": "ru", "expect": [["104720", ["99", "98"]]]}
+{"q": "Форма договора займа между гражданами", "lang": "ru", "expect": [["180552", ["733"]]]}
+{"q": "Какой срок исковой давности?", "lang": "ru", "expect": [["111189", ["150", "149"]]]}
+{"q": "Расторжение брака через ЗАГС", "lang": "ru", "expect": [["104720", ["42", "43"]]]}
+{"q": "Наказание за мошенничество", "lang": "ru", "expect": [["111453", ["168"]]]}
+{"q": "Испытательный срок при приеме на работу", "lang": "ru", "expect": [["6257288", ["130", "129"]]]}
+{"q": "Штраф за мелкое хулиганство", "lang": "ru", "expect": [["97664", ["183"]]]}
+{"q": "Какая сейчас БРВ?", "lang": "ru", "expect": [["pf-115-2026", ["*"]]]}
+{"q": "Иш берувчи мени ишдан бўшатди, нима қилишим керак?", "lang": "uz_cyrl", "expect": [["6257288", ["161", "165", "166"]]]}
+{"q": "Алимент миқдори қанча?", "lang": "uz_cyrl", "expect": [["104720", ["99", "98", "101"]]]}
+{"q": "Мерос қачон очилади?", "lang": "uz_cyrl", "expect": [["180552", ["1116"]]]}

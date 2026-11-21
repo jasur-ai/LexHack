@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from lex_agent.config import Settings, get_settings
-from lex_agent.ingestion.corpora import iter_huggingface_corpus, iter_local_jsonl_or_parquet
+from lex_agent.ingestion.corpora import (
+    iter_huggingface_corpus,
+    iter_local_jsonl_or_parquet,
+)
 from lex_agent.ingestion.lex_fetcher import FetchedDocument, LexUzFetcher
 from lex_agent.ingestion.multi_source import (
     ALL_UZBEKISTAN_CODES_LEX_IDS,
